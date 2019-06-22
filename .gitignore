@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#emacs
+*~
+\#*\#
+.\#*
+TAGS
+
+#Xcode
+.DS_Store
