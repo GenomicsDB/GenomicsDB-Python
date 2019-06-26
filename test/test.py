@@ -4,12 +4,22 @@ import sys
 import tarfile
 import tempfile
 
-from genomicsdb import *
+import genomicsdb
 
 def run_test():
-	version()
-	gdb = connect("ws", "callset_t0_1_2.json", "vid.json", "chr1_10MB.fasta.gz", ["DP"], 40)
-	
+	genomicsdb.version()
+
+	gdb = genomicsdb.connect("ws", "callset_t0_1_2.json", "vid.json", "chr1_10MB.fasta.gz", ["DP"], 40)
+	try:
+		gdb.query_variant_calls()
+	except Exception as e:
+		print(e)
+
+	gdb = genomicsdb.connect("ws", "callset_t0_1_2.json", "vid.json", "chr1_10MB.fasta.gz", ["DP"], 40)
+	gdb.query_variant_calls("t0_1_2", [(0,1000000000)], [(0,3)])
+	gdb.query_variant_calls("t0_1_2", [(0,1000000000)])
+	gdb.query_variant_calls("t0_1_2")
+	print("Finished test")
 
 tmp_dir = tempfile.TemporaryDirectory().name
 
