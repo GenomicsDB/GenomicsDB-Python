@@ -617,9 +617,10 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include <vector>
 #include <functional>
 #include <stdint.h>
+#include <stdio.h>
+#include "pythread.h"
 #include "genomicsdb.h"
 #include "genomicsdb_processor.h"
-#include <stdio.h>
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -832,22 +833,23 @@ static const char *__pyx_f[] = {
   "src/genomicsdb.pyx",
   "stringsource",
   "type.pxd",
+  "bool.pxd",
+  "complex.pxd",
 };
 
 /*--- Type declarations ---*/
 struct __pyx_obj_10genomicsdb__GenomicsDB;
 
-/* "genomicsdb.pyx":22
- * 	print(row, interval.contig_name)
+/* "genomicsdb.pyx":14
+ * 	return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size)
  * 
  * cdef class _GenomicsDB:             # <<<<<<<<<<<<<<
  * 	cdef GenomicsDB* _genomicsdb
- * 	cdef VariantCallProcessor _processor
+ * 
  */
 struct __pyx_obj_10genomicsdb__GenomicsDB {
   PyObject_HEAD
   GenomicsDB *_genomicsdb;
-  VariantCallProcessor _processor;
 };
 
 
@@ -1122,9 +1124,6 @@ static void __pyx_insert_code_object(int code_line, PyCodeObject* code_object);
 static void __Pyx_AddTraceback(const char *funcname, int c_line,
                                int py_line, const char *filename);
 
-/* None.proto */
-#include <new>
-
 /* CppExceptionConversion.proto */
 #ifndef __Pyx_CppExn2PyErr
 #include <new>
@@ -1166,12 +1165,6 @@ static void __Pyx_CppExn2PyErr() {
   }
 }
 #endif
-
-/* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_uint64_t(uint64_t value);
-
-/* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_uint32_t(uint32_t value);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE int64_t __Pyx_PyInt_As_int64_t(PyObject *);
@@ -1222,22 +1215,88 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'libc.stdint' */
 
-/* Module declarations from 'cython' */
-
 /* Module declarations from 'cpython.version' */
-
-/* Module declarations from 'libc.stdio' */
 
 /* Module declarations from '__builtin__' */
 
 /* Module declarations from 'cpython.type' */
 static PyTypeObject *__pyx_ptype_7cpython_4type_type = 0;
 
-/* Module declarations from 'cpython' */
+/* Module declarations from 'libc.stdio' */
 
 /* Module declarations from 'cpython.object' */
 
+/* Module declarations from 'cpython.ref' */
+
+/* Module declarations from 'cpython.exc' */
+
+/* Module declarations from 'cpython.module' */
+
+/* Module declarations from 'cpython.mem' */
+
+/* Module declarations from 'cpython.tuple' */
+
+/* Module declarations from 'cpython.list' */
+
+/* Module declarations from 'cpython.sequence' */
+
+/* Module declarations from 'cpython.mapping' */
+
+/* Module declarations from 'cpython.iterator' */
+
+/* Module declarations from 'cpython.number' */
+
+/* Module declarations from 'cpython.int' */
+
+/* Module declarations from '__builtin__' */
+
+/* Module declarations from 'cpython.bool' */
+static PyTypeObject *__pyx_ptype_7cpython_4bool_bool = 0;
+
+/* Module declarations from 'cpython.long' */
+
+/* Module declarations from 'cpython.float' */
+
+/* Module declarations from '__builtin__' */
+
+/* Module declarations from 'cpython.complex' */
+static PyTypeObject *__pyx_ptype_7cpython_7complex_complex = 0;
+
+/* Module declarations from 'cpython.string' */
+
+/* Module declarations from 'cpython.unicode' */
+
+/* Module declarations from 'cpython.dict' */
+
+/* Module declarations from 'cpython.instance' */
+
+/* Module declarations from 'cpython.function' */
+
+/* Module declarations from 'cpython.method' */
+
+/* Module declarations from 'cpython.weakref' */
+
+/* Module declarations from 'cpython.getargs' */
+
+/* Module declarations from 'cpython.pythread' */
+
+/* Module declarations from 'cpython.pystate' */
+
+/* Module declarations from 'cpython.cobject' */
+
+/* Module declarations from 'cpython.oldbuffer' */
+
+/* Module declarations from 'cpython.set' */
+
+/* Module declarations from 'cpython.buffer' */
+
 /* Module declarations from 'cpython.bytes' */
+
+/* Module declarations from 'cpython.pycapsule' */
+
+/* Module declarations from 'cpython' */
+
+/* Module declarations from 'cython' */
 
 /* Module declarations from 'genomicsdb' */
 static PyTypeObject *__pyx_ptype_10genomicsdb__GenomicsDB = 0;
@@ -1245,8 +1304,6 @@ static PyObject *__pyx_f_10genomicsdb_to_unicode(PyObject *); /*proto*/
 static std::string __pyx_f_10genomicsdb_as_string(PyObject *); /*proto*/
 static std::vector<std::string>  __pyx_f_10genomicsdb_as_vector(PyObject *); /*proto*/
 static genomicsdb_ranges_t __pyx_f_10genomicsdb_as_ranges(PyObject *); /*proto*/
-static void __pyx_f_10genomicsdb_process_interval(interval_t); /*proto*/
-static void __pyx_f_10genomicsdb_process_variant_call(uint32_t, struct genomic_interval_t, std::vector<genomic_field_t> ); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyObject_string_to_py_std__in_string(std::string const &); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyUnicode_string_to_py_std__in_string(std::string const &); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyStr_string_to_py_std__in_string(std::string const &); /*proto*/
@@ -1258,13 +1315,10 @@ int __pyx_module_is_main_genomicsdb = 0;
 
 /* Implementation of 'genomicsdb' */
 static PyObject *__pyx_builtin_TypeError;
-static PyObject *__pyx_builtin_print;
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_array[] = "array";
-static const char __pyx_k_print[] = "print";
-static const char __pyx_k_Got_ws[] = "Got ws";
 static const char __pyx_k_reduce[] = "__reduce__";
 static const char __pyx_k_connect[] = "connect";
 static const char __pyx_k_version[] = "version";
@@ -1277,53 +1331,32 @@ static const char __pyx_k_GenomicsDB[] = "_GenomicsDB";
 static const char __pyx_k_attributes[] = "attributes";
 static const char __pyx_k_genomicsdb[] = "genomicsdb";
 static const char __pyx_k_row_ranges[] = "row_ranges";
-static const char __pyx_k_Cleaning_up[] = "Cleaning up";
-static const char __pyx_k_Row_is_None[] = "Row is None";
-static const char __pyx_k_Cleanup_Done[] = "Cleanup Done";
-static const char __pyx_k_found_ranges[] = "found ranges";
 static const char __pyx_k_segment_size[] = "segment_size";
-static const char __pyx_k_array_is_none[] = "array is none";
 static const char __pyx_k_column_ranges[] = "column_ranges";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
-static const char __pyx_k_Column_is_None[] = "Column is None";
-static const char __pyx_k_Got_attributes[] = "Got attributes";
 static const char __pyx_k_version_string[] = "version_string";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
-static const char __pyx_k_Got_GDB_instance[] = "Got GDB instance";
 static const char __pyx_k_reference_genome[] = "reference_genome";
 static const char __pyx_k_vid_mapping_file[] = "vid_mapping_file";
-static const char __pyx_k_length_of_lranges[] = "length of lranges=";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_src_genomicsdb_pyx[] = "src/genomicsdb.pyx";
 static const char __pyx_k_callset_mapping_file[] = "callset_mapping_file";
 static const char __pyx_k_Could_not_convert_to_unicode[] = "Could not convert to unicode.";
-static const char __pyx_k_we_are_in_query_variant_calls[] = "we are in query_variant calls";
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
-static PyObject *__pyx_kp_u_Cleaning_up;
-static PyObject *__pyx_kp_u_Cleanup_Done;
-static PyObject *__pyx_kp_u_Column_is_None;
 static PyObject *__pyx_kp_u_Could_not_convert_to_unicode;
 static PyObject *__pyx_n_s_GenomicsDB;
-static PyObject *__pyx_kp_u_Got_GDB_instance;
-static PyObject *__pyx_kp_u_Got_attributes;
-static PyObject *__pyx_kp_u_Got_ws;
-static PyObject *__pyx_kp_u_Row_is_None;
 static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_n_s_array;
-static PyObject *__pyx_kp_u_array_is_none;
 static PyObject *__pyx_n_s_attributes;
 static PyObject *__pyx_n_s_callset_mapping_file;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_column_ranges;
 static PyObject *__pyx_n_s_connect;
-static PyObject *__pyx_kp_u_found_ranges;
 static PyObject *__pyx_n_s_genomicsdb;
 static PyObject *__pyx_n_s_getstate;
-static PyObject *__pyx_kp_u_length_of_lranges;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_kp_s_no_default___reduce___due_to_non;
-static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_reduce;
 static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_reduce_ex;
@@ -1337,7 +1370,6 @@ static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_version;
 static PyObject *__pyx_n_s_version_string;
 static PyObject *__pyx_n_s_vid_mapping_file;
-static PyObject *__pyx_kp_u_we_are_in_query_variant_calls;
 static PyObject *__pyx_n_s_workspace;
 static PyObject *__pyx_pf_10genomicsdb_version(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
 static PyObject *__pyx_pf_10genomicsdb_2connect(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_workspace, PyObject *__pyx_v_callset_mapping_file, PyObject *__pyx_v_vid_mapping_file, PyObject *__pyx_v_reference_genome, PyObject *__pyx_v_attributes, PyObject *__pyx_v_segment_size); /* proto */
@@ -1352,19 +1384,9 @@ static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__4;
-static PyObject *__pyx_tuple__5;
 static PyObject *__pyx_tuple__6;
-static PyObject *__pyx_tuple__7;
-static PyObject *__pyx_tuple__8;
-static PyObject *__pyx_tuple__9;
-static PyObject *__pyx_tuple__10;
-static PyObject *__pyx_tuple__11;
-static PyObject *__pyx_tuple__12;
-static PyObject *__pyx_tuple__13;
-static PyObject *__pyx_tuple__14;
-static PyObject *__pyx_tuple__16;
-static PyObject *__pyx_codeobj__15;
-static PyObject *__pyx_codeobj__17;
+static PyObject *__pyx_codeobj__5;
+static PyObject *__pyx_codeobj__7;
 /* Late includes */
 
 /* "src/utils.pxi":20
@@ -1711,7 +1733,7 @@ static std::vector<std::string>  __pyx_f_10genomicsdb_as_vector(PyObject *__pyx_
  * 
  * cdef genomicsdb_ranges_t as_ranges(l_ranges):             # <<<<<<<<<<<<<<
  * 	cdef vector[pair[int64_t, int64_t]] ranges
- * 	print("length of lranges=", len(l_ranges))
+ * 	if len(l_ranges) > 0:
  */
 
 static genomicsdb_ranges_t __pyx_f_10genomicsdb_as_ranges(PyObject *__pyx_v_l_ranges) {
@@ -1721,10 +1743,10 @@ static genomicsdb_ranges_t __pyx_f_10genomicsdb_as_ranges(PyObject *__pyx_v_l_ra
   genomicsdb_ranges_t __pyx_r;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
-  PyObject *__pyx_t_2 = NULL;
+  int __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
-  int __pyx_t_4;
-  PyObject *(*__pyx_t_5)(PyObject *);
+  PyObject *(*__pyx_t_4)(PyObject *);
+  PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
   PyObject *__pyx_t_8 = NULL;
@@ -1737,101 +1759,67 @@ static genomicsdb_ranges_t __pyx_f_10genomicsdb_as_ranges(PyObject *__pyx_v_l_ra
   /* "src/utils.pxi":47
  * cdef genomicsdb_ranges_t as_ranges(l_ranges):
  * 	cdef vector[pair[int64_t, int64_t]] ranges
- * 	print("length of lranges=", len(l_ranges))             # <<<<<<<<<<<<<<
- * 	if len(l_ranges) > 0:
- * 		print("found ranges")
- */
-  __pyx_t_1 = PyObject_Length(__pyx_v_l_ranges); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 47, __pyx_L1_error)
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_INCREF(__pyx_kp_u_length_of_lranges);
-  __Pyx_GIVEREF(__pyx_kp_u_length_of_lranges);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_kp_u_length_of_lranges);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
-  __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "src/utils.pxi":48
- * 	cdef vector[pair[int64_t, int64_t]] ranges
- * 	print("length of lranges=", len(l_ranges))
  * 	if len(l_ranges) > 0:             # <<<<<<<<<<<<<<
- * 		print("found ranges")
  * 		for low, high in l_ranges:
- */
-  __pyx_t_1 = PyObject_Length(__pyx_v_l_ranges); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 48, __pyx_L1_error)
-  __pyx_t_4 = ((__pyx_t_1 > 0) != 0);
-  if (__pyx_t_4) {
-
-    /* "src/utils.pxi":49
- * 	print("length of lranges=", len(l_ranges))
- * 	if len(l_ranges) > 0:
- * 		print("found ranges")             # <<<<<<<<<<<<<<
- * 		for low, high in l_ranges:
- * 			print(low, high)
- */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-    /* "src/utils.pxi":50
- * 	if len(l_ranges) > 0:
- * 		print("found ranges")
- * 		for low, high in l_ranges:             # <<<<<<<<<<<<<<
- * 			print(low, high)
  * 			ranges.push_back(pair[int64_t, int64_t](low, high))
  */
+  __pyx_t_1 = PyObject_Length(__pyx_v_l_ranges); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_t_2 = ((__pyx_t_1 > 0) != 0);
+  if (__pyx_t_2) {
+
+    /* "src/utils.pxi":48
+ * 	cdef vector[pair[int64_t, int64_t]] ranges
+ * 	if len(l_ranges) > 0:
+ * 		for low, high in l_ranges:             # <<<<<<<<<<<<<<
+ * 			ranges.push_back(pair[int64_t, int64_t](low, high))
+ * 	return ranges
+ */
     if (likely(PyList_CheckExact(__pyx_v_l_ranges)) || PyTuple_CheckExact(__pyx_v_l_ranges)) {
-      __pyx_t_2 = __pyx_v_l_ranges; __Pyx_INCREF(__pyx_t_2); __pyx_t_1 = 0;
-      __pyx_t_5 = NULL;
+      __pyx_t_3 = __pyx_v_l_ranges; __Pyx_INCREF(__pyx_t_3); __pyx_t_1 = 0;
+      __pyx_t_4 = NULL;
     } else {
-      __pyx_t_1 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_v_l_ranges); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 50, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_5 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 50, __pyx_L1_error)
+      __pyx_t_1 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_l_ranges); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_4 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
     }
     for (;;) {
-      if (likely(!__pyx_t_5)) {
-        if (likely(PyList_CheckExact(__pyx_t_2))) {
-          if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_2)) break;
+      if (likely(!__pyx_t_4)) {
+        if (likely(PyList_CheckExact(__pyx_t_3))) {
+          if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_1); __Pyx_INCREF(__pyx_t_3); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 50, __pyx_L1_error)
+          __pyx_t_5 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_1); __Pyx_INCREF(__pyx_t_5); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
           #else
-          __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 50, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_3);
+          __pyx_t_5 = PySequence_ITEM(__pyx_t_3, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_5);
           #endif
         } else {
-          if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
+          if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_1); __Pyx_INCREF(__pyx_t_3); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 50, __pyx_L1_error)
+          __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_1); __Pyx_INCREF(__pyx_t_5); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
           #else
-          __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 50, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_3);
+          __pyx_t_5 = PySequence_ITEM(__pyx_t_3, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_5);
           #endif
         }
       } else {
-        __pyx_t_3 = __pyx_t_5(__pyx_t_2);
-        if (unlikely(!__pyx_t_3)) {
+        __pyx_t_5 = __pyx_t_4(__pyx_t_3);
+        if (unlikely(!__pyx_t_5)) {
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 50, __pyx_L1_error)
+            else __PYX_ERR(0, 48, __pyx_L1_error)
           }
           break;
         }
-        __Pyx_GOTREF(__pyx_t_3);
+        __Pyx_GOTREF(__pyx_t_5);
       }
-      if ((likely(PyTuple_CheckExact(__pyx_t_3))) || (PyList_CheckExact(__pyx_t_3))) {
-        PyObject* sequence = __pyx_t_3;
+      if ((likely(PyTuple_CheckExact(__pyx_t_5))) || (PyList_CheckExact(__pyx_t_5))) {
+        PyObject* sequence = __pyx_t_5;
         Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
         if (unlikely(size != 2)) {
           if (size > 2) __Pyx_RaiseTooManyValuesError(2);
           else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-          __PYX_ERR(0, 50, __pyx_L1_error)
+          __PYX_ERR(0, 48, __pyx_L1_error)
         }
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
         if (likely(PyTuple_CheckExact(sequence))) {
@@ -1844,23 +1832,23 @@ static genomicsdb_ranges_t __pyx_f_10genomicsdb_as_ranges(PyObject *__pyx_v_l_ra
         __Pyx_INCREF(__pyx_t_6);
         __Pyx_INCREF(__pyx_t_7);
         #else
-        __pyx_t_6 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 50, __pyx_L1_error)
+        __pyx_t_6 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 48, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 50, __pyx_L1_error)
+        __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 48, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         #endif
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       } else {
         Py_ssize_t index = -1;
-        __pyx_t_8 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 50, __pyx_L1_error)
+        __pyx_t_8 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 48, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         __pyx_t_9 = Py_TYPE(__pyx_t_8)->tp_iternext;
         index = 0; __pyx_t_6 = __pyx_t_9(__pyx_t_8); if (unlikely(!__pyx_t_6)) goto __pyx_L6_unpacking_failed;
         __Pyx_GOTREF(__pyx_t_6);
         index = 1; __pyx_t_7 = __pyx_t_9(__pyx_t_8); if (unlikely(!__pyx_t_7)) goto __pyx_L6_unpacking_failed;
         __Pyx_GOTREF(__pyx_t_7);
-        if (__Pyx_IternextUnpackEndCheck(__pyx_t_9(__pyx_t_8), 2) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
+        if (__Pyx_IternextUnpackEndCheck(__pyx_t_9(__pyx_t_8), 2) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
         __pyx_t_9 = NULL;
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         goto __pyx_L7_unpacking_done;
@@ -1868,7 +1856,7 @@ static genomicsdb_ranges_t __pyx_f_10genomicsdb_as_ranges(PyObject *__pyx_v_l_ra
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_t_9 = NULL;
         if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-        __PYX_ERR(0, 50, __pyx_L1_error)
+        __PYX_ERR(0, 48, __pyx_L1_error)
         __pyx_L7_unpacking_done:;
       }
       __Pyx_XDECREF_SET(__pyx_v_low, __pyx_t_6);
@@ -1876,68 +1864,48 @@ static genomicsdb_ranges_t __pyx_f_10genomicsdb_as_ranges(PyObject *__pyx_v_l_ra
       __Pyx_XDECREF_SET(__pyx_v_high, __pyx_t_7);
       __pyx_t_7 = 0;
 
-      /* "src/utils.pxi":51
- * 		print("found ranges")
+      /* "src/utils.pxi":49
+ * 	if len(l_ranges) > 0:
  * 		for low, high in l_ranges:
- * 			print(low, high)             # <<<<<<<<<<<<<<
- * 			ranges.push_back(pair[int64_t, int64_t](low, high))
- * 	return ranges
- */
-      __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_INCREF(__pyx_v_low);
-      __Pyx_GIVEREF(__pyx_v_low);
-      PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_low);
-      __Pyx_INCREF(__pyx_v_high);
-      __Pyx_GIVEREF(__pyx_v_high);
-      PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_high);
-      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_3, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 51, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-
-      /* "src/utils.pxi":52
- * 		for low, high in l_ranges:
- * 			print(low, high)
  * 			ranges.push_back(pair[int64_t, int64_t](low, high))             # <<<<<<<<<<<<<<
  * 	return ranges
  */
-      __pyx_t_10 = __Pyx_PyInt_As_int64_t(__pyx_v_low); if (unlikely((__pyx_t_10 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 52, __pyx_L1_error)
-      __pyx_t_11 = __Pyx_PyInt_As_int64_t(__pyx_v_high); if (unlikely((__pyx_t_11 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 52, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyInt_As_int64_t(__pyx_v_low); if (unlikely((__pyx_t_10 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L1_error)
+      __pyx_t_11 = __Pyx_PyInt_As_int64_t(__pyx_v_high); if (unlikely((__pyx_t_11 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L1_error)
       try {
         __pyx_t_12 = std::pair<int64_t,int64_t> (__pyx_t_10, __pyx_t_11);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 52, __pyx_L1_error)
+        __PYX_ERR(0, 49, __pyx_L1_error)
       }
       try {
         __pyx_v_ranges.push_back(__pyx_t_12);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 52, __pyx_L1_error)
+        __PYX_ERR(0, 49, __pyx_L1_error)
       }
 
-      /* "src/utils.pxi":50
+      /* "src/utils.pxi":48
+ * 	cdef vector[pair[int64_t, int64_t]] ranges
  * 	if len(l_ranges) > 0:
- * 		print("found ranges")
  * 		for low, high in l_ranges:             # <<<<<<<<<<<<<<
- * 			print(low, high)
  * 			ranges.push_back(pair[int64_t, int64_t](low, high))
+ * 	return ranges
  */
     }
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "src/utils.pxi":48
+    /* "src/utils.pxi":47
+ * cdef genomicsdb_ranges_t as_ranges(l_ranges):
  * 	cdef vector[pair[int64_t, int64_t]] ranges
- * 	print("length of lranges=", len(l_ranges))
  * 	if len(l_ranges) > 0:             # <<<<<<<<<<<<<<
- * 		print("found ranges")
  * 		for low, high in l_ranges:
+ * 			ranges.push_back(pair[int64_t, int64_t](low, high))
  */
   }
 
-  /* "src/utils.pxi":53
- * 			print(low, high)
+  /* "src/utils.pxi":50
+ * 		for low, high in l_ranges:
  * 			ranges.push_back(pair[int64_t, int64_t](low, high))
  * 	return ranges             # <<<<<<<<<<<<<<
  */
@@ -1949,13 +1917,13 @@ static genomicsdb_ranges_t __pyx_f_10genomicsdb_as_ranges(PyObject *__pyx_v_l_ra
  * 
  * cdef genomicsdb_ranges_t as_ranges(l_ranges):             # <<<<<<<<<<<<<<
  * 	cdef vector[pair[int64_t, int64_t]] ranges
- * 	print("length of lranges=", len(l_ranges))
+ * 	if len(l_ranges) > 0:
  */
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
@@ -2165,7 +2133,7 @@ static PyObject *__pyx_pf_10genomicsdb_2connect(CYTHON_UNUSED PyObject *__pyx_se
  * def connect(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size):
  * 	return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size)             # <<<<<<<<<<<<<<
  * 
- * cdef void process_interval(interval_t interval):
+ * cdef class _GenomicsDB:
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = PyTuple_New(6); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 12, __pyx_L1_error)
@@ -2215,124 +2183,8 @@ static PyObject *__pyx_pf_10genomicsdb_2connect(CYTHON_UNUSED PyObject *__pyx_se
   return __pyx_r;
 }
 
-/* "genomicsdb.pyx":14
- * 	return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size)
- * 
- * cdef void process_interval(interval_t interval):             # <<<<<<<<<<<<<<
- * 	print(interval.first, interval.second)
- * 
- */
-
-static void __pyx_f_10genomicsdb_process_interval(interval_t __pyx_v_interval) {
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  __Pyx_RefNannySetupContext("process_interval", 0);
-
-  /* "genomicsdb.pyx":15
- * 
- * cdef void process_interval(interval_t interval):
- * 	print(interval.first, interval.second)             # <<<<<<<<<<<<<<
- * 
- * cdef void	process_variant_call(uint32_t row,
- */
-  __pyx_t_1 = __Pyx_PyInt_From_uint64_t(__pyx_v_interval.first); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 15, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_From_uint64_t(__pyx_v_interval.second); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 15, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 15, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 15, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "genomicsdb.pyx":14
- * 	return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size)
- * 
- * cdef void process_interval(interval_t interval):             # <<<<<<<<<<<<<<
- * 	print(interval.first, interval.second)
- * 
- */
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_WriteUnraisable("genomicsdb.process_interval", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-}
-
 /* "genomicsdb.pyx":17
- * 	print(interval.first, interval.second)
- * 
- * cdef void	process_variant_call(uint32_t row,             # <<<<<<<<<<<<<<
- * 															 genomic_interval_t interval,
- * 															 vector[genomic_field_t] fields):
- */
-
-static void __pyx_f_10genomicsdb_process_variant_call(uint32_t __pyx_v_row, struct genomic_interval_t __pyx_v_interval, CYTHON_UNUSED std::vector<genomic_field_t>  __pyx_v_fields) {
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  __Pyx_RefNannySetupContext("process_variant_call", 0);
-
-  /* "genomicsdb.pyx":20
- * 															 genomic_interval_t interval,
- * 															 vector[genomic_field_t] fields):
- * 	print(row, interval.contig_name)             # <<<<<<<<<<<<<<
- * 
- * cdef class _GenomicsDB:
- */
-  __pyx_t_1 = __Pyx_PyInt_From_uint32_t(__pyx_v_row); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 20, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_interval.contig_name); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 20, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 20, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 20, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "genomicsdb.pyx":17
- * 	print(interval.first, interval.second)
- * 
- * cdef void	process_variant_call(uint32_t row,             # <<<<<<<<<<<<<<
- * 															 genomic_interval_t interval,
- * 															 vector[genomic_field_t] fields):
- */
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_WriteUnraisable("genomicsdb.process_variant_call", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-}
-
-/* "genomicsdb.pyx":26
- * 	cdef VariantCallProcessor _processor
+ * 	cdef GenomicsDB* _genomicsdb
  * 
  * 	def __cinit__(self):             # <<<<<<<<<<<<<<
  * 		self._genomicsdb = NULL
@@ -2360,7 +2212,7 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB___cinit__(struct __pyx_obj_10geno
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "genomicsdb.pyx":27
+  /* "genomicsdb.pyx":18
  * 
  * 	def __cinit__(self):
  * 		self._genomicsdb = NULL             # <<<<<<<<<<<<<<
@@ -2369,8 +2221,8 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB___cinit__(struct __pyx_obj_10geno
  */
   __pyx_v_self->_genomicsdb = NULL;
 
-  /* "genomicsdb.pyx":26
- * 	cdef VariantCallProcessor _processor
+  /* "genomicsdb.pyx":17
+ * 	cdef GenomicsDB* _genomicsdb
  * 
  * 	def __cinit__(self):             # <<<<<<<<<<<<<<
  * 		self._genomicsdb = NULL
@@ -2383,7 +2235,7 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB___cinit__(struct __pyx_obj_10geno
   return __pyx_r;
 }
 
-/* "genomicsdb.pyx":29
+/* "genomicsdb.pyx":20
  * 		self._genomicsdb = NULL
  * 
  * 	def __init__(self,             # <<<<<<<<<<<<<<
@@ -2407,7 +2259,7 @@ static int __pyx_pw_10genomicsdb_11_GenomicsDB_3__init__(PyObject *__pyx_v_self,
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_workspace,&__pyx_n_s_callset_mapping_file,&__pyx_n_s_vid_mapping_file,&__pyx_n_s_reference_genome,&__pyx_n_s_attributes,&__pyx_n_s_segment_size,0};
     PyObject* values[6] = {0,0,0,0,0,0};
 
-    /* "genomicsdb.pyx":34
+    /* "genomicsdb.pyx":25
  * 							 vid_mapping_file,
  * 							 reference_genome,
  * 							 attributes = None,             # <<<<<<<<<<<<<<
@@ -2416,12 +2268,12 @@ static int __pyx_pw_10genomicsdb_11_GenomicsDB_3__init__(PyObject *__pyx_v_self,
  */
     values[4] = ((PyObject *)Py_None);
 
-    /* "genomicsdb.pyx":35
+    /* "genomicsdb.pyx":26
  * 							 reference_genome,
  * 							 attributes = None,
  * 							 segment_size = None):             # <<<<<<<<<<<<<<
  * 		cdef string ws = as_string(workspace)
- * 		print("Got ws")
+ * 		cdef vector[string] vec = as_vector(attributes)
  */
     values[5] = ((PyObject *)Py_None);
     if (unlikely(__pyx_kwds)) {
@@ -2452,19 +2304,19 @@ static int __pyx_pw_10genomicsdb_11_GenomicsDB_3__init__(PyObject *__pyx_v_self,
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_callset_mapping_file)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 6, 1); __PYX_ERR(1, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 6, 1); __PYX_ERR(1, 20, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_vid_mapping_file)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 6, 2); __PYX_ERR(1, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 6, 2); __PYX_ERR(1, 20, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_reference_genome)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 6, 3); __PYX_ERR(1, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 6, 3); __PYX_ERR(1, 20, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -2480,7 +2332,7 @@ static int __pyx_pw_10genomicsdb_11_GenomicsDB_3__init__(PyObject *__pyx_v_self,
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 29, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 20, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -2505,7 +2357,7 @@ static int __pyx_pw_10genomicsdb_11_GenomicsDB_3__init__(PyObject *__pyx_v_self,
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 29, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 20, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("genomicsdb._GenomicsDB.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2513,7 +2365,7 @@ static int __pyx_pw_10genomicsdb_11_GenomicsDB_3__init__(PyObject *__pyx_v_self,
   __pyx_L4_argument_unpacking_done:;
   __pyx_r = __pyx_pf_10genomicsdb_11_GenomicsDB_2__init__(((struct __pyx_obj_10genomicsdb__GenomicsDB *)__pyx_v_self), __pyx_v_workspace, __pyx_v_callset_mapping_file, __pyx_v_vid_mapping_file, __pyx_v_reference_genome, __pyx_v_attributes, __pyx_v_segment_size);
 
-  /* "genomicsdb.pyx":29
+  /* "genomicsdb.pyx":20
  * 		self._genomicsdb = NULL
  * 
  * 	def __init__(self,             # <<<<<<<<<<<<<<
@@ -2531,82 +2383,59 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB_2__init__(struct __pyx_obj_10geno
   CYTHON_UNUSED std::vector<std::string>  __pyx_v_vec;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
+  int __pyx_t_1;
   int __pyx_t_2;
-  int __pyx_t_3;
-  GenomicsDB *__pyx_t_4;
-  uint64_t __pyx_t_5;
+  GenomicsDB *__pyx_t_3;
+  uint64_t __pyx_t_4;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "genomicsdb.pyx":36
+  /* "genomicsdb.pyx":27
  * 							 attributes = None,
  * 							 segment_size = None):
  * 		cdef string ws = as_string(workspace)             # <<<<<<<<<<<<<<
- * 		print("Got ws")
  * 		cdef vector[string] vec = as_vector(attributes)
+ * 		if attributes is None:
  */
   __pyx_v_ws = __pyx_f_10genomicsdb_as_string(__pyx_v_workspace);
 
-  /* "genomicsdb.pyx":37
+  /* "genomicsdb.pyx":28
  * 							 segment_size = None):
  * 		cdef string ws = as_string(workspace)
- * 		print("Got ws")             # <<<<<<<<<<<<<<
- * 		cdef vector[string] vec = as_vector(attributes)
- * 		print("Got attributes")
- */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 37, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "genomicsdb.pyx":38
- * 		cdef string ws = as_string(workspace)
- * 		print("Got ws")
  * 		cdef vector[string] vec = as_vector(attributes)             # <<<<<<<<<<<<<<
- * 		print("Got attributes")
- * 		if attributes is None:
- */
-  __pyx_v_vec = __pyx_f_10genomicsdb_as_vector(__pyx_v_attributes);
-
-  /* "genomicsdb.pyx":39
- * 		print("Got ws")
- * 		cdef vector[string] vec = as_vector(attributes)
- * 		print("Got attributes")             # <<<<<<<<<<<<<<
  * 		if attributes is None:
  * 			self._genomicsdb  = new GenomicsDB(as_string(workspace),
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 39, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_vec = __pyx_f_10genomicsdb_as_vector(__pyx_v_attributes);
 
-  /* "genomicsdb.pyx":40
+  /* "genomicsdb.pyx":29
+ * 		cdef string ws = as_string(workspace)
  * 		cdef vector[string] vec = as_vector(attributes)
- * 		print("Got attributes")
  * 		if attributes is None:             # <<<<<<<<<<<<<<
  * 			self._genomicsdb  = new GenomicsDB(as_string(workspace),
  * 																				 as_string(callset_mapping_file),
  */
-  __pyx_t_2 = (__pyx_v_attributes == Py_None);
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
+  __pyx_t_1 = (__pyx_v_attributes == Py_None);
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
 
-    /* "genomicsdb.pyx":41
- * 		print("Got attributes")
+    /* "genomicsdb.pyx":30
+ * 		cdef vector[string] vec = as_vector(attributes)
  * 		if attributes is None:
  * 			self._genomicsdb  = new GenomicsDB(as_string(workspace),             # <<<<<<<<<<<<<<
  * 																				 as_string(callset_mapping_file),
  * 																				 as_string(vid_mapping_file),
  */
     try {
-      __pyx_t_4 = new GenomicsDB(__pyx_f_10genomicsdb_as_string(__pyx_v_workspace), __pyx_f_10genomicsdb_as_string(__pyx_v_callset_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_vid_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_reference_genome));
+      __pyx_t_3 = new GenomicsDB(__pyx_f_10genomicsdb_as_string(__pyx_v_workspace), __pyx_f_10genomicsdb_as_string(__pyx_v_callset_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_vid_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_reference_genome));
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(1, 41, __pyx_L1_error)
+      __PYX_ERR(1, 30, __pyx_L1_error)
     }
-    __pyx_v_self->_genomicsdb = __pyx_t_4;
+    __pyx_v_self->_genomicsdb = __pyx_t_3;
 
-    /* "genomicsdb.pyx":40
+    /* "genomicsdb.pyx":29
+ * 		cdef string ws = as_string(workspace)
  * 		cdef vector[string] vec = as_vector(attributes)
- * 		print("Got attributes")
  * 		if attributes is None:             # <<<<<<<<<<<<<<
  * 			self._genomicsdb  = new GenomicsDB(as_string(workspace),
  * 																				 as_string(callset_mapping_file),
@@ -2614,18 +2443,18 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB_2__init__(struct __pyx_obj_10geno
     goto __pyx_L3;
   }
 
-  /* "genomicsdb.pyx":45
+  /* "genomicsdb.pyx":34
  * 																				 as_string(vid_mapping_file),
  * 																				 as_string(reference_genome))
  * 		elif segment_size is None:             # <<<<<<<<<<<<<<
  * 			self._genomicsdb  = new GenomicsDB(as_string(workspace),
  * 																				 as_string(callset_mapping_file),
  */
-  __pyx_t_3 = (__pyx_v_segment_size == Py_None);
-  __pyx_t_2 = (__pyx_t_3 != 0);
-  if (__pyx_t_2) {
+  __pyx_t_2 = (__pyx_v_segment_size == Py_None);
+  __pyx_t_1 = (__pyx_t_2 != 0);
+  if (__pyx_t_1) {
 
-    /* "genomicsdb.pyx":46
+    /* "genomicsdb.pyx":35
  * 																				 as_string(reference_genome))
  * 		elif segment_size is None:
  * 			self._genomicsdb  = new GenomicsDB(as_string(workspace),             # <<<<<<<<<<<<<<
@@ -2633,14 +2462,14 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB_2__init__(struct __pyx_obj_10geno
  * 																				 as_string(vid_mapping_file),
  */
     try {
-      __pyx_t_4 = new GenomicsDB(__pyx_f_10genomicsdb_as_string(__pyx_v_workspace), __pyx_f_10genomicsdb_as_string(__pyx_v_callset_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_vid_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_reference_genome), __pyx_f_10genomicsdb_as_vector(__pyx_v_attributes));
+      __pyx_t_3 = new GenomicsDB(__pyx_f_10genomicsdb_as_string(__pyx_v_workspace), __pyx_f_10genomicsdb_as_string(__pyx_v_callset_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_vid_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_reference_genome), __pyx_f_10genomicsdb_as_vector(__pyx_v_attributes));
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(1, 46, __pyx_L1_error)
+      __PYX_ERR(1, 35, __pyx_L1_error)
     }
-    __pyx_v_self->_genomicsdb = __pyx_t_4;
+    __pyx_v_self->_genomicsdb = __pyx_t_3;
 
-    /* "genomicsdb.pyx":45
+    /* "genomicsdb.pyx":34
  * 																				 as_string(vid_mapping_file),
  * 																				 as_string(reference_genome))
  * 		elif segment_size is None:             # <<<<<<<<<<<<<<
@@ -2650,7 +2479,7 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB_2__init__(struct __pyx_obj_10geno
     goto __pyx_L3;
   }
 
-  /* "genomicsdb.pyx":52
+  /* "genomicsdb.pyx":41
  * 																				 as_vector(attributes))
  * 		else:
  * 			self._genomicsdb  = new GenomicsDB(as_string(workspace),             # <<<<<<<<<<<<<<
@@ -2659,16 +2488,16 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB_2__init__(struct __pyx_obj_10geno
  */
   /*else*/ {
 
-    /* "genomicsdb.pyx":57
+    /* "genomicsdb.pyx":46
  * 																				 as_string(reference_genome),
  * 																				 as_vector(attributes),
  * 																				 segment_size)             # <<<<<<<<<<<<<<
- * 		print("Got GDB instance")
  * 
+ * 	def query_variant_calls(self,
  */
-    __pyx_t_5 = __Pyx_PyInt_As_uint64_t(__pyx_v_segment_size); if (unlikely((__pyx_t_5 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 57, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_As_uint64_t(__pyx_v_segment_size); if (unlikely((__pyx_t_4 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 46, __pyx_L1_error)
 
-    /* "genomicsdb.pyx":52
+    /* "genomicsdb.pyx":41
  * 																				 as_vector(attributes))
  * 		else:
  * 			self._genomicsdb  = new GenomicsDB(as_string(workspace),             # <<<<<<<<<<<<<<
@@ -2676,27 +2505,16 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB_2__init__(struct __pyx_obj_10geno
  * 																				 as_string(vid_mapping_file),
  */
     try {
-      __pyx_t_4 = new GenomicsDB(__pyx_f_10genomicsdb_as_string(__pyx_v_workspace), __pyx_f_10genomicsdb_as_string(__pyx_v_callset_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_vid_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_reference_genome), __pyx_f_10genomicsdb_as_vector(__pyx_v_attributes), __pyx_t_5);
+      __pyx_t_3 = new GenomicsDB(__pyx_f_10genomicsdb_as_string(__pyx_v_workspace), __pyx_f_10genomicsdb_as_string(__pyx_v_callset_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_vid_mapping_file), __pyx_f_10genomicsdb_as_string(__pyx_v_reference_genome), __pyx_f_10genomicsdb_as_vector(__pyx_v_attributes), __pyx_t_4);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(1, 52, __pyx_L1_error)
+      __PYX_ERR(1, 41, __pyx_L1_error)
     }
-    __pyx_v_self->_genomicsdb = __pyx_t_4;
+    __pyx_v_self->_genomicsdb = __pyx_t_3;
   }
   __pyx_L3:;
 
-  /* "genomicsdb.pyx":58
- * 																				 as_vector(attributes),
- * 																				 segment_size)
- * 		print("Got GDB instance")             # <<<<<<<<<<<<<<
- * 
- * 	def query_variant_calls(self,
- */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 58, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "genomicsdb.pyx":29
+  /* "genomicsdb.pyx":20
  * 		self._genomicsdb = NULL
  * 
  * 	def __init__(self,             # <<<<<<<<<<<<<<
@@ -2708,7 +2526,6 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB_2__init__(struct __pyx_obj_10geno
   __pyx_r = 0;
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("genomicsdb._GenomicsDB.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
@@ -2716,8 +2533,8 @@ static int __pyx_pf_10genomicsdb_11_GenomicsDB_2__init__(struct __pyx_obj_10geno
   return __pyx_r;
 }
 
-/* "genomicsdb.pyx":60
- * 		print("Got GDB instance")
+/* "genomicsdb.pyx":48
+ * 																				 segment_size)
  * 
  * 	def query_variant_calls(self,             # <<<<<<<<<<<<<<
  * 													array=None,
@@ -2737,7 +2554,7 @@ static PyObject *__pyx_pw_10genomicsdb_11_GenomicsDB_5query_variant_calls(PyObje
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_array,&__pyx_n_s_column_ranges,&__pyx_n_s_row_ranges,0};
     PyObject* values[3] = {0,0,0};
 
-    /* "genomicsdb.pyx":61
+    /* "genomicsdb.pyx":49
  * 
  * 	def query_variant_calls(self,
  * 													array=None,             # <<<<<<<<<<<<<<
@@ -2746,21 +2563,21 @@ static PyObject *__pyx_pw_10genomicsdb_11_GenomicsDB_5query_variant_calls(PyObje
  */
     values[0] = ((PyObject *)Py_None);
 
-    /* "genomicsdb.pyx":62
+    /* "genomicsdb.pyx":50
  * 	def query_variant_calls(self,
  * 													array=None,
  * 													column_ranges=None,             # <<<<<<<<<<<<<<
  * 													row_ranges=None):
- * 		print("we are in query_variant calls")
+ * 		cdef list variant_calls = []
  */
     values[1] = ((PyObject *)Py_None);
 
-    /* "genomicsdb.pyx":63
+    /* "genomicsdb.pyx":51
  * 													array=None,
  * 													column_ranges=None,
  * 													row_ranges=None):             # <<<<<<<<<<<<<<
- * 		print("we are in query_variant calls")
- * 		cdef function[void(interval_t)] process_interval_fn = process_interval
+ * 		cdef list variant_calls = []
+ * 		cdef VariantCallProcessor processor
  */
     values[2] = ((PyObject *)Py_None);
     if (unlikely(__pyx_kwds)) {
@@ -2797,7 +2614,7 @@ static PyObject *__pyx_pw_10genomicsdb_11_GenomicsDB_5query_variant_calls(PyObje
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "query_variant_calls") < 0)) __PYX_ERR(1, 60, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "query_variant_calls") < 0)) __PYX_ERR(1, 48, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -2817,7 +2634,7 @@ static PyObject *__pyx_pw_10genomicsdb_11_GenomicsDB_5query_variant_calls(PyObje
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("query_variant_calls", 0, 0, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 60, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("query_variant_calls", 0, 0, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 48, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("genomicsdb._GenomicsDB.query_variant_calls", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2825,8 +2642,8 @@ static PyObject *__pyx_pw_10genomicsdb_11_GenomicsDB_5query_variant_calls(PyObje
   __pyx_L4_argument_unpacking_done:;
   __pyx_r = __pyx_pf_10genomicsdb_11_GenomicsDB_4query_variant_calls(((struct __pyx_obj_10genomicsdb__GenomicsDB *)__pyx_v_self), __pyx_v_array, __pyx_v_column_ranges, __pyx_v_row_ranges);
 
-  /* "genomicsdb.pyx":60
- * 		print("Got GDB instance")
+  /* "genomicsdb.pyx":48
+ * 																				 segment_size)
  * 
  * 	def query_variant_calls(self,             # <<<<<<<<<<<<<<
  * 													array=None,
@@ -2839,8 +2656,8 @@ static PyObject *__pyx_pw_10genomicsdb_11_GenomicsDB_5query_variant_calls(PyObje
 }
 
 static PyObject *__pyx_pf_10genomicsdb_11_GenomicsDB_4query_variant_calls(struct __pyx_obj_10genomicsdb__GenomicsDB *__pyx_v_self, PyObject *__pyx_v_array, PyObject *__pyx_v_column_ranges, PyObject *__pyx_v_row_ranges) {
-  std::function<void (interval_t)>  __pyx_v_process_interval_fn;
-  std::function<void (uint32_t, struct genomic_interval_t, std::vector<genomic_field_t> )>  __pyx_v_process_variant_call_fn;
+  PyObject *__pyx_v_variant_calls = 0;
+  VariantCallProcessor __pyx_v_processor;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -2848,214 +2665,171 @@ static PyObject *__pyx_pf_10genomicsdb_11_GenomicsDB_4query_variant_calls(struct
   int __pyx_t_3;
   __Pyx_RefNannySetupContext("query_variant_calls", 0);
 
-  /* "genomicsdb.pyx":64
+  /* "genomicsdb.pyx":52
  * 													column_ranges=None,
  * 													row_ranges=None):
- * 		print("we are in query_variant calls")             # <<<<<<<<<<<<<<
- * 		cdef function[void(interval_t)] process_interval_fn = process_interval
- * 		cdef function[void(uint32_t, genomic_interval_t, vector[genomic_field_t])] process_variant_call_fn = process_variant_call;
+ * 		cdef list variant_calls = []             # <<<<<<<<<<<<<<
+ * 		cdef VariantCallProcessor processor
+ * 		processor.set_root(variant_calls)
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 64, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_variant_calls = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
 
-  /* "genomicsdb.pyx":65
- * 													row_ranges=None):
- * 		print("we are in query_variant calls")
- * 		cdef function[void(interval_t)] process_interval_fn = process_interval             # <<<<<<<<<<<<<<
- * 		cdef function[void(uint32_t, genomic_interval_t, vector[genomic_field_t])] process_variant_call_fn = process_variant_call;
- * 		self._processor.setup_callbacks(process_interval_fn, process_variant_call_fn)
- */
-  __pyx_v_process_interval_fn = __pyx_f_10genomicsdb_process_interval;
-
-  /* "genomicsdb.pyx":66
- * 		print("we are in query_variant calls")
- * 		cdef function[void(interval_t)] process_interval_fn = process_interval
- * 		cdef function[void(uint32_t, genomic_interval_t, vector[genomic_field_t])] process_variant_call_fn = process_variant_call;             # <<<<<<<<<<<<<<
- * 		self._processor.setup_callbacks(process_interval_fn, process_variant_call_fn)
+  /* "genomicsdb.pyx":54
+ * 		cdef list variant_calls = []
+ * 		cdef VariantCallProcessor processor
+ * 		processor.set_root(variant_calls)             # <<<<<<<<<<<<<<
  * 		if array is None:
- */
-  __pyx_v_process_variant_call_fn = __pyx_f_10genomicsdb_process_variant_call;
-
-  /* "genomicsdb.pyx":67
- * 		cdef function[void(interval_t)] process_interval_fn = process_interval
- * 		cdef function[void(uint32_t, genomic_interval_t, vector[genomic_field_t])] process_variant_call_fn = process_variant_call;
- * 		self._processor.setup_callbacks(process_interval_fn, process_variant_call_fn)             # <<<<<<<<<<<<<<
- * 		if array is None:
- * 			print("array is none")
- */
-  try {
-    __pyx_v_self->_processor.setup_callbacks(__pyx_v_process_interval_fn, __pyx_v_process_variant_call_fn);
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    __PYX_ERR(1, 67, __pyx_L1_error)
-  }
-
-  /* "genomicsdb.pyx":68
- * 		cdef function[void(uint32_t, genomic_interval_t, vector[genomic_field_t])] process_variant_call_fn = process_variant_call;
- * 		self._processor.setup_callbacks(process_interval_fn, process_variant_call_fn)
- * 		if array is None:             # <<<<<<<<<<<<<<
- * 			print("array is none")
  * 			self._genomicsdb.query_variant_calls()
+ */
+  __pyx_v_processor.set_root(__pyx_v_variant_calls);
+
+  /* "genomicsdb.pyx":55
+ * 		cdef VariantCallProcessor processor
+ * 		processor.set_root(variant_calls)
+ * 		if array is None:             # <<<<<<<<<<<<<<
+ * 			self._genomicsdb.query_variant_calls()
+ * 		elif column_ranges is None:
  */
   __pyx_t_2 = (__pyx_v_array == Py_None);
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "genomicsdb.pyx":69
- * 		self._processor.setup_callbacks(process_interval_fn, process_variant_call_fn)
+    /* "genomicsdb.pyx":56
+ * 		processor.set_root(variant_calls)
  * 		if array is None:
- * 			print("array is none")             # <<<<<<<<<<<<<<
- * 			self._genomicsdb.query_variant_calls()
- * 		elif column_ranges is None:
- */
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 69, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-    /* "genomicsdb.pyx":70
- * 		if array is None:
- * 			print("array is none")
  * 			self._genomicsdb.query_variant_calls()             # <<<<<<<<<<<<<<
  * 		elif column_ranges is None:
- * 			print("Column is None")
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array))
  */
     try {
       __pyx_v_self->_genomicsdb->query_variant_calls();
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(1, 70, __pyx_L1_error)
+      __PYX_ERR(1, 56, __pyx_L1_error)
     }
 
-    /* "genomicsdb.pyx":68
- * 		cdef function[void(uint32_t, genomic_interval_t, vector[genomic_field_t])] process_variant_call_fn = process_variant_call;
- * 		self._processor.setup_callbacks(process_interval_fn, process_variant_call_fn)
+    /* "genomicsdb.pyx":55
+ * 		cdef VariantCallProcessor processor
+ * 		processor.set_root(variant_calls)
  * 		if array is None:             # <<<<<<<<<<<<<<
- * 			print("array is none")
  * 			self._genomicsdb.query_variant_calls()
+ * 		elif column_ranges is None:
  */
     goto __pyx_L3;
   }
 
-  /* "genomicsdb.pyx":71
- * 			print("array is none")
+  /* "genomicsdb.pyx":57
+ * 		if array is None:
  * 			self._genomicsdb.query_variant_calls()
  * 		elif column_ranges is None:             # <<<<<<<<<<<<<<
- * 			print("Column is None")
- * 			self._genomicsdb.query_variant_calls(as_string(array))
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array))
+ * 		elif row_ranges is None:
  */
   __pyx_t_3 = (__pyx_v_column_ranges == Py_None);
   __pyx_t_2 = (__pyx_t_3 != 0);
   if (__pyx_t_2) {
 
-    /* "genomicsdb.pyx":72
+    /* "genomicsdb.pyx":58
  * 			self._genomicsdb.query_variant_calls()
  * 		elif column_ranges is None:
- * 			print("Column is None")             # <<<<<<<<<<<<<<
- * 			self._genomicsdb.query_variant_calls(as_string(array))
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array))             # <<<<<<<<<<<<<<
  * 		elif row_ranges is None:
- */
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-    /* "genomicsdb.pyx":73
- * 		elif column_ranges is None:
- * 			print("Column is None")
- * 			self._genomicsdb.query_variant_calls(as_string(array))             # <<<<<<<<<<<<<<
- * 		elif row_ranges is None:
- * 			print("Row is None")
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array),
  */
     try {
-      __pyx_v_self->_genomicsdb->query_variant_calls(__pyx_f_10genomicsdb_as_string(__pyx_v_array));
+      __pyx_v_self->_genomicsdb->query_variant_calls(__pyx_v_processor, __pyx_f_10genomicsdb_as_string(__pyx_v_array));
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(1, 73, __pyx_L1_error)
+      __PYX_ERR(1, 58, __pyx_L1_error)
     }
 
-    /* "genomicsdb.pyx":71
- * 			print("array is none")
+    /* "genomicsdb.pyx":57
+ * 		if array is None:
  * 			self._genomicsdb.query_variant_calls()
  * 		elif column_ranges is None:             # <<<<<<<<<<<<<<
- * 			print("Column is None")
- * 			self._genomicsdb.query_variant_calls(as_string(array))
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array))
+ * 		elif row_ranges is None:
  */
     goto __pyx_L3;
   }
 
-  /* "genomicsdb.pyx":74
- * 			print("Column is None")
- * 			self._genomicsdb.query_variant_calls(as_string(array))
+  /* "genomicsdb.pyx":59
+ * 		elif column_ranges is None:
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array))
  * 		elif row_ranges is None:             # <<<<<<<<<<<<<<
- * 			print("Row is None")
- * 			self._genomicsdb.query_variant_calls(as_string(array),
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array),
+ * 																					 as_ranges(column_ranges))
  */
   __pyx_t_2 = (__pyx_v_row_ranges == Py_None);
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "genomicsdb.pyx":75
- * 			self._genomicsdb.query_variant_calls(as_string(array))
+    /* "genomicsdb.pyx":60
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array))
  * 		elif row_ranges is None:
- * 			print("Row is None")             # <<<<<<<<<<<<<<
- * 			self._genomicsdb.query_variant_calls(as_string(array),
- * 																					 as_ranges(column_ranges))
- */
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 75, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-    /* "genomicsdb.pyx":76
- * 		elif row_ranges is None:
- * 			print("Row is None")
- * 			self._genomicsdb.query_variant_calls(as_string(array),             # <<<<<<<<<<<<<<
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array),             # <<<<<<<<<<<<<<
  * 																					 as_ranges(column_ranges))
  * 		else:
  */
     try {
-      __pyx_v_self->_genomicsdb->query_variant_calls(__pyx_f_10genomicsdb_as_string(__pyx_v_array), __pyx_f_10genomicsdb_as_ranges(__pyx_v_column_ranges));
+      __pyx_v_self->_genomicsdb->query_variant_calls(__pyx_v_processor, __pyx_f_10genomicsdb_as_string(__pyx_v_array), __pyx_f_10genomicsdb_as_ranges(__pyx_v_column_ranges));
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(1, 76, __pyx_L1_error)
+      __PYX_ERR(1, 60, __pyx_L1_error)
     }
 
-    /* "genomicsdb.pyx":74
- * 			print("Column is None")
- * 			self._genomicsdb.query_variant_calls(as_string(array))
+    /* "genomicsdb.pyx":59
+ * 		elif column_ranges is None:
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array))
  * 		elif row_ranges is None:             # <<<<<<<<<<<<<<
- * 			print("Row is None")
- * 			self._genomicsdb.query_variant_calls(as_string(array),
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array),
+ * 																					 as_ranges(column_ranges))
  */
     goto __pyx_L3;
   }
 
-  /* "genomicsdb.pyx":79
+  /* "genomicsdb.pyx":63
  * 																					 as_ranges(column_ranges))
  * 		else:
- * 			self._genomicsdb.query_variant_calls(self._processor, as_string(array),             # <<<<<<<<<<<<<<
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array),             # <<<<<<<<<<<<<<
  * 																					 as_ranges(column_ranges),
  * 																					 as_ranges(row_ranges))
  */
   /*else*/ {
 
-    /* "genomicsdb.pyx":81
- * 			self._genomicsdb.query_variant_calls(self._processor, as_string(array),
+    /* "genomicsdb.pyx":65
+ * 			self._genomicsdb.query_variant_calls(processor, as_string(array),
  * 																					 as_ranges(column_ranges),
  * 																					 as_ranges(row_ranges))             # <<<<<<<<<<<<<<
+ * 		return variant_calls
  * 
- * 	def __dealloc__(self):
  */
     try {
-      __pyx_v_self->_genomicsdb->query_variant_calls(__pyx_v_self->_processor, __pyx_f_10genomicsdb_as_string(__pyx_v_array), __pyx_f_10genomicsdb_as_ranges(__pyx_v_column_ranges), __pyx_f_10genomicsdb_as_ranges(__pyx_v_row_ranges));
+      __pyx_v_self->_genomicsdb->query_variant_calls(__pyx_v_processor, __pyx_f_10genomicsdb_as_string(__pyx_v_array), __pyx_f_10genomicsdb_as_ranges(__pyx_v_column_ranges), __pyx_f_10genomicsdb_as_ranges(__pyx_v_row_ranges));
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(1, 79, __pyx_L1_error)
+      __PYX_ERR(1, 63, __pyx_L1_error)
     }
   }
   __pyx_L3:;
 
-  /* "genomicsdb.pyx":60
- * 		print("Got GDB instance")
+  /* "genomicsdb.pyx":66
+ * 																					 as_ranges(column_ranges),
+ * 																					 as_ranges(row_ranges))
+ * 		return variant_calls             # <<<<<<<<<<<<<<
+ * 
+ * 	def __dealloc__(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(__pyx_v_variant_calls);
+  __pyx_r = __pyx_v_variant_calls;
+  goto __pyx_L0;
+
+  /* "genomicsdb.pyx":48
+ * 																				 segment_size)
  * 
  * 	def query_variant_calls(self,             # <<<<<<<<<<<<<<
  * 													array=None,
@@ -3063,24 +2837,23 @@ static PyObject *__pyx_pf_10genomicsdb_11_GenomicsDB_4query_variant_calls(struct
  */
 
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("genomicsdb._GenomicsDB.query_variant_calls", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_variant_calls);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "genomicsdb.pyx":83
- * 																					 as_ranges(row_ranges))
+/* "genomicsdb.pyx":68
+ * 		return variant_calls
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
- * 		print("Cleaning up")
  * 		if self._genomicsdb != NULL:
+ * 			del self._genomicsdb
  */
 
 /* Python wrapper */
@@ -3096,73 +2869,45 @@ static void __pyx_pw_10genomicsdb_11_GenomicsDB_7__dealloc__(PyObject *__pyx_v_s
 
 static void __pyx_pf_10genomicsdb_11_GenomicsDB_6__dealloc__(struct __pyx_obj_10genomicsdb__GenomicsDB *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_t_2;
+  int __pyx_t_1;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "genomicsdb.pyx":84
+  /* "genomicsdb.pyx":69
  * 
  * 	def __dealloc__(self):
- * 		print("Cleaning up")             # <<<<<<<<<<<<<<
- * 		if self._genomicsdb != NULL:
- * 			del self._genomicsdb
- */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 84, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "genomicsdb.pyx":85
- * 	def __dealloc__(self):
- * 		print("Cleaning up")
  * 		if self._genomicsdb != NULL:             # <<<<<<<<<<<<<<
  * 			del self._genomicsdb
- * 		print("Cleanup Done")
+ * 
  */
-  __pyx_t_2 = ((__pyx_v_self->_genomicsdb != NULL) != 0);
-  if (__pyx_t_2) {
+  __pyx_t_1 = ((__pyx_v_self->_genomicsdb != NULL) != 0);
+  if (__pyx_t_1) {
 
-    /* "genomicsdb.pyx":86
- * 		print("Cleaning up")
+    /* "genomicsdb.pyx":70
+ * 	def __dealloc__(self):
  * 		if self._genomicsdb != NULL:
  * 			del self._genomicsdb             # <<<<<<<<<<<<<<
- * 		print("Cleanup Done")
  * 
  */
     delete __pyx_v_self->_genomicsdb;
 
-    /* "genomicsdb.pyx":85
+    /* "genomicsdb.pyx":69
+ * 
  * 	def __dealloc__(self):
- * 		print("Cleaning up")
  * 		if self._genomicsdb != NULL:             # <<<<<<<<<<<<<<
  * 			del self._genomicsdb
- * 		print("Cleanup Done")
+ * 
  */
   }
 
-  /* "genomicsdb.pyx":87
- * 		if self._genomicsdb != NULL:
- * 			del self._genomicsdb
- * 		print("Cleanup Done")             # <<<<<<<<<<<<<<
- * 
- */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 87, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "genomicsdb.pyx":83
- * 																					 as_ranges(row_ranges))
+  /* "genomicsdb.pyx":68
+ * 		return variant_calls
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
- * 		print("Cleaning up")
  * 		if self._genomicsdb != NULL:
+ * 			del self._genomicsdb
  */
 
   /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_WriteUnraisable("genomicsdb._GenomicsDB.__dealloc__", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
-  __pyx_L0:;
   __Pyx_RefNannyFinishContext();
 }
 
@@ -3197,7 +2942,7 @@ static PyObject *__pyx_pf_10genomicsdb_11_GenomicsDB_8__reduce_cython__(CYTHON_U
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -3250,7 +2995,7 @@ static PyObject *__pyx_pf_10genomicsdb_11_GenomicsDB_10__setstate_cython__(CYTHO
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -3508,7 +3253,6 @@ static CYTHON_INLINE PyObject *__pyx_convert_PyByteArray_string_to_py_std__in_st
 }
 
 static PyObject *__pyx_tp_new_10genomicsdb__GenomicsDB(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
-  struct __pyx_obj_10genomicsdb__GenomicsDB *p;
   PyObject *o;
   if (likely((t->tp_flags & Py_TPFLAGS_IS_ABSTRACT) == 0)) {
     o = (*t->tp_alloc)(t, 0);
@@ -3516,8 +3260,6 @@ static PyObject *__pyx_tp_new_10genomicsdb__GenomicsDB(PyTypeObject *t, CYTHON_U
     o = (PyObject *) PyBaseObject_Type.tp_new(t, __pyx_empty_tuple, 0);
   }
   if (unlikely(!o)) return 0;
-  p = ((struct __pyx_obj_10genomicsdb__GenomicsDB *)o);
-  new((void*)&(p->_processor)) VariantCallProcessor();
   if (unlikely(__pyx_pw_10genomicsdb_11_GenomicsDB_1__cinit__(o, __pyx_empty_tuple, NULL) < 0)) goto bad;
   return o;
   bad:
@@ -3526,7 +3268,6 @@ static PyObject *__pyx_tp_new_10genomicsdb__GenomicsDB(PyTypeObject *t, CYTHON_U
 }
 
 static void __pyx_tp_dealloc_10genomicsdb__GenomicsDB(PyObject *o) {
-  struct __pyx_obj_10genomicsdb__GenomicsDB *p = (struct __pyx_obj_10genomicsdb__GenomicsDB *)o;
   #if CYTHON_USE_TP_FINALIZE
   if (unlikely(PyType_HasFeature(Py_TYPE(o), Py_TPFLAGS_HAVE_FINALIZE) && Py_TYPE(o)->tp_finalize) && (!PyType_IS_GC(Py_TYPE(o)) || !_PyGC_FINALIZED(o))) {
     if (PyObject_CallFinalizerFromDealloc(o)) return;
@@ -3540,7 +3281,6 @@ static void __pyx_tp_dealloc_10genomicsdb__GenomicsDB(PyObject *o) {
     --Py_REFCNT(o);
     PyErr_Restore(etype, eval, etb);
   }
-  __Pyx_call_destructor(p->_processor);
   (*Py_TYPE(o)->tp_free)(o);
 }
 
@@ -3658,31 +3398,20 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_kp_u_Cleaning_up, __pyx_k_Cleaning_up, sizeof(__pyx_k_Cleaning_up), 0, 1, 0, 0},
-  {&__pyx_kp_u_Cleanup_Done, __pyx_k_Cleanup_Done, sizeof(__pyx_k_Cleanup_Done), 0, 1, 0, 0},
-  {&__pyx_kp_u_Column_is_None, __pyx_k_Column_is_None, sizeof(__pyx_k_Column_is_None), 0, 1, 0, 0},
   {&__pyx_kp_u_Could_not_convert_to_unicode, __pyx_k_Could_not_convert_to_unicode, sizeof(__pyx_k_Could_not_convert_to_unicode), 0, 1, 0, 0},
   {&__pyx_n_s_GenomicsDB, __pyx_k_GenomicsDB, sizeof(__pyx_k_GenomicsDB), 0, 0, 1, 1},
-  {&__pyx_kp_u_Got_GDB_instance, __pyx_k_Got_GDB_instance, sizeof(__pyx_k_Got_GDB_instance), 0, 1, 0, 0},
-  {&__pyx_kp_u_Got_attributes, __pyx_k_Got_attributes, sizeof(__pyx_k_Got_attributes), 0, 1, 0, 0},
-  {&__pyx_kp_u_Got_ws, __pyx_k_Got_ws, sizeof(__pyx_k_Got_ws), 0, 1, 0, 0},
-  {&__pyx_kp_u_Row_is_None, __pyx_k_Row_is_None, sizeof(__pyx_k_Row_is_None), 0, 1, 0, 0},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
   {&__pyx_n_s_array, __pyx_k_array, sizeof(__pyx_k_array), 0, 0, 1, 1},
-  {&__pyx_kp_u_array_is_none, __pyx_k_array_is_none, sizeof(__pyx_k_array_is_none), 0, 1, 0, 0},
   {&__pyx_n_s_attributes, __pyx_k_attributes, sizeof(__pyx_k_attributes), 0, 0, 1, 1},
   {&__pyx_n_s_callset_mapping_file, __pyx_k_callset_mapping_file, sizeof(__pyx_k_callset_mapping_file), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_column_ranges, __pyx_k_column_ranges, sizeof(__pyx_k_column_ranges), 0, 0, 1, 1},
   {&__pyx_n_s_connect, __pyx_k_connect, sizeof(__pyx_k_connect), 0, 0, 1, 1},
-  {&__pyx_kp_u_found_ranges, __pyx_k_found_ranges, sizeof(__pyx_k_found_ranges), 0, 1, 0, 0},
   {&__pyx_n_s_genomicsdb, __pyx_k_genomicsdb, sizeof(__pyx_k_genomicsdb), 0, 0, 1, 1},
   {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
-  {&__pyx_kp_u_length_of_lranges, __pyx_k_length_of_lranges, sizeof(__pyx_k_length_of_lranges), 0, 1, 0, 0},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_kp_s_no_default___reduce___due_to_non, __pyx_k_no_default___reduce___due_to_non, sizeof(__pyx_k_no_default___reduce___due_to_non), 0, 0, 1, 0},
-  {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
@@ -3696,13 +3425,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_version, __pyx_k_version, sizeof(__pyx_k_version), 0, 0, 1, 1},
   {&__pyx_n_s_version_string, __pyx_k_version_string, sizeof(__pyx_k_version_string), 0, 0, 1, 1},
   {&__pyx_n_s_vid_mapping_file, __pyx_k_vid_mapping_file, sizeof(__pyx_k_vid_mapping_file), 0, 0, 1, 1},
-  {&__pyx_kp_u_we_are_in_query_variant_calls, __pyx_k_we_are_in_query_variant_calls, sizeof(__pyx_k_we_are_in_query_variant_calls), 0, 1, 0, 0},
   {&__pyx_n_s_workspace, __pyx_k_workspace, sizeof(__pyx_k_workspace), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 34, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 47, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -3723,133 +3450,24 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "src/utils.pxi":49
- * 	print("length of lranges=", len(l_ranges))
- * 	if len(l_ranges) > 0:
- * 		print("found ranges")             # <<<<<<<<<<<<<<
- * 		for low, high in l_ranges:
- * 			print(low, high)
- */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_found_ranges); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 49, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__2);
-  __Pyx_GIVEREF(__pyx_tuple__2);
-
-  /* "genomicsdb.pyx":37
- * 							 segment_size = None):
- * 		cdef string ws = as_string(workspace)
- * 		print("Got ws")             # <<<<<<<<<<<<<<
- * 		cdef vector[string] vec = as_vector(attributes)
- * 		print("Got attributes")
- */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_u_Got_ws); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(1, 37, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__3);
-  __Pyx_GIVEREF(__pyx_tuple__3);
-
-  /* "genomicsdb.pyx":39
- * 		print("Got ws")
- * 		cdef vector[string] vec = as_vector(attributes)
- * 		print("Got attributes")             # <<<<<<<<<<<<<<
- * 		if attributes is None:
- * 			self._genomicsdb  = new GenomicsDB(as_string(workspace),
- */
-  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_u_Got_attributes); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(1, 39, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__4);
-  __Pyx_GIVEREF(__pyx_tuple__4);
-
-  /* "genomicsdb.pyx":58
- * 																				 as_vector(attributes),
- * 																				 segment_size)
- * 		print("Got GDB instance")             # <<<<<<<<<<<<<<
- * 
- * 	def query_variant_calls(self,
- */
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_u_Got_GDB_instance); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(1, 58, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__5);
-  __Pyx_GIVEREF(__pyx_tuple__5);
-
-  /* "genomicsdb.pyx":64
- * 													column_ranges=None,
- * 													row_ranges=None):
- * 		print("we are in query_variant calls")             # <<<<<<<<<<<<<<
- * 		cdef function[void(interval_t)] process_interval_fn = process_interval
- * 		cdef function[void(uint32_t, genomic_interval_t, vector[genomic_field_t])] process_variant_call_fn = process_variant_call;
- */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_u_we_are_in_query_variant_calls); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(1, 64, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__6);
-  __Pyx_GIVEREF(__pyx_tuple__6);
-
-  /* "genomicsdb.pyx":69
- * 		self._processor.setup_callbacks(process_interval_fn, process_variant_call_fn)
- * 		if array is None:
- * 			print("array is none")             # <<<<<<<<<<<<<<
- * 			self._genomicsdb.query_variant_calls()
- * 		elif column_ranges is None:
- */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_u_array_is_none); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(1, 69, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
-
-  /* "genomicsdb.pyx":72
- * 			self._genomicsdb.query_variant_calls()
- * 		elif column_ranges is None:
- * 			print("Column is None")             # <<<<<<<<<<<<<<
- * 			self._genomicsdb.query_variant_calls(as_string(array))
- * 		elif row_ranges is None:
- */
-  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_u_Column_is_None); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(1, 72, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
-
-  /* "genomicsdb.pyx":75
- * 			self._genomicsdb.query_variant_calls(as_string(array))
- * 		elif row_ranges is None:
- * 			print("Row is None")             # <<<<<<<<<<<<<<
- * 			self._genomicsdb.query_variant_calls(as_string(array),
- * 																					 as_ranges(column_ranges))
- */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_u_Row_is_None); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(1, 75, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
-
-  /* "genomicsdb.pyx":84
- * 
- * 	def __dealloc__(self):
- * 		print("Cleaning up")             # <<<<<<<<<<<<<<
- * 		if self._genomicsdb != NULL:
- * 			del self._genomicsdb
- */
-  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_u_Cleaning_up); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(1, 84, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
-
-  /* "genomicsdb.pyx":87
- * 		if self._genomicsdb != NULL:
- * 			del self._genomicsdb
- * 		print("Cleanup Done")             # <<<<<<<<<<<<<<
- * 
- */
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_u_Cleanup_Done); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(1, 87, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__11);
-  __Pyx_GIVEREF(__pyx_tuple__11);
-
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(2, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__12);
-  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(2, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__2);
+  __Pyx_GIVEREF(__pyx_tuple__2);
 
   /* "(tree fragment)":4
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(2, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__3);
+  __Pyx_GIVEREF(__pyx_tuple__3);
 
   /* "genomicsdb.pyx":6
  * include "utils.pxi"
@@ -3858,10 +3476,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 	version_string = genomicsdb_version()
  * 	return version_string
  */
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_n_s_version_string); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(1, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__14);
-  __Pyx_GIVEREF(__pyx_tuple__14);
-  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_genomicsdb_pyx, __pyx_n_s_version, 6, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(1, 6, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_n_s_version_string); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(1, 6, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__4);
+  __Pyx_GIVEREF(__pyx_tuple__4);
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_genomicsdb_pyx, __pyx_n_s_version, 6, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(1, 6, __pyx_L1_error)
 
   /* "genomicsdb.pyx":11
  * 
@@ -3870,10 +3488,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 	return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size)
  * 
  */
-  __pyx_tuple__16 = PyTuple_Pack(6, __pyx_n_s_workspace, __pyx_n_s_callset_mapping_file, __pyx_n_s_vid_mapping_file, __pyx_n_s_reference_genome, __pyx_n_s_attributes, __pyx_n_s_segment_size); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(1, 11, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__16);
-  __Pyx_GIVEREF(__pyx_tuple__16);
-  __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_genomicsdb_pyx, __pyx_n_s_connect, 11, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(1, 11, __pyx_L1_error)
+  __pyx_tuple__6 = PyTuple_Pack(6, __pyx_n_s_workspace, __pyx_n_s_callset_mapping_file, __pyx_n_s_vid_mapping_file, __pyx_n_s_reference_genome, __pyx_n_s_attributes, __pyx_n_s_segment_size); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(1, 11, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__6);
+  __Pyx_GIVEREF(__pyx_tuple__6);
+  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_genomicsdb_pyx, __pyx_n_s_connect, 11, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(1, 11, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -3924,15 +3542,15 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
-  if (PyType_Ready(&__pyx_type_10genomicsdb__GenomicsDB) < 0) __PYX_ERR(1, 22, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_10genomicsdb__GenomicsDB) < 0) __PYX_ERR(1, 14, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
   __pyx_type_10genomicsdb__GenomicsDB.tp_print = 0;
   #endif
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_10genomicsdb__GenomicsDB.tp_dictoffset && __pyx_type_10genomicsdb__GenomicsDB.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_10genomicsdb__GenomicsDB.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_GenomicsDB, (PyObject *)&__pyx_type_10genomicsdb__GenomicsDB) < 0) __PYX_ERR(1, 22, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_10genomicsdb__GenomicsDB) < 0) __PYX_ERR(1, 22, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_GenomicsDB, (PyObject *)&__pyx_type_10genomicsdb__GenomicsDB) < 0) __PYX_ERR(1, 14, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_10genomicsdb__GenomicsDB) < 0) __PYX_ERR(1, 14, __pyx_L1_error)
   __pyx_ptype_10genomicsdb__GenomicsDB = &__pyx_type_10genomicsdb__GenomicsDB;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -3956,6 +3574,16 @@ static int __Pyx_modinit_type_import_code(void) {
   #endif
   __Pyx_ImportType_CheckSize_Warn);
    if (!__pyx_ptype_7cpython_4type_type) __PYX_ERR(3, 9, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 8, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_ptype_7cpython_4bool_bool = __Pyx_ImportType(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "bool", sizeof(PyBoolObject), __Pyx_ImportType_CheckSize_Warn);
+   if (!__pyx_ptype_7cpython_4bool_bool) __PYX_ERR(4, 8, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 15, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_ptype_7cpython_7complex_complex = __Pyx_ImportType(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "complex", sizeof(PyComplexObject), __Pyx_ImportType_CheckSize_Warn);
+   if (!__pyx_ptype_7cpython_7complex_complex) __PYX_ERR(5, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -5245,68 +4873,6 @@ bad:
         }\
         return (target_type) value;\
     }
-
-/* CIntToPy */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_uint64_t(uint64_t value) {
-    const uint64_t neg_one = (uint64_t) ((uint64_t) 0 - (uint64_t) 1), const_zero = (uint64_t) 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(uint64_t) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(uint64_t) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(uint64_t) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-#endif
-        }
-    } else {
-        if (sizeof(uint64_t) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(uint64_t) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-#endif
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(uint64_t),
-                                     little, !is_unsigned);
-    }
-}
-
-/* CIntToPy */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_uint32_t(uint32_t value) {
-    const uint32_t neg_one = (uint32_t) ((uint32_t) 0 - (uint32_t) 1), const_zero = (uint32_t) 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(uint32_t) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(uint32_t) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(uint32_t) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-#endif
-        }
-    } else {
-        if (sizeof(uint32_t) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(uint32_t) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-#endif
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(uint32_t),
-                                     little, !is_unsigned);
-    }
-}
 
 /* CIntFromPy */
 static CYTHON_INLINE int64_t __Pyx_PyInt_As_int64_t(PyObject *x) {

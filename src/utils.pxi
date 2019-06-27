@@ -44,10 +44,7 @@ cdef vector[string] as_vector(l):
 
 cdef genomicsdb_ranges_t as_ranges(l_ranges):
 	cdef vector[pair[int64_t, int64_t]] ranges
-	print("length of lranges=", len(l_ranges))
 	if len(l_ranges) > 0:
-		print("found ranges")
 		for low, high in l_ranges:
-			print(low, high)
 			ranges.push_back(pair[int64_t, int64_t](low, high))
 	return ranges

@@ -6,6 +6,7 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.functional cimport function
 from libc.stdint cimport (int32_t, uint32_t, int64_t, uint64_t, uintptr_t, INT64_MAX)
+from cpython cimport (PyObject, PyList_New)
 
 cdef extern from "genomicsdb.h":
 	cdef string genomicsdb_version()
@@ -60,10 +61,12 @@ cdef extern from "genomicsdb.h":
 		GenomicsDBVariants query_variants()
 		GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
 		GenomicsDBVariantCalls query_variant_calls(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
+		GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string, genomicsdb_ranges_t) except +
 		GenomicsDBVariantCalls query_variant_calls(string, genomicsdb_ranges_t) except +
-		GenomicsDBVariantCalls query_variant_calls(string, ) except +
-		GenomicsDBVariantCalls query_variant_calls() except +
+		GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string) except +
+		GenomicsDBVariantCalls query_variant_calls(string) except +
 		GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor) except +
+		GenomicsDBVariantCalls query_variant_calls() except +
 
 #
 # GenomicsDB Helper Utilities
@@ -83,7 +86,9 @@ cdef extern from "genomicsdb.h":
 cdef extern from "genomicsdb_processor.h":
 	cdef cppclass VariantCallProcessor(GenomicsDBVariantCallProcessor):
 		VariantCallProcessor() except +
-		void setup_callbacks(function[void(interval_t)], function[void(uint32_t, genomic_interval_t, vector[genomic_field_t])]) except +
-		void process(interval_t)
-		void process(uint32_t, genomic_interval_t, vector[genomic_field_t])
+		void set_root(object)
+		void process(interval_t) except +
+		void process(uint32_t, genomic_interval_t, vector[genomic_field_t]) except +
+		void finalize() except +
+		pass
 

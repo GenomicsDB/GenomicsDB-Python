@@ -1,18 +1,33 @@
 #include "genomicsdb.h"
 
-#include <functional>
+#include <cstring>
+#include <iostream>
+#include <Python.h>
+#include <stdio.h>
 
-class VariantCallProcessor : public GenomicsDBVariantCallProcessor {  
+#define THROW_GENOMICSDB_EXCEPTION(MSG)                      \
+do {                                                         \
+    std::string errmsg = std::string("GenomicsDB-Python: (") \
+        + __func__ + ") " + MSG;                             \
+    if (errno > 0) {                                         \
+      errmsg += "; errno=" + std::to_string(errno)           \
+          + "(" + std::string(std::strerror(errno)) + ")";   \
+    }                                                        \
+    throw new GenomicsDBException(errmsg);                   \
+  } while (false)
+
+
+class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
  public:
   VariantCallProcessor();
-
-  void setup_callbacks(std::function<void(interval_t)>, std::function<void(uint32_t, genomic_interval_t, std::vector<genomic_field_t>)>);
-
+  ~VariantCallProcessor();
+  void set_root(PyObject*);
   void process(interval_t);
-
   void process(uint32_t, genomic_interval_t, std::vector<genomic_field_t>);
-
-  std::function<void(interval_t)> _process_interval_callback;
-  std::function<void(uint32_t, genomic_interval_t, std::vector<genomic_field_t>)> _process_variant_call_callback;
-
+ private:
+  void initialize_interval();
+  void finalize_interval();
+  interval_t _current_interval;
+  PyObject* _current_calls_list = NULL;
+  PyObject* _intervals_list = NULL;
 };
