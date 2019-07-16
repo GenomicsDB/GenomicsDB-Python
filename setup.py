@@ -3,14 +3,27 @@ from __future__ import absolute_import, print_function
 from setuptools import setup, Extension, find_packages
 from pkg_resources import resource_filename
 
-#TODO: Replace hardcoded dirs
+import os
+import sys
+
+# Specify genomicsdb install location via "--with-genomicsdb=<genomicsdb_install_path>" command line arg
+GENOMICSDB_INSTALL_PATH="/usr/local"
+args = sys.argv[:]
+for arg in args:
+	if arg.find('--with-genomicsdb=') == 0:
+		GENOMICSDB_INSTALL_PATH = os.path.expanduser(arg.split('=')[1])
+		sys.argv.remove(arg)
+
+GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
+GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
+		
 genomicsdb_extension=Extension(
 	"genomicsdb",
 	language="c++",
 	sources=["src/genomicsdb.pyx", "src/genomicsdb_processor.cpp"],
 	libraries=["tiledbgenomicsdb"],
-	include_dirs=["/home/vagrant/include"],
-	library_dirs=["/home/vagrant/lib"],
+	include_dirs=[GENOMICSDB_INCLUDE_DIR],
+	library_dirs=[GENOMICSDB_LIB_DIR],
 	extra_compile_args=["-std=c++11"]
 )
 
