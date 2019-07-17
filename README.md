@@ -13,5 +13,6 @@ deactivate
 
 To run tests:
 ```
+cd GenomicsDB-Python
 PYTHONPATH=${PYTHONPATH}:$(shell pwd) python test/test.py
 ```
