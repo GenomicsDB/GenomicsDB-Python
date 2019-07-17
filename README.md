@@ -1,5 +1,5 @@
 # GenomicsDB-Python
-Experimental Python Bindings using python3 and cython to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library
+Experimental Python Bindings using cython to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library
 
 To build:
 ```
