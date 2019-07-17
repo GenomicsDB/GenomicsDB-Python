@@ -7,7 +7,7 @@ clean:
 
 .PHONY: build
 build: clean
-	python setup.py build_ext --with-genomicsdb=$(HOME) --inplace
+	python setup.py build_ext --with-genomicsdb=$(GENOMICSDB_HOME) --inplace
 
 .PHONY: tests
 tests: build
