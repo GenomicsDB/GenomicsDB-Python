@@ -39,7 +39,7 @@ void VariantCallProcessor::process(const std::string& sample_name,
                                    const genomic_interval_t& genomic_interval,
                                    const std::vector<genomic_field_t>& genomic_fields) {
   errno = 0;
-  PyObject *call = PyTuple_New(6);
+  PyObject *call = PyTuple_New(5);
   if (call) {
     if (PyTuple_SetItem(call, 0, PyUnicode_FromString(sample_name.c_str()))
         || PyTuple_SetItem(call, 1, PyLong_FromLong(row))
