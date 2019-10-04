@@ -13,12 +13,12 @@ void VariantCallProcessor::set_root(PyObject *intervals_list) {
   _intervals_list = intervals_list;
 }
 
-void VariantCallProcessor::process(interval_t interval) {
+void VariantCallProcessor::process(const interval_t interval) {
   finalize_interval();
   _current_interval = interval;
 }
 
-PyObject* wrap_fields(std::vector<genomic_field_t> fields) {
+PyObject* wrap_fields(const std::vector<genomic_field_t>& fields) {
   PyObject* dict_fields = PyDict_New();
   if (dict_fields) {
     for (auto field: fields) {
@@ -34,20 +34,22 @@ PyObject* wrap_fields(std::vector<genomic_field_t> fields) {
   return dict_fields;
 }
 
-void VariantCallProcessor::process(uint32_t row,
-                                   genomic_interval_t genomic_interval,
-                                   std::vector<genomic_field_t> fields) {
+void VariantCallProcessor::process(const std::string& sample_name,
+                                   const uint32_t row,
+                                   const genomic_interval_t& genomic_interval,
+                                   const std::vector<genomic_field_t>& genomic_fields) {
   errno = 0;
-  PyObject *call = PyTuple_New(5);
+  PyObject *call = PyTuple_New(6);
   if (call) {
-    if (PyTuple_SetItem(call, 0, PyLong_FromLong(row))
-        || PyTuple_SetItem(call, 1, PyUnicode_FromString(genomic_interval.contig_name.c_str()))
-        || PyTuple_SetItem(call, 2, PyLong_FromLong(genomic_interval.interval.first))
-        ||PyTuple_SetItem(call, 3, PyLong_FromLong(genomic_interval.interval.second))) {
-      
+    if (PyTuple_SetItem(call, 0, PyUnicode_FromString(sample_name.c_str()))
+        || PyTuple_SetItem(call, 1, PyLong_FromLong(row))
+        || PyTuple_SetItem(call, 2, PyUnicode_FromString(genomic_interval.contig_name.c_str()))
+        || PyTuple_SetItem(call, 3, PyLong_FromLong(genomic_interval.interval.first))
+        ||PyTuple_SetItem(call, 4, PyLong_FromLong(genomic_interval.interval.second))) {
+
       THROW_GENOMICSDB_EXCEPTION("Failed to setup python tuples");
     }
-    PyTuple_SetItem(call, 4, wrap_fields(fields));
+    PyTuple_SetItem(call, 4, wrap_fields(genomic_fields));
     // Add to current list
     if (PyList_Append( _current_calls_list, call)) {
       THROW_GENOMICSDB_EXCEPTION("Failed to append to python list");
