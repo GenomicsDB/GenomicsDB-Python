@@ -7,10 +7,10 @@ clean:
 
 .PHONY: build
 build: clean
-	python setup.py build_ext --with-genomicsdb=$(GENOMICSDB_HOME) --inplace
+	python3 setup.py build_ext --with-genomicsdb=$(GENOMICSDB_HOME) --inplace
 
 .PHONY: tests
 tests: build
 	echo "Running tests..."
-	PYTHONPATH=${PYTHONPATH}:$(shell pwd) python test/test.py
+	PYTHONPATH=${PYTHONPATH}:$(shell pwd) python3 test/test.py
 	echo "Running tests DONE"
