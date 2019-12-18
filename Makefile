@@ -1,3 +1,5 @@
+all: build
+
 clean:
 	rm -f -r build/
 	rm -f *.so
@@ -5,12 +7,13 @@ clean:
 	rm -f src/genomicsdb.cpp
 	rm -f src/utils.cpp
 
-.PHONY: build
-build: clean
+build:  $(wildcard src/*pxd) $(wildcard src/*pyx) $(wildcard src/*pxi) $(widcard src/genomicsdb_processor*)
 	python3 setup.py build_ext --with-genomicsdb=$(GENOMICSDB_HOME) --inplace
 
-.PHONY: tests
-tests: build
+rebuild: clean build
+
+.PHONY: test
+test: build
 	echo "Running tests..."
 	PYTHONPATH=${PYTHONPATH}:$(shell pwd) python3 test/test.py
 	echo "Running tests DONE"
