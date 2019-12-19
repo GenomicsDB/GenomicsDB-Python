@@ -44,7 +44,7 @@ void VariantCallProcessor::process(uint32_t row,
         || PyTuple_SetItem(call, 1, PyUnicode_FromString(genomic_interval.contig_name.c_str()))
         || PyTuple_SetItem(call, 2, PyLong_FromLong(genomic_interval.interval.first))
         ||PyTuple_SetItem(call, 3, PyLong_FromLong(genomic_interval.interval.second))) {
-      
+
       THROW_GENOMICSDB_EXCEPTION("Failed to setup python tuples");
     }
     PyTuple_SetItem(call, 4, wrap_fields(fields));
