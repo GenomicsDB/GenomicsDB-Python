@@ -3,13 +3,34 @@
 
 include "utils.pxi"
 
+import os
+
 def version():
-    version_string = genomicsdb_version()
+    version_string = genomicsdb_version().decode("ascii")
     return version_string
 
+class GenomicsDBException(Exception):
+    pass
+    
+def connect(workspace,
+            callset_mapping_file = None,
+            vid_mapping_file = None,
+            reference_genome,
+            attributes = None,
+            segment_size = None):
+    if not os.path.exists(workspace):
+        raise GenomicsDBException("workspace=" + workspace + "does not exist")
+    if callset_mapping_file is None:
+        callset_mapping_file = os.path.join(workspace, "callset.json")
+    if not os.path.exists(callset_mapping_file):
+        raise GenomicsDBException("callset_mapping_file=" + callset_mapping_file + "does not exist")
+    if vid_mapping_file is None:
+        vid_mapping_file = os.path.join(workspace, "vidmap.json")
+    if not os.path.exists(vid_mapping_file):
+        raise GenomicsDBException("vid_mapping_file=" + vid_mapping_file + "does not exist")
 
-def connect(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size):
-    return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size)
+    return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file,
+                       reference_genome, attributes, segment_size)
 
 cdef class _GenomicsDB:
     cdef GenomicsDB* _genomicsdb
