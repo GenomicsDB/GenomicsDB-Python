@@ -111,3 +111,6 @@ TAGS
 
 #Xcode
 .DS_Store
+
+#Ignore generated cpp files
+src/genomicsdb.cpp
