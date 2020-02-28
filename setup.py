@@ -4,19 +4,39 @@ from setuptools import setup, Extension, find_packages
 from pkg_resources import resource_filename
 
 import os
+import shutil
+import glob
 import sys
+import logging
+
+# Directory where a copy of the CPP compiled object is found.
+GENOMICSDB_LOCAL_DATA_DIR = 'gdb_data'
 
 # Specify genomicsdb install location via "--with-genomicsdb=<genomicsdb_install_path>" command line arg
-GENOMICSDB_INSTALL_PATH="/usr/local"
+GENOMICSDB_INSTALL_PATH = os.getenv('GENOMICSDB_HOME', default = '/usr/local')
 args = sys.argv[:]
 for arg in args:
 	if arg.find('--with-genomicsdb=') == 0:
 		GENOMICSDB_INSTALL_PATH = os.path.expanduser(arg.split('=')[1])
 		sys.argv.remove(arg)
 
+print('Compiled GenomicsDB Install Path: {}'.format(GENOMICSDB_INSTALL_PATH))
+
 GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
 GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
-		
+
+rpath = []
+for arg in args:	
+	if arg.find('--with-libs') == 0:
+		dst = os.path.join(GENOMICSDB_LOCAL_DATA_DIR, 'lib')
+
+		if os.path.isdir(dst):
+			shutil.rmtree(dst)
+
+		shutil.copytree(GENOMICSDB_LIB_DIR, dst)
+		rpath = ['$ORIGIN/gdb_data/lib']
+		sys.argv.remove(arg)
+
 genomicsdb_extension=Extension(
 	"genomicsdb",
 	language="c++",
@@ -24,6 +44,7 @@ genomicsdb_extension=Extension(
 	libraries=["tiledbgenomicsdb"],
 	include_dirs=[GENOMICSDB_INCLUDE_DIR],
 	library_dirs=[GENOMICSDB_LIB_DIR],
+	runtime_library_dirs= rpath,
 	extra_compile_args=["-std=c++11"]
 )
 
@@ -38,6 +59,8 @@ setup(name='genomicsdb',
 		'wheel>=0.30'],
 	packages = find_packages(),
 	keywords=['genomics', 'genomicsdb', 'variant'],
+	include_package_data=True,
+	version = '0.0.1.dev0',
 	classifiers=[
 		'Development Status :: Experimental - pre Alpha',
 		'Intended Audience :: Developers',
@@ -48,10 +71,7 @@ setup(name='genomicsdb',
 		'Topic :: Software Development :: Libraries :: Python Modules',
 		'Operating System :: POSIX :: Linux',
 		'Operating System :: MacOS :: MacOS X',
-		'Programming Language :: Python :: 2.7',
 		'Programming Language :: Python :: 3',
-		'Programming Language :: Python :: 3.4',
-		'Programming Language :: Python :: 3.5',
 		'Programming Language :: Python :: 3.6',
 	],
 )
