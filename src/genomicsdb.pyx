@@ -6,6 +6,13 @@ include "utils.pxi"
 import os
 
 def version():
+    """Print out GenomicsDB C++ Version
+    
+    Returns
+    -------
+    str
+        GenomicsDB Version
+    """
     version_string = genomicsdb_version().decode("ascii")
     return version_string
 
@@ -15,9 +22,40 @@ class GenomicsDBException(Exception):
 def connect(workspace,
             callset_mapping_file = None,
             vid_mapping_file = None,
-            reference_genome,
+            reference_genome = None,
             attributes = None,
             segment_size = None):
+    """Connect to an existing GenomicsDB Workspace.
+    
+    Parameters
+    ----------
+    workspace : str
+        Path to the GenomicsDB workspace.
+    callset_mapping_file : [type], optional
+        [description], by default None
+    vid_mapping_file : [type], optional
+        [description], by default None
+    reference_genome : [type], optional
+        [description], by default None
+    attributes : [type], optional
+        [description], by default None
+    segment_size : [type], optional
+        [description], by default None
+    
+    Returns
+    -------
+    [type]
+        [description]
+    
+    Raises
+    ------
+    GenomicsDBException
+        If workspace does not exist.
+    GenomicsDBException
+        If callset mapping file does not exist.
+    GenomicsDBException
+        If vidmap file does not exist.
+    """    
     if not os.path.exists(workspace):
         raise GenomicsDBException("workspace=" + workspace + "does not exist")
     if callset_mapping_file is None:
