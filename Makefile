@@ -1,6 +1,9 @@
 .PHONY: clean clean-test clean-pyc clean-build docs help
 .DEFAULT_GOAL := help
 
+PACKAGE_NAME    = genomicsdb_python
+GENOMICS_DB_INSTALL_PATH ?= /usr/local
+
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
 
@@ -53,9 +56,6 @@ clean-test: ## remove test and coverage artifacts
 #lint: ## check style with flake8
 #	flake8 pathds tests
 
-#test: ## run tests quickly with the default Python
-#	pytest
-
 #test-all: ## run tests on every Python version with tox
 #	tox
 
@@ -66,30 +66,37 @@ clean-test: ## remove test and coverage artifacts
 #	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/genomicsdb_python.rst
+	rm -f docs/$(PACKAGE_NAME).rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ src
+	sphinx-apidoc -o docs/ . *_data setup.py
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(MAKE) -C docs latex
 
-latexpdf: docs
+latexpdf: docs ## compy the latex into a single pdf.
 	$(MAKE) -C docs/_build/latex all
 
-#servedocs: docs ## compile the docs watching for changes
-#	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
+servedocs: docs ## compile the docs watching for changes
+	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
 #release: dist ## package and upload a release
 #	twine upload dist/*
 
-dist: clean ## builds source and wheel package
+build: clean ## builds source and wheel package
 	python setup.py sdist
 	python setup.py bdist_wheel
 	ls -l dist
 
+build-dist: clean ## builds wheel package along with binary library.
+	python setup.py bdist_wheel --with-libs --with-genomicsdb=$(GENOMICS_DB_INSTALL_PATH)
+	ls -l dist
+
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+	python setup.py build_ext
 
 install-dev: clean ## install the package in place for debug purposes.
 	pip install -r requirements.txt
-	pip install -e .
+	python setup.py build_ext --inplace
+
+tests: ## run tests quickly with the default Python
+	pytest

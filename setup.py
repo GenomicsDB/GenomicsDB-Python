@@ -9,8 +9,12 @@ import glob
 import sys
 import logging
 
+PACKAGE_NAME = 'genomicsdb'
+INCLUDE_PACKAGE_DATA = False
+
 # Directory where a copy of the CPP compiled object is found.
 GENOMICSDB_LOCAL_DATA_DIR = 'gdb_data'
+
 
 # Specify genomicsdb install location via "--with-genomicsdb=<genomicsdb_install_path>" command line arg
 GENOMICSDB_INSTALL_PATH = os.getenv('GENOMICSDB_HOME', default = '/usr/local')
@@ -33,6 +37,9 @@ for arg in args:
 		if os.path.isdir(dst):
 			shutil.rmtree(dst)
 
+		PACKAGE_NAME = 'genomicsdb-dist'
+		INCLUDE_PACKAGE_DATA = True
+
 		shutil.copytree(GENOMICSDB_LIB_DIR, dst)
 		rpath = ['$ORIGIN/gdb_data/lib']
 		sys.argv.remove(arg)
@@ -48,7 +55,7 @@ genomicsdb_extension=Extension(
 	extra_compile_args=["-std=c++11"]
 )
 
-setup(name='genomicsdb',
+setup(name=PACKAGE_NAME,
 	description='Experimental Python Bindings to GenomicsDB',
 	author='ODA Automation Inc.',
 	license='MIT',
@@ -59,7 +66,7 @@ setup(name='genomicsdb',
 		'wheel>=0.30'],
 	packages = find_packages(),
 	keywords=['genomics', 'genomicsdb', 'variant'],
-	include_package_data=True,
+	include_package_data=INCLUDE_PACKAGE_DATA,
 	version = '0.0.1.dev0',
 	classifiers=[
 		'Development Status :: Experimental - pre Alpha',
