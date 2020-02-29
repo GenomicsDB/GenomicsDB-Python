@@ -186,7 +186,7 @@ latex_elements = {
         \renewcommand{\headrulewidth}{0.5pt}
         \renewcommand{\footrulewidth}{0.5pt}
 
-        \RequirePackage{tocbibind} %%% comment this to remove page number for following
+        % \RequirePackage{tocbibind} %%% comment this to remove page number for following
         \addto\captionsenglish{\renewcommand{\contentsname}{Table of contents}}
         \addto\captionsenglish{\renewcommand{\listfigurename}{List of figures}}
         \addto\captionsenglish{\renewcommand{\listtablename}{List of tables}}
@@ -231,10 +231,11 @@ latex_elements = {
             \vfill
             \small \textit{Utilizes the C version of GenomicsDB found on }{\href{https://github.com/GenomicsDB/GenomicsDB}{Github}}
         \end{titlepage}
-
+        \clearpage
         \pagenumbering{arabic}
 
-        '''
+        ''',
+        
 }
 
 latex_logo = '_static/logo.pdf'

@@ -1,4 +1,4 @@
-GenomicsDB PySpark API Documentation
+GenomicsDB Python API Documentation
 ======================================
 
 .. toctree::
