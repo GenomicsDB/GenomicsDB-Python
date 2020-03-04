@@ -50,25 +50,17 @@ def connect(workspace,
     Raises
     ------
     GenomicsDBException
-        If workspace does not exist.
-    GenomicsDBException
-        If callset mapping file does not exist.
-    GenomicsDBException
-        If vidmap file does not exist.
+         On failure to connect to the native GenomicsDB library
     """    
-    if not os.path.exists(workspace):
-        raise GenomicsDBException("workspace=" + workspace + "does not exist")
     if callset_mapping_file is None:
         callset_mapping_file = os.path.join(workspace, "callset.json")
-    if not os.path.exists(callset_mapping_file):
-        raise GenomicsDBException("callset_mapping_file=" + callset_mapping_file + "does not exist")
     if vid_mapping_file is None:
         vid_mapping_file = os.path.join(workspace, "vidmap.json")
-    if not os.path.exists(vid_mapping_file):
-        raise GenomicsDBException("vid_mapping_file=" + vid_mapping_file + "does not exist")
-
-    return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file,
-                       reference_genome, attributes, segment_size)
+    try:
+        return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file,
+                           reference_genome, attributes, segment_size)
+    except:
+        raise GenomicsDBException("Failed to connect to the native GenomicsDB library")
 
 cdef class _GenomicsDB:
     cdef GenomicsDB* _genomicsdb
