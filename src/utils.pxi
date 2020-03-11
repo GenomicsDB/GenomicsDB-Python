@@ -38,13 +38,14 @@ cdef string as_string(s):
 
 cdef vector[string] as_vector(l):
     cdef vector[string] v
-    for s in l:
-        v.push_back(as_string(s))
-        return v
+    if l is not None:
+        for s in l:
+            v.push_back(as_string(s))
+    return v
 
 cdef genomicsdb_ranges_t as_ranges(l_ranges):
     cdef vector[pair[int64_t, int64_t]] ranges
-    if len(l_ranges) > 0:
+    if l_ranges is not None and len(l_ranges) > 0:
         for low, high in l_ranges:
             ranges.push_back(pair[int64_t, int64_t](low, high))
     return ranges
