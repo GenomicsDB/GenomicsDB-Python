@@ -60,7 +60,7 @@ setup(name='genomicsdb',
 	packages = find_packages(),
 	keywords=['genomics', 'genomicsdb', 'variant'],
 	include_package_data=True,
-	version = '0.0.1.dev0',
+	version = '0.0.4.dev0',
 	classifiers=[
 		'Development Status :: Experimental - pre Alpha',
 		'Intended Audience :: Developers',
