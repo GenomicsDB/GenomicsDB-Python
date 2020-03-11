@@ -63,6 +63,15 @@ cdef extern from "genomicsdb.h":
         GenomicsDBVariantCalls query_variant_calls(string) except +
         GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor) except +
         GenomicsDBVariantCalls query_variant_calls() except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, bool) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
+        void generate_vcf(string, string, bool) except +
+        void generate_vcf(string, string) except +
+        void generate_vcf(string) except +
+        void generate_vcf() except +
+        pass
 
 #   GenomicsDB Helper Utilities
 
