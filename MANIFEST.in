@@ -1,1 +1,1 @@
-recursive-include gdb_data libtiledbgenomicsdb.*
+recursive-include genomicsdb_data libtiledbgenomicsdb.*
