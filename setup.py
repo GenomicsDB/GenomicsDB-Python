@@ -10,7 +10,7 @@ import sys
 import logging
 
 # Directory where a copy of the CPP compiled object is found.
-GENOMICSDB_LOCAL_DATA_DIR = 'gdb_data'
+GENOMICSDB_LOCAL_DATA_DIR = 'genomicsdb_data'
 
 # Specify genomicsdb install location via "--with-genomicsdb=<genomicsdb_install_path>" command line arg
 GENOMICSDB_INSTALL_PATH = os.getenv('GENOMICSDB_HOME', default = '/usr/local')
@@ -26,15 +26,24 @@ GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
 GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
 
 rpath = []
-for arg in args:	
+for arg in args:
 	if arg.find('--with-libs') == 0:
-		dst = os.path.join(GENOMICSDB_LOCAL_DATA_DIR, 'lib')
+		glob_paths = [os.path.join(GENOMICSDB_LIB_DIR, e) for e in ['lib*genomicsdb*.so','lib*genomicsdb*.dylib']]
+		lib_paths = []
+		for paths in glob_paths:
+			lib_paths.extend(glob.glob(paths))
+		print('Adding the following libraries to the GenomicsDB Package :')
+		print(*lib_paths, sep="\n")
 
+		dst = os.path.join(GENOMICSDB_LOCAL_DATA_DIR, 'lib')
 		if os.path.isdir(dst):
 			shutil.rmtree(dst)
+		os.makedirs(dst)
+		for lib_path in lib_paths:
+			print('Copying {0} to {1}'.format(lib_path, dst))
+			shutil.copy(lib_path, dst)
+		rpath = ['$ORIGIN/' + dst]
 
-		shutil.copytree(GENOMICSDB_LIB_DIR, dst)
-		rpath = ['$ORIGIN/gdb_data/lib']
 		sys.argv.remove(arg)
 
 genomicsdb_extension=Extension(
@@ -52,7 +61,7 @@ setup(name='genomicsdb',
 	description='Experimental Python Bindings to GenomicsDB',
 	author='ODA Automation Inc.',
 	license='MIT',
-	ext_modules=[genomicsdb_extension], 
+	ext_modules=[genomicsdb_extension],
 	setup_requires=['cython>=0.27'],
 	install_requires=[
 		'numpy>=1.7',
@@ -60,7 +69,7 @@ setup(name='genomicsdb',
 	packages = find_packages(),
 	keywords=['genomics', 'genomicsdb', 'variant'],
 	include_package_data=True,
-	version = '0.0.1.dev0',
+	version = '0.0.4.dev0',
 	classifiers=[
 		'Development Status :: Experimental - pre Alpha',
 		'Intended Audience :: Developers',

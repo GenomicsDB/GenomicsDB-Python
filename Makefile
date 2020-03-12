@@ -83,12 +83,12 @@ latexpdf: docs
 #	twine upload dist/*
 
 dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
+	python setup.py sdist --with-libs
+	python setup.py bdist_wheel --with-libs
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+	python setup.py install --with-libs
 
 install-dev: clean ## install the package in place for debug purposes.
 	pip install -r requirements.txt
