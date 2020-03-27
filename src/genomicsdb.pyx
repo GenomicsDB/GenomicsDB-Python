@@ -3,34 +3,60 @@
 
 include "utils.pxi"
 
-import os
+import tempfile
 
 def version():
+    """Print out version of the GenomicsDB native library
+    
+    Returns
+    -------
+    str
+        GenomicsDB Version
+    """
     version_string = genomicsdb_version().decode("ascii")
     return version_string
 
 class GenomicsDBException(Exception):
     pass
-    
+
 def connect(workspace,
-            callset_mapping_file = None,
-            vid_mapping_file = None,
-            reference_genome,
+            callset_mapping_file = "callset.json",
+            vid_mapping_file = "vidmap.json",
+            reference_genome = None,
             attributes = None,
             segment_size = None):
-    if not os.path.exists(workspace):
-        raise GenomicsDBException("workspace=" + workspace + "does not exist")
-    if callset_mapping_file is None:
-        callset_mapping_file = os.path.join(workspace, "callset.json")
-    if not os.path.exists(callset_mapping_file):
-        raise GenomicsDBException("callset_mapping_file=" + callset_mapping_file + "does not exist")
-    if vid_mapping_file is None:
-        vid_mapping_file = os.path.join(workspace, "vidmap.json")
-    if not os.path.exists(vid_mapping_file):
-        raise GenomicsDBException("vid_mapping_file=" + vid_mapping_file + "does not exist")
-
-    return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file,
-                       reference_genome, attributes, segment_size)
+    """Connect to an existing GenomicsDB Workspace.
+    
+    Parameters
+    ----------
+    workspace : str
+        Path to the GenomicsDB workspace.
+    callset_mapping_file : str, optional
+        Path to a json file describing callset mappings, by default "callset.json"
+    vid_mapping_file : str, optional
+        Path to a json file describing vid mappings, by default "vidmap.json"
+    reference_genome : str, optional
+        Path to the reference genome file, by default None
+    attributes : list, optional
+        List of attributes to be queried, by default None. All attributes will be queried if None.
+    segment_size : int, optional
+        Segment Size, by default None. Allow GenomicsDB to configure one.
+    
+    Returns
+    -------
+    GenomicsDB
+        GenomicsDB instance ready for queries
+    
+    Raises
+    ------
+    GenomicsDBException
+         On failure to connect to the native GenomicsDB library
+    """    
+    try:
+        return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file,
+                           reference_genome, attributes, segment_size)
+    except:
+        raise GenomicsDBException("Failed to connect to the native GenomicsDB library")
 
 cdef class _GenomicsDB:
     cdef GenomicsDB* _genomicsdb
@@ -42,11 +68,16 @@ cdef class _GenomicsDB:
                  workspace,
                  callset_mapping_file,
                  vid_mapping_file,
-                 reference_genome,
+                 reference_genome = None,
                  attributes = None,
                  segment_size = None):
         cdef string ws = as_string(workspace)
         cdef vector[string] vec = as_vector(attributes)
+        if reference_genome is None:
+            self._genomicsdb  = new GenomicsDB(as_string(workspace),
+                                               as_string(callset_mapping_file),
+                                               as_string(vid_mapping_file),
+                                               as_string(""))
         if attributes is None:
             self._genomicsdb  = new GenomicsDB(as_string(workspace),
                                                as_string(callset_mapping_file),
@@ -70,6 +101,8 @@ cdef class _GenomicsDB:
                             array=None,
                             column_ranges=None,
                             row_ranges=None):
+        """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
+
         cdef list variant_calls = []
         cdef VariantCallProcessor processor
         processor.set_root(variant_calls)
@@ -85,6 +118,32 @@ cdef class _GenomicsDB:
                                                  as_ranges(column_ranges),
                                                  as_ranges(row_ranges))
         return variant_calls
+
+    def to_vcf(self,
+               array=None,
+               column_ranges=None,
+               row_ranges=None,
+               output=None,
+               output_format=None,
+               overwrite=False):
+        """ Generate vcf from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
+
+        if output is None:
+            output = ""
+        if output_format is None:
+            output_format = ""
+        if array is None:
+            self._genomicsdb.generate_vcf(as_string(output),
+                                          as_string(output_format),
+                                          overwrite)
+        else:
+            self._genomicsdb.generate_vcf(as_string(array),
+                                          as_ranges(column_ranges),
+                                          as_ranges(row_ranges),
+                                          as_string(output),
+                                          as_string(output_format),
+                                          overwrite)
+
 
     def __dealloc__(self):
         if self._genomicsdb != NULL:
