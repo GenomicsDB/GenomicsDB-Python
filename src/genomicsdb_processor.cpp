@@ -51,6 +51,9 @@ int VariantCallProcessor::wrap_fields(PyObject* call, std::vector<genomic_field_
   for (auto field: fields) {
     if (field.num_elements == 1 || get_genomic_field_type(field.name).is_string()) {
       rc = rc || PyDict_SetItem(call, PyUnicode_FromString(field.name.c_str()), wrap_field(field, get_genomic_field_type(field.name), 0));
+    } else if (field.name.compare("GT") == 0) {
+      // Treat genotypes separately
+      PyDict_SetItem(call, PyUnicode_FromString("GT"), PyUnicode_FromString(field.to_string(get_genomic_field_type(field.name)).c_str()));
     } else {
       PyObject *list = PyList_New(field.num_elements);
       for (auto i=0ul; i<field.num_elements; i++) {
