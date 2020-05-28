@@ -57,9 +57,18 @@ genomicsdb_extension=Extension(
 	extra_compile_args=["-std=c++11"]
 )
 
-setup(name='genomicsdb',
+with open('README.md') as f:
+	long_description = f.read()
+
+setup(
+	name='genomicsdb',
 	description='Experimental Python Bindings to GenomicsDB',
-	author='ODA Automation Inc.',
+	long_description=long_description,
+	long_description_content_type='text/markdown',
+	author='GenomicsDB.org',
+	author_email='support@genomicsdb.org',
+	maintainer='GenomicsDB.org',
+	maintainer_email='support@genomicsdb.org',
 	license='MIT',
 	ext_modules=[genomicsdb_extension],
 	setup_requires=['cython>=0.27'],
@@ -69,7 +78,7 @@ setup(name='genomicsdb',
 	packages = find_packages(),
 	keywords=['genomics', 'genomicsdb', 'variant'],
 	include_package_data=True,
-	version = '0.0.6.dev0',
+	version = '0.0.6.1',
 	classifiers=[
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',
