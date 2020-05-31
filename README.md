@@ -1,5 +1,5 @@
 # GenomicsDB-Python
-Experimental Python Bindings using cython to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library
+Experimental Python Bindings using cython to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library. Only queries are supported for now. For ingestion, use the command line tool - `vcf2genomicsdb` or `gatk GenomicsDBImport`.
 
 To build:
 ```
