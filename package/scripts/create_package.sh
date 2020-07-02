@@ -29,7 +29,7 @@ python$PYTHON_VERSION -m venv env-dist-$PYTHON_VERSION &&
 cd GenomicsDB-Python &&
   pip install -r requirements.txt &&
   python setup.py sdist --with-libs &&
-	python setup.py bdist_wheel --with-libs --python-tag=cp${PYTHON_VERSION//./}
+	python setup.py bdist_wheel --with-libs --python-tag=cp${PYTHON_VERSION//./} &&
 	echo "Packaging genomicsdb for Python Version=$PYTHON_VERSION DONE" &&
 	exit 0
 
