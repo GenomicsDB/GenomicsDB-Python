@@ -79,10 +79,13 @@ latexpdf: docs
 #servedocs: docs ## compile the docs watching for changes
 #	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
-#release: dist ## package and upload a release
-#	twine upload dist/*
+test-release: dist ## package and upload a test release
+	twine upload --repository testpypi dist/*
 
-dist: clean ## builds source and wheel package
+release: dist ## package and upload a release
+	twine upload dist/*
+
+dist: ## builds source and wheel package
 	python setup.py sdist --with-libs
 	python setup.py bdist_wheel --with-libs
 	ls -l dist

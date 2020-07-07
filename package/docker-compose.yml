@@ -1,0 +1,7 @@
+version: "3"
+services:
+  package:
+    image: genomicsdb:all_python
+    volumes: 
+      - ..:/home/genomicsdb/GenomicsDB-Python:delegated
+    command: "/home/genomicsdb/GenomicsDB-Python/package/scripts/create_package.sh"
