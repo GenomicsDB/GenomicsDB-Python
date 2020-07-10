@@ -1,7 +1,6 @@
-This a repository of scripts and Docker related files to publish to PyPi.
-TODO: Only Linux PyPi packages are supported for now. Work is ongoing to publish MacOS packages.
+This is a repository of scripts and Docker related files to publish to PyPi.
 
-To create a GenomicsDB centos 6 docker image for publishing to PyPi
+To create a GenomicsDB centos 6 docker image for publishing to PyPi.
 
 ```bash
 # Step1
