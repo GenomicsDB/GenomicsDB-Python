@@ -26,6 +26,7 @@ GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
 GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
 
 rpath = []
+link_args = []
 for arg in args:
 	if arg.find('--with-libs') == 0:
 		glob_paths = [os.path.join(GENOMICSDB_LIB_DIR, e) for e in ['lib*genomicsdb*.so','lib*genomicsdb*.dylib']]
@@ -36,14 +37,15 @@ for arg in args:
 		print(*lib_paths, sep="\n")
 
 		dst = os.path.join(GENOMICSDB_LOCAL_DATA_DIR, 'lib')
-		if os.path.isdir(dst):
-			shutil.rmtree(dst)
-		os.makedirs(dst)
+		if not os.path.exists(dst):
+			os.makedirs(dst)
 		for lib_path in lib_paths:
 			print('Copying {0} to {1}'.format(lib_path, dst))
 			shutil.copy(lib_path, dst)
-		rpath = ['$ORIGIN/' + dst]
-
+		if sys.platform == 'darwin':
+			link_args = ["-Wl,-rpath," + dst]
+		else:
+			rpath = ['$ORIGIN/' + dst]
 		sys.argv.remove(arg)
 
 genomicsdb_extension=Extension(
@@ -53,7 +55,8 @@ genomicsdb_extension=Extension(
 	libraries=["tiledbgenomicsdb"],
 	include_dirs=[GENOMICSDB_INCLUDE_DIR],
 	library_dirs=[GENOMICSDB_LIB_DIR],
-	runtime_library_dirs= rpath,
+	runtime_library_dirs=rpath,
+	extra_link_args=link_args,
 	extra_compile_args=["-std=c++11"]
 )
 
@@ -75,7 +78,7 @@ setup(
 	install_requires=[
 		'numpy>=1.7'],
 	python_requires='>=3.6',
-	packages = find_packages(),
+	packages = find_packages(exclude=["package", "test"]),
 	keywords=['genomics', 'genomicsdb', 'variant', 'vcf', 'variant calls'],
 	include_package_data=True,
 	version = '0.0.7.4',
