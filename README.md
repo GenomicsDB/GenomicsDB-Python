@@ -10,4 +10,4 @@ pip install genomicsdb
 ```
 
 ## Development
-See [instructions](INSTALL.md) for local builds and running tests.
+See [instructions](https://github.com/nalinigans/GenomicsDB-Python/blob/master/INSTALL.md) for local builds and running tests.
