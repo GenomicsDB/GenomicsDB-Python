@@ -22,4 +22,4 @@ cd /path/to/GenomicsDB-Python/package
 ./publish_package.sh test_release
 # OR
 # ./publish_package.sh release
-```javascript
+```
