@@ -3,7 +3,7 @@ Experimental Python Bindings using cython to the native [GenomicsDB](https://git
 
 To build:
 ```
-git clone https://github.com/nalinigans/GenomicsDB-Python.git
+git clone https://github.com/GenomicsDB/GenomicsDB-Python.git
 cd GenomicsDB-Python
 virtualenv -p python3 env
 source env/bin/activate > /dev/null
