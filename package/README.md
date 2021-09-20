@@ -19,7 +19,7 @@ docker build --build-arg os=all_python:centos6 --build-arg distributable_jar=tru
 # Step 3
 # Build and publish genomicsdb python images
 cd /path/to/GenomicsDB-Python/package
-./publish_package.sh test_release
+./publish_package.sh test-release
 # OR
 # ./publish_package.sh release
 ```
