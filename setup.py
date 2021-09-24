@@ -81,7 +81,7 @@ setup(
 	packages = find_packages(exclude=["package", "test"]),
 	keywords=['genomics', 'genomicsdb', 'variant', 'vcf', 'variant calls'],
 	include_package_data=True,
-	version = '0.0.8.04',
+	version = '0.0.8.0',
 	classifiers=[
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',
