@@ -10,9 +10,7 @@ ZLIB_PREFIX_DIR=$PREFIX_DIR/zlib-$ZLIB_VERSION
 
 GENOMICSDB_DIR=$PREFIX_DIR/GenomicsDB
 GENOMICSDB_HOME=$GENOMICSDB_DIR/release
-
-PROTOBUF_VERSION=3.0.0-beta-1
-PROTOBUF_PREFIX_DIR=$PREFIX_DIR/protobuf.$PROTOBUF_VERSION
+GENOMICSDB_BRANCH=master
 
 GENOMICSDB_PYTHON_DIR=`pwd`/..
 
@@ -45,6 +43,7 @@ install_openssl() {
 	popd	
 	rm -fr openssl-$OPENSSL_VERSION*
   popd
+  export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX_DIR
 	check_rc $RC
 }
 
@@ -67,14 +66,14 @@ install_zlib() {
 
 install_python_version() {
   case $1 in
-    3.6*)
-      PYTHON_EXECUTABLE=$PREFIX_DIR/bin/python3.6
-      ;;
     3.7*)
       PYTHON_EXECUTABLE=$PREFIX_DIR/bin/python3.7
       ;;
     3.8*)
       PYTHON_EXECUTABLE=$PREFIX_DIR/bin/python3.8
+      ;;
+    3.9*)
+      PYTHON_EXECUTABLE=$PREFIX_DIR/bin/python3.9
       ;;
     *)
       echo "Unsupported Python Version $1"
@@ -116,48 +115,28 @@ publish_package() {
     popd &&
 		deactivate
 	RC=$?
-	# rm -fr try$PYTHON_VERSION
+	rm -fr try$PYTHON_VERSION
   popd
 	check_rc $RC
   echo "Publishing package DONE"
 }
 
 publish() {
-  echo "Installing Python"
-  install_python_version 3.6.10 && publish_package 3.6 &&
-    install_python_version 3.7.7  && publish_package 3.7 &&
-	  install_python_version 3.8.3  && publish_package 3.8
-}
-
-install_protobuf() {
-  if [[ -d $PROTOBUF_PREFIX_DIR ]]; then
-    return 0
-  fi
-  
-  pushd /tmp
-  wget -nv https://github.com/protocolbuffers/protobuf/releases/download/v$PROTOBUF_VERSION/protobuf-cpp-$PROTOBUF_VERSION.zip &&
-    unzip protobuf-cpp-$PROTOBUF_VERSION.zip &&
-    cd protobuf-$PROTOBUF_VERSION &&
-    ./autogen.sh &&
-    ./configure --prefix=$PROTOBUF_PREFIX_DIR --with-pic &&
-    make -j4 && make install
-  RC=$?
-  rm -fr protobuf*
-  popd
-  check_rc $RC
+  echo "Installing Python" &&
+    install_python_version 3.7.10  && publish_package 3.7 &&
+	  install_python_version 3.8.11  && publish_package 3.8 &&
+    install_python_version 3.9.6 && publish_package 3.9
 }
 
 install_genomicsdb() {
-  return 0
-  install_protobuf
   rm -fr $GENOMICSDB_DIR
-  git clone https://github.com/GenomicsDB/GenomicsDB.git $GENOMICSDB_DIR
+  git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GENOMICSDB_DIR
   OPENSSL_ROOT_DIR=$OPENSSL_PREFIX_DIR
-  CMAKE_PREFIX_PATH=$PROTOBUF_PREFIX_DIR:$OPENSSL_ROOT_DIR:$ZLIB_PREFIX_DIR
+  CMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR:$ZLIB_PREFIX_DIR
   pushd $GENOMICSDB_DIR
   mkdir build
   cd build
-  cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH -DBUILD_EXAMPLES=False -DDISABLE_MPI=True  .. &&
+  cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DBUILD_DISTRIBUTABLE_LIBRARY=1 .. &&
   make -j4 && make install
 }
 
@@ -166,14 +145,10 @@ if [[ `uname` != "Darwin" ]]; then
   exit 1
 fi
 
-export MACOSX_DEPLOYMENT_TARGET=10.9
+export MACOSX_DEPLOYMENT_TARGET=11.0
+export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX_DIR
+
 install_openssl &&
   install_zlib &&
   install_genomicsdb &&
   publish
-
-    
-
-
-
-

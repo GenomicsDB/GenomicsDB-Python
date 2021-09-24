@@ -20,7 +20,7 @@
 #
 # Description: Base Docker file for creating PyPi Packages
 
-FROM centos:6
+FROM centos:7
 
 COPY scripts /build
 WORKDIR /build
