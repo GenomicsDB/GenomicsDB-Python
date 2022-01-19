@@ -7,7 +7,7 @@ git clone https://github.com/GenomicsDB/GenomicsDB-Python.git
 cd GenomicsDB-Python
 virtualenv -p python3 env
 source env/bin/activate > /dev/null
-python setup.py build_ext --inplace --with-genomicsdb=$GENOMICSDB_HOME
+python setup.py build_ext --inplace --with-libs --with-genomicsdb=$GENOMICSDB_HOME
 deactivate
 ```
 
