@@ -65,7 +65,7 @@ with open('README.md') as f:
 
 setup(
 	name='genomicsdb',
-	description='Experimental Python Bindings to GenomicsDB',
+	description='Experimental Python Bindings for querying GenomicsDB',
 	long_description=long_description,
 	long_description_content_type='text/markdown',
 	author='GenomicsDB.org',
@@ -77,11 +77,11 @@ setup(
 	setup_requires=['cython>=0.27'],
 	install_requires=[
 		'numpy>=1.7'],
-	python_requires='>=3.6',
+	python_requires='>=3.7',
 	packages = find_packages(exclude=["package", "test"]),
 	keywords=['genomics', 'genomicsdb', 'variant', 'vcf', 'variant calls'],
 	include_package_data=True,
-	version = '0.0.7.4',
+	version = '0.0.8.0',
 	classifiers=[
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',
@@ -91,9 +91,9 @@ setup(
 		'Topic :: Software Development :: Libraries :: Python Modules',
 		'Operating System :: POSIX :: Linux',
 		'Operating System :: MacOS :: MacOS X',
-		'Programming Language :: Python :: 3.6',
 		'Programming Language :: Python :: 3.7',
 		'Programming Language :: Python :: 3.8',
+		'Programming Language :: Python :: 3.9',
 	],
 )
 
