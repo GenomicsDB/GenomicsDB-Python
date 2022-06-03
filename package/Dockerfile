@@ -20,9 +20,12 @@
 #
 # Description: Base Docker file for creating PyPi Packages
 
-FROM centos:7
+FROM centos:6
 
+ARG user=genomicsdb
+ARG user_id=0
+ARG group_id=0
 COPY scripts /build
 WORKDIR /build
-RUN ./install_python.sh
+RUN ./install_python.sh $user $user_id $group_id
 
