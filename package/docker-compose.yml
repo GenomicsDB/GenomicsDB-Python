@@ -1,7 +1,7 @@
 version: "3"
 services:
   package:
-    image: genomicsdb:all_python
+    image: genomicsdb:python
     user: ${CURRENT_UID}
     volumes: 
       - ..:/home/${USER}/GenomicsDB-Python:delegated

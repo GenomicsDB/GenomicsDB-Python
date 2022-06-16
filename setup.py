@@ -6,16 +6,20 @@ import glob
 import sys
 
 # Directory where a copy of the CPP compiled object is found.
-GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb_data"
+GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 
 # Specify genomicsdb install location via
 #     "--with-genomicsdb=<genomicsdb_install_path>" command line arg
 GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="/usr/local")
-print("GENOMICSDB_INSTALL_PATH={}", GENOMICSDB_INSTALL_PATH)
+
+copy_genomicsdb_libs = False
 args = sys.argv[:]
 for arg in args:
     if arg.find("--with-genomicsdb=") == 0:
         GENOMICSDB_INSTALL_PATH = os.path.expanduser(arg.split("=")[1])
+        sys.argv.remove(arg)
+    if arg.find("--with-libs") == 0:
+        copy_genomicsdb_libs = True;
         sys.argv.remove(arg)
 
 print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
@@ -23,38 +27,42 @@ print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
 GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
 GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
 
+dst = os.path.join("lib")
+if copy_genomicsdb_libs:
+    glob_paths = [
+        os.path.join(GENOMICSDB_LIB_DIR, e)
+        for e in ["lib*genomicsdb*.so", "lib*genomicsdb*.dylib"]
+    ]
+    lib_paths = []
+    for paths in glob_paths:
+        lib_paths.extend(glob.glob(paths))
+    print("Adding the following libraries to the GenomicsDB Package :")
+    print(lib_paths, sep="\n")
+
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for lib_path in lib_paths:
+        print("Copying {0} to {1}".format(lib_path, dst))
+        shutil.copy(lib_path, dst)
+
 rpath = []
 link_args = []
-for arg in args:
-    if arg.find("--with-libs") == 0:
-        glob_paths = [
-            os.path.join(GENOMICSDB_LIB_DIR, e)
-            for e in ["lib*genomicsdb*.so", "lib*genomicsdb*.dylib"]
-        ]
-        lib_paths = []
-        for paths in glob_paths:
-            lib_paths.extend(glob.glob(paths))
-        print("Adding the following libraries to the GenomicsDB Package :")
-        print(*lib_paths, sep="\n")
+if sys.platform == "darwin":
+    link_args = ["-Wl,-rpath," + dst]
+else:
+    rpath = ["$ORIGIN/" + dst]
 
-        dst = os.path.join(GENOMICSDB_LOCAL_DATA_DIR, "lib")
-        if not os.path.exists(dst):
-            os.makedirs(dst)
-        for lib_path in lib_paths:
-            print("Copying {0} to {1}".format(lib_path, dst))
-            shutil.copy(lib_path, dst)
-        if sys.platform == "darwin":
-            link_args = ["-Wl,-rpath," + dst]
-        else:
-            rpath = ["$ORIGIN/" + dst]
-        sys.argv.remove(arg)
+def run_cythonize(src):
+    from Cython.Build.Dependencies import cythonize
+    cythonize(src, include_path=[GENOMICSDB_INCLUDE_DIR], force=True)
+    return os.path.splitext(src)[0] + ".cpp"
 
 genomicsdb_extension = Extension(
-    "genomicsdb",
+    "genomicsdb.genomicsdb",
     language="c++",
-    sources=["src/genomicsdb.pyx", "src/genomicsdb_processor.cpp"],
-    libraries=["tiledbgenomicsdb"],
     include_dirs=[GENOMICSDB_INCLUDE_DIR],
+    sources=[run_cythonize("src/genomicsdb.pyx"), "src/genomicsdb_processor.cpp"],
+    libraries=["tiledbgenomicsdb"],
     library_dirs=[GENOMICSDB_LIB_DIR],
     runtime_library_dirs=rpath,
     extra_link_args=link_args,
@@ -75,13 +83,14 @@ setup(
     maintainer_email="support@genomicsdb.org",
     license="MIT",
     ext_modules=[genomicsdb_extension],
+    zip_safe=False,
     setup_requires=["cython>=0.27"],
     install_requires=["numpy>=1.7"],
     python_requires=">=3.7",
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
     include_package_data=True,
-    version="0.0.8.6",
+    version="0.0.8.10",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

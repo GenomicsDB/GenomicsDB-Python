@@ -19,7 +19,6 @@ echo "Sleeping for 10 seconds. Ctrl-C if you want to set new version in setup.py
 sleep 10
 make clean
 rm -fr genomics_data
-popd
 
 # Build locally for MacOS, use Docker for Linux
 if [[ `uname` == "Darwin" ]]; then
@@ -29,6 +28,23 @@ if [[ `uname` == "Darwin" ]]; then
 else
   echo "Cannot build MacOS packages from this system"
 fi
+
+# Copy genomicsdb artifacts created in docker image
+docker create -it --name genomicsdb genomicsdb:python bash &&
+docker cp genomicsdb:/usr/local/genomicsdb/protobuf/python/ genomicsdb/protobuf &&
+mv genomicsdb/protobuf/python/* genomicsdb/protobuf &&
+rmdir genomicsdb/protobuf/python &&
+docker cp genomicsdb:/usr/local/lib/libtiledbgenomicsdb.so genomicsdb_data/lib &&
+docker rm -fv genomicsdb &&
+sed -i 's/import genomicsdb_/from . import genomicsdb_/g' genomicsdb/protobuf/*.py &&
+echo "Docker copy from genomicsdb:python successful"
+
+set -e
+
+# Run setup for source distribution of genomicsdb api and binary distribution of protobuf bindings
+python setup.py sdist
+
+popd
 
 # Use centos6 based genomicsdb:all_python Docker image to create packages for 3.6/3.7/3.8
 # Current dependencies are zlib and jvm. TODO: Statically link in zlib too.
@@ -43,7 +59,7 @@ pushd ../
 
 # Repair linux wheel names
 for linux_wheel in dist/*-linux_*.whl; do
-	mv $linux_wheel ${linux_wheel//-linux_/-manylinux1_};
+    mv $linux_wheel ${linux_wheel//-linux_/-manylinux1_};
 done
 
 # Publish

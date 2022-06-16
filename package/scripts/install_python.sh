@@ -1,3 +1,25 @@
+# The MIT License (MIT)
+# Copyright (c) 2022 Omics Data Automation, Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+# Description: Script to install python versions of interest
+
 #!/bin/bash
 
 # Argument parsing
@@ -30,36 +52,13 @@ install_python_version() {
     tar -xvzf Python-$VERSION.tgz
   check_rc $?
   pushd Python-$VERSION
-  ./configure --prefix=/usr/local --with-openssl=/usr/local/ssl-$OPENSSL_VERSION --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
+  ./configure --prefix=/usr/local --with-openssl=$OPENSSL_ROOT_DIR --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
     make &&
     make altinstall
   RC=$?
   popd
   rm -fr Python-$VERSION Python-$VERSION.tgz
   check_rc $RC
-}
-
-install_openssl() {
-  pushd /tmp
-  wget $WGET_NO_CERTIFICATE -nv https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz &&
-    tar xzvf openssl-$OPENSSL_VERSION.tar.gz &&
-    pushd openssl-$OPENSSL_VERSION
-    CFLAGS=-fPIC ./config -fPIC -shared --prefix=/usr/local/ssl-$OPENSSL_VERSION &&
-    make depend && make && make install
-    RC=$?
-    ln -s /usr/local/ssl-$OPENSSL_VERSION /usr/local/ssl
-    export LD_LIBRARY_PATH=/usr/local/ssl-$OPENSSL_VERSION/lib:$LD_LIBRARY_PATH
-    popd
-    rm -fr openssl-$OPENSSL_VERSION*
-    check_rc $RC
-  popd
-}
-
-install_devtoolset() {
-  echo "Installing devtoolset"
-  yum install -y centos-release-scl &&
-  yum install -y devtoolset-7 &&
-  source /opt/rh/devtoolset-7/enable
 }
 
 sanity_test_python() {
@@ -78,32 +77,31 @@ sanity_test_python() {
   check_rc $RC
 }
 
-install
+if [[ ! -f /etc/profile.d/genomicsdb_prereqs.sh ]]; then
+    echo "Missing genomicsdb_prereqs.sh. Start with a GenomicsDB prerequistes docker image"
+    exit 1
+fi
+source /etc/profile.d/genomicsdb_prereqs.sh
+if [[ -z ${OPENSSL_ROOT_DIR} ]]; then
+    echo "Point to a prerequistes docker image that has openssl installed and env OPENSSL_ROOT_DIR set"
+    exit 1
+fi
 
 # Workaround for Centos 6 being EOL'ed
-curl https://www.getpagespeed.com/files/centos6-eol.repo --output /etc/yum.repos.d/CentOS-Base.repo
-yum -y install centos-release-scl
-curl https://www.getpagespeed.com/files/centos6-scl-eol.repo --output /etc/yum.repos.d/CentOS-SCLo-scl.repo
-curl https://www.getpagespeed.com/files/centos6-scl-rh-eol.repo --output /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
-sed -i 's/http/https/g' /etc/yum.repos.d/CentOS-Base.repo
-sed -i 's/http/https/g' /etc/yum.repos.d/CentOS-SCLo-scl.repo
-sed -i 's/http/https/g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
 WGET_NO_CERTIFICATE="--no-check-certificate"
 
-yum install -y zlib-devel bzip2-devel libffi libffi-devel wget
-yum groupinstall -y "development tools"
+yum install -y bzip2-devel libffi libffi-devel
 
 if [[ $PYTHON_USER_ID != 0  && $PYTHON_GROUP_ID != 0 ]]; then
-  echo "groupadd -g $PYTHON_GROUP_ID genomicsdb-python"
+  echo "groupadd -g $PYTHON_GROUP_ID genomicsdb"
   echo "useradd -m $PYTHON_USER -u $PYTHON_USER_ID -g $PYTHON_GROUP_ID"
-  groupadd -g $PYTHON_GROUP_ID genomicsdb-python &&
+  groupadd -g $PYTHON_GROUP_ID genomicsdb &&
   useradd -m $PYTHON_USER -u $PYTHON_USER_ID -g $PYTHON_GROUP_ID
 fi
 
-install_devtoolset &&
-  install_openssl &&
-  install_python_version 3.7.10  && sanity_test_python 3.7 &&
-  install_python_version 3.8.11 && sanity_test_python 3.8 &&
-  install_python_version 3.9.6 && sanity_test_python 3.9 &&
-  echo "Python versions successfully installed"
+install_python_version 3.7.10  && sanity_test_python 3.7 &&
+install_python_version 3.8.11 && sanity_test_python 3.8 &&
+install_python_version 3.9.6 && sanity_test_python 3.9 &&
+echo "Python versions successfully installed"
+
 
