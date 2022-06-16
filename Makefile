@@ -30,7 +30,7 @@ help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
-	rm -fr genomicsdb_data/lib/lib*
+	rm -fr genomicsdb/lib/lib*
 	rm -fr genomicsdb/protobuf/genomicsdb*.py
 
 clean-build: ## remove build artifacts
