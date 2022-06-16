@@ -6,7 +6,7 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.functional cimport function
 from libc.stdint cimport (int32_t, uint32_t, int64_t, uint64_t, uintptr_t, INT64_MAX)
-from cpython cimport (PyObject, PyList_New)
+from cpython cimport (PyObject, PyList_New, tuple)
 
 cdef extern from "genomicsdb.h":
     cdef string genomicsdb_version()
@@ -71,6 +71,44 @@ cdef extern from "genomicsdb.h":
         void generate_vcf(string, string) except +
         void generate_vcf(string) except +
         void generate_vcf() except +
+        pass
+
+    cdef cppclass transcriptomics_cell:
+        transcriptomics_cell(int64_t, int64_t, float, string, string, int64_t, int32_t) except +
+        transcriptomics_cell(int64_t, int64_t, float, string, string, int64_t) except +
+        transcriptomics_cell(int64_t, int64_t, float, string, string) except +
+        transcriptomics_cell(int64_t, int64_t, float, string) except +
+        transcriptomics_cell(int64_t, int64_t, float) except +
+        transcriptomics_cell(int64_t, int64_t) except +
+        transcriptomics_cell(int64_t) except +
+        transcriptomics_cell() except +
+        int64_t start
+        int64_t end
+        int64_t sample_idx
+        int64_t position
+        int32_t file_idx
+        float score
+        string name
+        string gene
+        pass
+
+#   GenomicsDBTranscriptomics Class
+    cdef cppclass GenomicsDBTranscriptomics:
+        GenomicsDBTranscriptomics(string, string, string, string, string, uint64_t) except +
+        GenomicsDBTranscriptomics(string, string, string, string, string) except +
+        GenomicsDBTranscriptomics(string, string, string, string) except +
+        GenomicsDBTranscriptomics(string, string, string) except +
+        GenomicsDBTranscriptomics(string, string) except +
+        GenomicsDBTranscriptomics(string) except +
+        #vector[vector[string]] query_variant_calls(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
+        #vector[vector[string]] query_variant_calls(string, genomicsdb_ranges_t) except +
+        #vector[vector[string]] query_variant_calls(string) except +
+        vector[transcriptomics_cell] query_variant_calls(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
+        vector[transcriptomics_cell] query_variant_calls(string, genomicsdb_ranges_t) except +
+        vector[transcriptomics_cell] query_variant_calls(string) except +
+        #vector[transcriptomics_cell] query_variant_calls(GenomicsDBVariantCallProcessor, string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
+        #vector[transcriptomics_cell] query_variant_calls(GenomicsDBVariantCallProcessor, string, genomicsdb_ranges_t) except +
+        #vector[transcriptomics_cell] query_variant_calls(GenomicsDBVariantCallProcessor, string) except +
         pass
 
 #   GenomicsDB Helper Utilities
