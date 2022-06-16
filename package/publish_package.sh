@@ -10,6 +10,8 @@ if [ "$1" != "release" ] && [ "$1" != "test-release" ]; then
 	exit 1
 fi
 
+set -e
+
 # Move to the package directory
 pushd $(dirname "$0")
 
@@ -18,7 +20,6 @@ echo "Packaging for GenomicsDB-Python "`grep version setup.py`
 echo "Sleeping for 10 seconds. Ctrl-C if you want to set new version in setup.py."
 sleep 10
 make clean
-rm -fr genomics_data
 
 # Build locally for MacOS, use Docker for Linux
 if [[ `uname` == "Darwin" ]]; then
@@ -34,12 +35,10 @@ docker create -it --name genomicsdb genomicsdb:python bash &&
 docker cp genomicsdb:/usr/local/genomicsdb/protobuf/python/ genomicsdb/protobuf &&
 mv genomicsdb/protobuf/python/* genomicsdb/protobuf &&
 rmdir genomicsdb/protobuf/python &&
-docker cp genomicsdb:/usr/local/lib/libtiledbgenomicsdb.so genomicsdb_data/lib &&
+docker cp genomicsdb:/usr/local/lib/libtiledbgenomicsdb.so genomicsdb/lib &&
 docker rm -fv genomicsdb &&
 sed -i 's/import genomicsdb_/from . import genomicsdb_/g' genomicsdb/protobuf/*.py &&
 echo "Docker copy from genomicsdb:python successful"
-
-set -e
 
 # Run setup for source distribution of genomicsdb api and binary distribution of protobuf bindings
 python setup.py sdist
