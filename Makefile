@@ -30,6 +30,8 @@ help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
+	rm -fr genomicsdb/lib/lib*
+	rm -fr genomicsdb/protobuf/genomicsdb*.py
 
 clean-build: ## remove build artifacts
 	rm -fr build/
@@ -84,6 +86,10 @@ test-release: dist ## package and upload a test release
 
 release: dist ## package and upload a release
 	twine upload dist/*
+
+dist-no-libs: ## use with docker for building wheels for python versions
+	python setup.py sdist
+	python setup.py bdist_wheel
 
 dist: ## builds source and wheel package
 	python setup.py sdist --with-libs

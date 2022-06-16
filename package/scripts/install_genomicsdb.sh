@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2020 Omics Data Automation, Inc.
+# Copyright (c) 2022 Omics Data Automation, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -18,23 +18,18 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# Description: Base Docker file for creating PyPi Packages
+# Description: Script to build GenomicsDB
 
-FROM ghcr.io/genomicsdb/genomicsdb:centos_6_prereqs
+USER=$1
+BRANCH=$2
 
-ARG user=genomicsdb
-ARG user_id=0
-ARG group_id=0
+set -e
 
-ARG genomicsdb_branch=develop
+echo "git clone https://github.com/GenomicsDB/GenomicsDB.git --recursive -b $BRANCH GenomicsDB"
+git clone https://github.com/GenomicsDB/GenomicsDB.git --recursive -b $BRANCH GenomicsDB
 
-COPY scripts /build
-WORKDIR /build
-RUN ./install_python.sh $user $user_id $group_id
+pushd GenomicsDB
+DOCKER_BUILD=true ./scripts/install_genomicsdb.sh $USER /usr/local true python false
+popd
 
-WORKDIR /build
-RUN ./install_genomicsdb.sh $user $genomicsdb_branch
-
-USER ${user}
-WORKDIR /home/${user}
-ENTRYPOINT ["/bin/bash", "--login"]
+echo "GenomicsDB for Python installed successfully"

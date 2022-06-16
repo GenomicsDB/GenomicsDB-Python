@@ -39,10 +39,9 @@ if [[ $? -ne 0 ]]; then
 fi
 
 cd GenomicsDB-Python &&
-  python setup.py sdist --with-libs &&
-	python setup.py bdist_wheel --with-libs --python-tag=cp${PYTHON_VERSION//./} &&
-	echo "Packaging genomicsdb for Python Version=$PYTHON_VERSION DONE" &&
-	exit 0
+  python setup.py bdist_wheel --python-tag=cp${PYTHON_VERSION//./} &&
+  echo "Packaging genomicsdb for Python Version=$PYTHON_VERSION DONE" &&
+  exit 0
 
 echo "Issues encoutered while packaging genomicsdb for Python Version=$PYTHON_VERSION. Aborting."
 exit 1
