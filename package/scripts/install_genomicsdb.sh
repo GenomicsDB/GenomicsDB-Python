@@ -27,7 +27,6 @@ BRANCH=$2
 
 set -e
 
-<<<<<<< HEAD
 . /etc/profile
 
 INSTALL_PREFIX=/usr/local
