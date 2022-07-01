@@ -20,11 +20,8 @@
 #
 # Description: Script to build GenomicsDB
 
-<<<<<<< HEAD
 #!/bin/bash
 
-=======
->>>>>>> develop
 USER=$1
 BRANCH=$2
 
