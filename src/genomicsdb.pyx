@@ -22,7 +22,6 @@ class GenomicsDBException(Exception):
 def connect(workspace,
             callset_mapping_file = "callset.json",
             vid_mapping_file = "vidmap.json",
-            reference_genome = None,
             attributes = None,
             segment_size = None):
     """Connect to an existing GenomicsDB Workspace.
@@ -35,8 +34,6 @@ def connect(workspace,
         Path to a json file describing callset mappings, by default "callset.json"
     vid_mapping_file : str, optional
         Path to a json file describing vid mappings, by default "vidmap.json"
-    reference_genome : str, optional
-        Path to the reference genome file, by default None
     attributes : list, optional
         List of attributes to be queried, by default None. All attributes will be queried if None.
     segment_size : int, optional
@@ -54,7 +51,7 @@ def connect(workspace,
     """    
     try:
         return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file,
-                           reference_genome, attributes, segment_size)
+                           attributes, segment_size)
     except:
         raise GenomicsDBException("Failed to connect to the native GenomicsDB library")
 
@@ -68,32 +65,23 @@ cdef class _GenomicsDB:
                  workspace,
                  callset_mapping_file,
                  vid_mapping_file,
-                 reference_genome = None,
                  attributes = None,
                  segment_size = None):
         cdef string ws = as_string(workspace)
         cdef vector[string] vec = as_vector(attributes)
-        if reference_genome is None:
-            self._genomicsdb  = new GenomicsDB(as_string(workspace),
-                                               as_string(callset_mapping_file),
-                                               as_string(vid_mapping_file),
-                                               as_string(""))
         if attributes is None:
             self._genomicsdb  = new GenomicsDB(as_string(workspace),
                                                as_string(callset_mapping_file),
-                                               as_string(vid_mapping_file),
-                                               as_string(reference_genome))
+                                               as_string(vid_mapping_file))
         elif segment_size is None:
             self._genomicsdb  = new GenomicsDB(as_string(workspace),
                                                as_string(callset_mapping_file),
                                                as_string(vid_mapping_file),
-                                               as_string(reference_genome),
                                                as_vector(attributes))
         else:
             self._genomicsdb  = new GenomicsDB(as_string(workspace),
                                                as_string(callset_mapping_file),
                                                as_string(vid_mapping_file),
-                                               as_string(reference_genome),
                                                as_vector(attributes),
                                                segment_size)
 
@@ -123,6 +111,8 @@ cdef class _GenomicsDB:
                array=None,
                column_ranges=None,
                row_ranges=None,
+               reference_genome=None,
+               vcf_header=None,
                output=None,
                output_format=None,
                overwrite=False):
@@ -140,6 +130,8 @@ cdef class _GenomicsDB:
             self._genomicsdb.generate_vcf(as_string(array),
                                           as_ranges(column_ranges),
                                           as_ranges(row_ranges),
+                                          as_string(reference_genome),
+                                          as_string(vcf_header),
                                           as_string(output),
                                           as_string(output_format),
                                           overwrite)

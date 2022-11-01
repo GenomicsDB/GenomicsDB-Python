@@ -35,10 +35,17 @@ docker create -it --name genomicsdb genomicsdb:python bash &&
 docker cp genomicsdb:/usr/local/genomicsdb/protobuf/python/ genomicsdb/protobuf &&
 mv genomicsdb/protobuf/python/* genomicsdb/protobuf &&
 rmdir genomicsdb/protobuf/python &&
+mkdir -p genomicsdb/lib &&
 docker cp genomicsdb:/usr/local/lib/libtiledbgenomicsdb.so genomicsdb/lib &&
 docker rm -fv genomicsdb &&
 sed -i 's/import genomicsdb_/from . import genomicsdb_/g' genomicsdb/protobuf/*.py &&
 echo "Docker copy from genomicsdb:python successful"
+
+RC=$?
+if [[ $RC != 0 ]]; then
+  echo "Failure to copy of genomicsdb artifacts RC=$RC"
+  exit $RC
+fi
 
 # Run setup for source distribution of genomicsdb api and binary distribution of protobuf bindings
 python setup.py sdist

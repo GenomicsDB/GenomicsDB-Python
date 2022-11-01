@@ -47,11 +47,12 @@ cdef extern from "genomicsdb.h":
 #   GenomicsDB Class
 
     cdef cppclass GenomicsDB:
-        GenomicsDB(string, string, string, string, vector[string], uint64_t) except +
-        GenomicsDB(string, string, string, string, vector[string]) except +
-        GenomicsDB(string, string, string, string) except +
-        GenomicsDB(string, string, int) except +
-        GenomicsDB(string, string) except +
+        GenomicsDB(string, string, string, vector[string], uint64_t) except +
+        GenomicsDB(string, string, string, vector[string]) except +
+        GenomicsDB(string, string, string) except +
+        GenomicsDB(string, int, string, int) except +
+        GenomicsDB(string, int, string) except +
+        GenomicsDB(string, int) except +
         GenomicsDB(string) except +
         GenomicsDBVariants query_variants(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
         GenomicsDBVariants query_variants()
@@ -63,7 +64,9 @@ cdef extern from "genomicsdb.h":
         GenomicsDBVariantCalls query_variant_calls(string) except +
         GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor) except +
         GenomicsDBVariantCalls query_variant_calls() except +
-        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, bool) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string, string, bool) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string, string) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string) except +
         void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string) except +
         void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string) except +
         void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +

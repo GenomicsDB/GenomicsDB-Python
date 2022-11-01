@@ -5,19 +5,19 @@ import tarfile
 import tempfile
 
 import genomicsdb
+genomicsdb.version()
 
 import pandas as pd
 
 def run_test():
-        genomicsdb.version()
 
-        gdb = genomicsdb.connect("ws", "callset_t0_1_2.json", "vid.json", "chr1_10MB.fasta.gz", ["DP"], 40)
+        gdb = genomicsdb.connect("ws", "callset_t0_1_2.json", "vid.json", ["DP"], 40)
         try:
                 gdb.query_variant_calls()
         except Exception as e:
                 print(e)
 
-        gdb = genomicsdb.connect("ws", "callset_t0_1_2.json", "vid.json", "chr1_10MB.fasta.gz", ["DP"], 40)
+        gdb = genomicsdb.connect("ws", "callset_t0_1_2.json", "vid.json", ["DP"], 10)
         list = gdb.query_variant_calls("t0_1_2", [(0,1000000000)], [(0,3)])
         print(list)
 
@@ -30,7 +30,7 @@ def run_test():
         gdb.query_variant_calls("t0_1_2")
 
         output = "out.vcf.gz"
-        gdb.to_vcf("t0_1_2", [(0,15000)], output=output, output_format="z")
+        gdb.to_vcf("t0_1_2", [(0,15000)], [(0,3)], "chr1_10MB.fasta.gz", "template_vcf_header.vcf", output=output, output_format="z")
         if not os.path.exists(output):
             print(output+" NOT FOUND")
         if not os.path.exists(output+".tbi"):
