@@ -73,17 +73,25 @@ install_curl() {
   fi
 }
 
-echo "Cleanup existing static libraries"
-rm -fr $INSTALL_PREFIX/lib/libcurl*
-rm -fr $INSTALL_PREFIX/lib/libuuid*
-rm -fr $INSTALL_PREFIX/include/curl
-rm -fr $INSTALL_PREFIX/include/uuid
-rm -fr $INSTALL_PREFIX/ssl
+#echo "Cleanup existing static libraries"
+#rm -fr $INSTALL_PREFIX/lib/libcurl*
+#rm -fr $INSTALL_PREFIX/lib/libuuid*
+#rm -fr $INSTALL_PREFIX/include/curl
+#rm -fr $INSTALL_PREFIX/include/uuid
+#rm -fr $INSTALL_PREFIX/ssl
 
 echo "Rebuilding openssl for shared libraries"
 install_openssl
+if [[ ! -f $OPENSSL_PREFIX/lib/libcrypto.a ]]; then
+   echo "Something wrong with OpenSSL installation"
+   exit 1
+fi
 echo "Rebuilding curl for shared libraries"
 install_curl
+if [[ ! -f $CURL_PREFIX/lib/libcurl.a ]]; then
+   echo "Something wrong with CURL installation"
+   exit 1
+fi
 
 echo "git clone https://github.com/GenomicsDB/GenomicsDB.git --recursive -b $BRANCH GenomicsDB"
 git clone https://github.com/GenomicsDB/GenomicsDB.git --recursive -b $BRANCH GenomicsDB
