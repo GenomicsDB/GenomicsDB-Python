@@ -11,6 +11,8 @@ GENOMICSDB_BRANCH=develop
 
 GENOMICSDB_PYTHON_DIR=`pwd`/..
 
+#MACOSX_DEPLOYMENT_TARGET=11.0
+
 die() {
   if [[ $# -eq 1 ]]; then
     echo $1
@@ -30,7 +32,6 @@ install_openssl() {
   brew list openssl@1.1 &> /dev/null || brew install openssl@1.1
   check_rc $?
   OPENSSL_ROOT_DIR=$(readlink -f /usr/local/opt/openssl@1.1)
-  echo "+++ 1 OPENSSL_ROOT_DIR=$OPENSSL_ROOT_DIR"
 }
 
 install_zlib() {
@@ -111,8 +112,8 @@ publish_package() {
 
 publish() {
   echo "Installing Python" &&
-#    install_python_version 3.7.10  && publish_package 3.7 &&
-#	  install_python_version 3.8.11  && publish_package 3.8 &&
+    install_python_version 3.7.10  && publish_package 3.7 &&
+	  install_python_version 3.8.11  && publish_package 3.8 &&
     install_python_version 3.9.6 && publish_package 3.9
 }
 
@@ -122,7 +123,6 @@ install_genomicsdb() {
   pushd $GENOMICSDB_DIR
   mkdir build
   cd build
-  echo "+++ OPENSSL_ROOT_DIR=$OPENSSL_ROOT_DIR"
   cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DBUILD_DISTRIBUTABLE_LIBRARY=1 -DBUILD_FOR_PYTHON=1 .. &&
     make -j4 && make install
 }
