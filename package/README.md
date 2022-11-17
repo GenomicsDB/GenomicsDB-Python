@@ -14,7 +14,7 @@ docker build -t genomicsdb:python . --build-arg user=$USER --build-arg user_id=`
 
 # Step 2
 # Build and publish genomicsdb python images
-./publish_package.sh test-release
+./publish_package.sh test-release linux
 # OR
-# ./publish_package.sh release
+# ./publish_package.sh release linux
 ```
