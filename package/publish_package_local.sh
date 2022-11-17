@@ -2,17 +2,16 @@
 
 PREFIX_DIR=$HOME/python
 
-OPENSSL_VERSION=1.0.2s
-OPENSSL_PREFIX_DIR=$PREFIX_DIR/openssl-$OPENSSL_VERSION
-
 ZLIB_VERSION=1.2.11
 ZLIB_PREFIX_DIR=$PREFIX_DIR/zlib-$ZLIB_VERSION
 
 GENOMICSDB_DIR=$PREFIX_DIR/GenomicsDB
 GENOMICSDB_HOME=$GENOMICSDB_DIR/release
-GENOMICSDB_BRANCH=master
+GENOMICSDB_BRANCH=develop
 
 GENOMICSDB_PYTHON_DIR=`pwd`/..
+
+#MACOSX_DEPLOYMENT_TARGET=11.0
 
 die() {
   if [[ $# -eq 1 ]]; then
@@ -30,21 +29,9 @@ check_rc() {
 }
 
 install_openssl() {
-  if [[ -d $OPENSSL_PREFIX_DIR ]]; then
-    return 0
-  fi
-	pushd /tmp
-	wget -nv https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz &&
-		tar xzvf openssl-$OPENSSL_VERSION.tar.gz &&
-		pushd openssl-$OPENSSL_VERSION &&
-    ./configure darwin64-x86_64-cc shared -fPIC --prefix=$OPENSSL_PREFIX_DIR &&
-    make && make install
-	RC=$?
-	popd	
-	rm -fr openssl-$OPENSSL_VERSION*
-  popd
-  export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX_DIR
-	check_rc $RC
+  brew list openssl@1.1 &> /dev/null || brew install openssl@1.1
+  check_rc $?
+  OPENSSL_ROOT_DIR=$(readlink -f /usr/local/opt/openssl@1.1)
 }
 
 install_zlib() {
@@ -110,6 +97,8 @@ publish_package() {
 		pip install --upgrade pip &&
     pushd $GENOMICSDB_PYTHON_DIR &&
 	  pip install -r requirements.txt &&
+    cp $GENOMICSDB_HOME/genomicsdb/protobuf/python/* genomicsdb/protobuf &&
+    sed -i '' 's/import genomicsdb_/from . import genomicsdb_/g' genomicsdb/protobuf/*.py &&  
     python setup.py sdist --with-genomicsdb=$GENOMICSDB_HOME &&
 	  python setup.py bdist_wheel --with-genomicsdb=$GENOMICSDB_HOME --with-libs &&
     popd &&
@@ -131,22 +120,17 @@ publish() {
 install_genomicsdb() {
   rm -fr $GENOMICSDB_DIR
   git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GENOMICSDB_DIR
-  OPENSSL_ROOT_DIR=$OPENSSL_PREFIX_DIR
-  CMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR:$ZLIB_PREFIX_DIR
   pushd $GENOMICSDB_DIR
   mkdir build
   cd build
-  cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DBUILD_DISTRIBUTABLE_LIBRARY=1 .. &&
-  make -j4 && make install
+  cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DBUILD_DISTRIBUTABLE_LIBRARY=1 -DBUILD_FOR_PYTHON=1 .. &&
+    make -j4 && make install
 }
 
 if [[ `uname` != "Darwin" ]]; then
   echo "Script needs porting for Non-MacOS systems"
   exit 1
 fi
-
-export MACOSX_DEPLOYMENT_TARGET=11.0
-export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX_DIR
 
 install_openssl &&
   install_zlib &&
