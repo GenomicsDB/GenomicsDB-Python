@@ -1,17 +1,14 @@
 #!/bin/bash
 
 PREFIX_DIR=$HOME/python
-
-ZLIB_VERSION=1.2.11
-ZLIB_PREFIX_DIR=$PREFIX_DIR/zlib-$ZLIB_VERSION
-
 GENOMICSDB_DIR=$PREFIX_DIR/GenomicsDB
 GENOMICSDB_HOME=$GENOMICSDB_DIR/release
-GENOMICSDB_BRANCH=develop
+GENOMICSDB_BRANCH=master
 
-GENOMICSDB_PYTHON_DIR=`pwd`/..
+GENOMICSDB_PYTHON_DIR=$(readlink -f `pwd`/..)
 
 #MACOSX_DEPLOYMENT_TARGET=11.0
+HOMEBREW_NO_AUTO_UPDATE=1
 
 die() {
   if [[ $# -eq 1 ]]; then
@@ -29,70 +26,20 @@ check_rc() {
 }
 
 install_openssl() {
-  brew list openssl@1.1 &> /dev/null || brew install openssl@1.1
-  check_rc $?
+  check_rc $(brew list openssl@1.1 &> /dev/null || brew install openssl@1.1)
   OPENSSL_ROOT_DIR=$(readlink -f /usr/local/opt/openssl@1.1)
 }
 
-install_zlib() {
-  if [[ -d $ZLIB_PREFIX_DIR ]]; then
-    return 0
-  fi
-  pushd /tmp
-  wget http://zlib.net/fossils/zlib-$ZLIB_VERSION.tar.gz &&
-    tar -xvzf zlib-$ZLIB_VERSION.tar.gz &&
-    pushd zlib-$ZLIB_VERSION &&
-    ./configure --prefix=$ZLIB_PREFIX_DIR &&
-    make && make install
-  RC=$?
-  popd 
-  rm zlib-1.2.11*
-  popd
-  check_rc $RC
-}
-
 install_python_version() {
-  case $1 in
-    3.7*)
-      PYTHON_EXECUTABLE=$PREFIX_DIR/bin/python3.7
-      ;;
-    3.8*)
-      PYTHON_EXECUTABLE=$PREFIX_DIR/bin/python3.8
-      ;;
-    3.9*)
-      PYTHON_EXECUTABLE=$PREFIX_DIR/bin/python3.9
-      ;;
-    *)
-      echo "Unsupported Python Version $1"
-      exit 1
-      ;;
-  esac
-  
-  if [[ -f $PYTHON_EXECUTABLE ]]; then
-    return 0
-  fi
-  
-	# Download and extract source
-	VERSION=$1
-  pushd /tmp
-	wget -nv https://www.python.org/ftp/python/$VERSION/Python-$VERSION.tgz &&
-		tar -xvzf Python-$VERSION.tgz &&
-	  pushd Python-$VERSION &&
-    CPPFLAGS="-I$OPENSSL_PREFIX_DIR/include -I$ZLIB_PREFIX_DIR/include" LDFLAGS="-L$OPENSSL_PREFIX_DIR/lib -L$ZLIB_PREFIX_DIR/lib" ./configure --prefix=$PREFIX_DIR --enable-shared --with-openssl=$OPENSSL_PREFIX_DIR &&
-		make &&
-		make altinstall
-	RC=$?
-	popd
-	rm -fr Python-$VERSION Python-$VERSION.tgz
-  popd
-	check_rc $RC
+  check_rc $(brew list python@$1 &> /dev/null || brew install python@$1)
 }
 
 publish_package() {
 	PYTHON_VERSION=$1
+  install_python_version $PYTHON_VERSION
   echo "Publishing python package for $1 ..."
   pushd /tmp
-	$PREFIX_DIR/bin/python$PYTHON_VERSION -m venv try$PYTHON_VERSION &&
+	python$PYTHON_VERSION -m venv try$PYTHON_VERSION &&
 		source try$PYTHON_VERSION/bin/activate &&
 		pip install --upgrade pip &&
     pushd $GENOMICSDB_PYTHON_DIR &&
@@ -107,14 +54,14 @@ publish_package() {
 	rm -fr try$PYTHON_VERSION
   popd
 	check_rc $RC
-  echo "Publishing package DONE"
+  echo "Publishing package for python $PYTHON_VERSION DONE"
 }
 
 publish() {
   echo "Installing Python" &&
-    install_python_version 3.7.10  && publish_package 3.7 &&
-	  install_python_version 3.8.11  && publish_package 3.8 &&
-    install_python_version 3.9.6 && publish_package 3.9
+#  publish_package 3.7 &&
+#	publish_package 3.8 &&
+  publish_package 3.9
 }
 
 install_genomicsdb() {
@@ -133,6 +80,5 @@ if [[ `uname` != "Darwin" ]]; then
 fi
 
 install_openssl &&
-  install_zlib &&
   install_genomicsdb &&
   publish

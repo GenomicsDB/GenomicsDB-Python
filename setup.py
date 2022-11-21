@@ -13,21 +13,29 @@ GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="/usr/local")
 
 copy_genomicsdb_libs = False
+copy_protobuf_definitions = False
+
 args = sys.argv[:]
 for arg in args:
     if arg.find("--with-genomicsdb=") == 0:
         GENOMICSDB_INSTALL_PATH = os.path.expanduser(arg.split("=")[1])
         sys.argv.remove(arg)
     if arg.find("--with-libs") == 0:
-        copy_genomicsdb_libs = True;
+        copy_genomicsdb_libs = True
+        sys.argv.remove(arg)
+    if arg.find("--with-protobuf") == 0:
+        copy_protobuf_definitions = True
         sys.argv.remove(arg)
 
 print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
 
 GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
 GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
+GENOMICSDB_PROTOBUF_DIR = os.path.join(
+    GENOMICSDB_INSTALL_PATH, "genomicsdb/protobuf/python"
+)
 
-dst = os.path.join("lib")
+dst = os.path.join("genomicsdb/lib")
 if copy_genomicsdb_libs:
     glob_paths = [
         os.path.join(GENOMICSDB_LIB_DIR, e)
@@ -52,10 +60,17 @@ if sys.platform == "darwin":
 else:
     rpath = ["$ORIGIN/" + dst]
 
+dst = os.path.join("genomicsdb/protobuf")
+if copy_protobuf_definitions:
+    shutil.copytree(GENOMICSDB_PROTOBUF_DIR, dst, dirs_exist_ok=True)
+
+
 def run_cythonize(src):
     from Cython.Build.Dependencies import cythonize
+
     cythonize(src, include_path=[GENOMICSDB_INCLUDE_DIR], force=True)
     return os.path.splitext(src)[0] + ".cpp"
+
 
 genomicsdb_extension = Extension(
     "genomicsdb.genomicsdb",
@@ -90,7 +105,7 @@ setup(
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
     include_package_data=True,
-    version="0.0.8.10",
+    version="0.0.8.16",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

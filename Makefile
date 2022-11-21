@@ -87,18 +87,16 @@ test-release: dist ## package and upload a test release
 release: dist ## package and upload a release
 	twine upload dist/*
 
-dist-no-libs: ## use with docker for building wheels for python versions
-	python setup.py sdist
-	python setup.py bdist_wheel
-
 dist: ## builds source and wheel package
-	python setup.py sdist --with-libs
-	python setup.py bdist_wheel --with-libs
+	python setup.py sdist --with-libs --with-protobuf
+	python setup.py bdist_wheel --with-libs --with-protobuf
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install --with-libs
+	python setup.py install --with-libs --with-protobuf
 
-install-dev: clean ## install the package in place for debug purposes.
-	pip install -r requirements.txt
+install-dev: clean # install the package in place for debug purposes.
+	python -m pip install --upgrade pip
+	python -m pip install -r requirements_dev.txt
+	python setup.py build_ext --inplace --with-libs --with-protobuf
 	pip install -e .

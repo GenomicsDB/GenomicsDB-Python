@@ -1,21 +1,30 @@
 # GenomicsDB-Python
 Experimental Python Bindings using cython to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library
 
-To build:
+Clone the repository for building
 ```
 git clone https://github.com/GenomicsDB/GenomicsDB-Python.git
 cd GenomicsDB-Python
-virtualenv -p python3 <env>
-or
-python -m venv <env>
-source <env>/bin/activate > /dev/null
-pip install -r requirements.txt OR pip install -r requirements_dev.txt
-python setup.py build_ext --inplace --with-libs --with-genomicsdb=$GENOMICSDB_HOME
-deactivate
 ```
 
-To run tests:
+To build the native library with python protobuf:
 ```
-cd GenomicsDB-Python
-PYTHONPATH=${PYTHONPATH}:$(pwd) python3 test/test.py
+git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop GenomicsDB.native
+pushd GenomicsDB.native
+# Set OPENSSL_ROOT_DIR, e.g. on MacOS
+OPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 cmake -S . -B build -DBUILD_FOR_PYTHON=1 -DCMAKE_INSTALL_PREFIX=install
+pushd install
+make && make install
+popd
+popd
+```
+
+To build and run tests in-place:
+```
+python3 -m venv env
+source env/bin/activate > /dev/null
+# Point GENOMICSDB_HOME to the installed native binaries built above
+GENOMICSDB_HOME=GenomicsDB.native/install make install-dev
+python test/test.py
+deactivate
 ```
