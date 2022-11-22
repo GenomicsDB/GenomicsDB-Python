@@ -44,6 +44,11 @@ cdef extern from "genomicsdb.h":
         void process(interval_t)
         void process(uint32_t, genomic_interval_t, vector[genomic_field_t])
 
+    cdef enum query_config_type_t "GenomicsDB::query_config_type_t":
+        GENOMICSDB_JSON_FILE "GenomicsDB::JSON_FILE",
+        GENOMICSDB_JSON_STRING "GenomicsDB::JSON_STRING",
+        GENOMICSDB_PROTOBUF_BINARY_STRING "GenomicsDB::PROTOBUF_BINARY_STRING"
+
 #   GenomicsDB Class
 
     cdef cppclass GenomicsDB:
