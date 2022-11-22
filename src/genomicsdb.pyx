@@ -59,7 +59,7 @@ def connect(workspace,
         print(e)
         raise GenomicsDBException("Failed to connect to the native GenomicsDB library")
 
-def connect_with_protobuf(query_protobuf):
+def connect_with_protobuf(query_protobuf, loader_json = None):
     """Connect to an existing GenomicsDB Workspace with protobuf.
 
     Parameters
@@ -78,7 +78,7 @@ def connect_with_protobuf(query_protobuf):
          On failure to connect to the native GenomicsDB library
     """
     try:
-        return _GenomicsDB(query_protobuf=query_protobuf)
+        return _GenomicsDB(query_protobuf=query_protobuf.SerializeToString(), loader_json=loader_json)
     except Exception as e:
         print(e)
         raise GenomicsDBException("Failed to connect to the native GenomicsDB library using protobuf")
@@ -113,16 +113,20 @@ cdef class _GenomicsDB:
     cdef GenomicsDB* _genomicsdb
 
     def __init__(self, **kwargs):
-        if 'query_protobuf' in kwargs:
-            self._genomicsdb = new GenomicsDB(kwargs['query_protobuf'].SerializeToString(),
-                                              GENOMICSDB_PROTOBUF_BINARY_STRING);
+        if 'query_protobuf' in kwargs  and 'loader_json' in kwargs and kwargs['loader_json'] is not None:
+            self._genomicsdb = new GenomicsDB(as_protobuf_string(kwargs['query_protobuf']),
+                                              GENOMICSDB_PROTOBUF_BINARY_STRING,
+                                              as_string(kwargs['loader_json']))
+        elif 'query_protobuf' in kwargs:
+                self._genomicsdb = new GenomicsDB(as_protobuf_string(kwargs['query_protobuf']),
+                                                  GENOMICSDB_PROTOBUF_BINARY_STRING)
         elif 'query_json' in kwargs and 'loader_json' in kwargs and kwargs['loader_json'] is not None:
             self._genomicsdb = new GenomicsDB(as_string(kwargs['query_json']),
                                               GENOMICSDB_JSON_FILE,
-                                              as_string(kwargs['loader_json']));
+                                              as_string(kwargs['loader_json']))
         elif 'query_json' in kwargs:
                 self._genomicsdb = new GenomicsDB(as_string(kwargs['query_json']),
-                                                  GENOMICSDB_JSON_FILE);
+                                                  GENOMICSDB_JSON_FILE)
         else:
             if 'workspace' not in kwargs:
                 raise GenomicsDBException("Workspace is a required argument to connect to GenomicsDB")

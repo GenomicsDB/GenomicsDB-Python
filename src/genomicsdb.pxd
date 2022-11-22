@@ -55,9 +55,9 @@ cdef extern from "genomicsdb.h":
         GenomicsDB(string, string, string, vector[string], uint64_t) except +
         GenomicsDB(string, string, string, vector[string]) except +
         GenomicsDB(string, string, string) except +
-        GenomicsDB(string, int, string, int) except +
-        GenomicsDB(string, int, string) except +
-        GenomicsDB(string, int) except +
+        GenomicsDB(string, query_config_type_t, string, int) except +
+        GenomicsDB(string, query_config_type_t, string) except +
+        GenomicsDB(string, query_config_type_t) except +
         GenomicsDB(string) except +
         GenomicsDBVariants query_variants(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
         GenomicsDBVariants query_variants()

@@ -57,8 +57,6 @@ def run_test_connect_with_protobuf():
     query_config = query_pb.ExportConfiguration()
     query_config.workspace = "ws"
     query_config.array_name = "t0_1_2"
-    query_config.callset_mapping_file = "callset_t0_1_2.json"
-    query_config.vid_mapping_file = "vid.json"
     query_config.segment_size = 40
     query_config.attributes.extend(["GT", "DP"])
 
@@ -77,6 +75,13 @@ def run_test_connect_with_protobuf():
     row_range_list.range_list.extend([range])
     query_config.query_row_ranges.extend([row_range_list])
 
+    # with loader.json
+    gdb = genomicsdb.connect_with_protobuf(query_config, "loader.json")
+    gdb.query_variant_calls()
+
+    # without loader.json
+    query_config.callset_mapping_file = "callset_t0_1_2.json"
+    query_config.vid_mapping_file = "vid.json"
     gdb = genomicsdb.connect_with_protobuf(query_config)
     gdb.query_variant_calls()
 
