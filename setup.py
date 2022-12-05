@@ -63,6 +63,17 @@ else:
 dst = os.path.join("genomicsdb/protobuf")
 if copy_protobuf_definitions:
     shutil.copytree(GENOMICSDB_PROTOBUF_DIR, dst, dirs_exist_ok=True)
+    for file in os.listdir(dst):
+        if file.endswith(".py"):
+            # Read in the file
+            filename = os.path.join(dst, file)
+            with open(filename, "r") as file:
+                replaced_contents = file.read().replace(
+                    "import genomicsdb_", "from . import genomicsdb_"
+                )
+            # Write out the file
+            with open(filename, "w") as file:
+                file.write(replaced_contents)
 
 
 def run_cythonize(src):

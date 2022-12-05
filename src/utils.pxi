@@ -36,6 +36,9 @@ cdef unicode to_unicode(s):
 cdef string as_string(s):
     return PyBytes_AS_STRING(to_unicode(s).encode('UTF-8'))
 
+cdef string as_protobuf_string(s):
+    return s
+
 cdef vector[string] as_vector(l):
     cdef vector[string] v
     if l is not None:

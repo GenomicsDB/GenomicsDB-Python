@@ -7,7 +7,7 @@ import tempfile
 
 def version():
     """Print out version of the GenomicsDB native library
-    
+
     Returns
     -------
     str
@@ -25,7 +25,7 @@ def connect(workspace,
             attributes = None,
             segment_size = None):
     """Connect to an existing GenomicsDB Workspace.
-    
+
     Parameters
     ----------
     workspace : str
@@ -38,6 +38,58 @@ def connect(workspace,
         List of attributes to be queried, by default None. All attributes will be queried if None.
     segment_size : int, optional
         Segment Size, by default None. Allow GenomicsDB to configure one.
+
+    Returns
+    -------
+    GenomicsDB
+        GenomicsDB instance ready for queries
+
+    Raises
+    ------
+    GenomicsDBException
+         On failure to connect to the native GenomicsDB library
+    """
+    try:
+        return _GenomicsDB(workspace=workspace,
+                           callset_mapping_file=callset_mapping_file,
+                           vid_mapping_file=vid_mapping_file,
+                           attributes=attributes,
+                           segment_size=segment_size)
+    except Exception as e:
+        raise GenomicsDBException("Failed to connect to the native GenomicsDB library", e)
+
+def connect_with_protobuf(query_protobuf, loader_json = None):
+    """Connect to an existing GenomicsDB Workspace with protobuf.
+
+    Parameters
+    ----------
+    query_protobuf : genomicsdb.protobuf.genomicsdb_export_config_pb2.ExportConfiguration
+        The GenomicsDB Export Configuration protobuf object
+
+    Returns
+    -------
+    GenomicsDB
+        GenomicsDB instance ready for queries
+
+    Raises
+    ------
+    GenomicsDBException
+         On failure to connect to the native GenomicsDB library
+    """
+    try:
+        return _GenomicsDB(query_protobuf=query_protobuf.SerializeToString(), loader_json=loader_json)
+    except Exception as e:
+        raise GenomicsDBException("Failed to connect to the native GenomicsDB library using protobuf", e)
+
+def connect_with_json(query_json, loader_json = None):
+    """Connect to an existing GenomicsDB Workspace with json files.
+
+    Parameters
+    ----------
+    query_json : str
+        Path to a json file describing the query
+    loader_json : str, optional
+        Path to a json file describing the loader, by default None.
     
     Returns
     -------
@@ -48,42 +100,55 @@ def connect(workspace,
     ------
     GenomicsDBException
          On failure to connect to the native GenomicsDB library
-    """    
+    """
     try:
-        return _GenomicsDB(workspace, callset_mapping_file, vid_mapping_file,
-                           attributes, segment_size)
-    except:
-        raise GenomicsDBException("Failed to connect to the native GenomicsDB library")
+        return _GenomicsDB(query_json=query_json, loader_json=loader_json)
+    except Exception as e:
+        raise GenomicsDBException("Failed to connect to the native GenomicsDB library using json", e)
 
 cdef class _GenomicsDB:
     cdef GenomicsDB* _genomicsdb
 
-    def __cinit__(self):
-        self._genomicsdb = NULL
-
-    def __init__(self,
-                 workspace,
-                 callset_mapping_file,
-                 vid_mapping_file,
-                 attributes = None,
-                 segment_size = None):
-        cdef string ws = as_string(workspace)
-        cdef vector[string] vec = as_vector(attributes)
-        if attributes is None:
-            self._genomicsdb  = new GenomicsDB(as_string(workspace),
-                                               as_string(callset_mapping_file),
-                                               as_string(vid_mapping_file))
-        elif segment_size is None:
-            self._genomicsdb  = new GenomicsDB(as_string(workspace),
-                                               as_string(callset_mapping_file),
-                                               as_string(vid_mapping_file),
-                                               as_vector(attributes))
+    def __init__(self, **kwargs):
+        if 'query_protobuf' in kwargs and kwargs.get('loader_json', None) is not None:
+            self._genomicsdb = new GenomicsDB(as_protobuf_string(kwargs['query_protobuf']),
+                                              GENOMICSDB_PROTOBUF_BINARY_STRING,
+                                              as_string(kwargs['loader_json']))
+        elif 'query_protobuf' in kwargs:
+                self._genomicsdb = new GenomicsDB(as_protobuf_string(kwargs['query_protobuf']),
+                                                  GENOMICSDB_PROTOBUF_BINARY_STRING)
+        elif 'query_json' in kwargs and kwargs.get('loader_json', None) is not None:
+            self._genomicsdb = new GenomicsDB(as_string(kwargs['query_json']),
+                                              GENOMICSDB_JSON_FILE,
+                                              as_string(kwargs['loader_json']))
+        elif 'query_json' in kwargs:
+                self._genomicsdb = new GenomicsDB(as_string(kwargs['query_json']),
+                                                  GENOMICSDB_JSON_FILE)
         else:
-            self._genomicsdb  = new GenomicsDB(as_string(workspace),
-                                               as_string(callset_mapping_file),
-                                               as_string(vid_mapping_file),
-                                               as_vector(attributes),
-                                               segment_size)
+            if kwargs.get('workspace', None) is None:
+                raise GenomicsDBException("Workspace is a required argument to connect to GenomicsDB")
+            workspace = kwargs["workspace"]
+            callset_mapping_file = kwargs["callset_mapping_file"]
+            vid_mapping_file = kwargs["vid_mapping_file"]
+            attributes = kwargs["attributes"]
+            segment_size = kwargs["segment_size"]
+
+            if attributes is None:
+                self._genomicsdb  = new GenomicsDB(as_string(workspace),
+                                                   as_string(callset_mapping_file),
+                                                   as_string(vid_mapping_file))
+            elif segment_size is None:
+                self._genomicsdb  = new GenomicsDB(as_string(workspace),
+                                                   as_string(callset_mapping_file),
+                                                   as_string(vid_mapping_file),
+                                                   as_vector(attributes))
+            else:
+                self._genomicsdb  = new GenomicsDB(as_string(workspace),
+                                                   as_string(callset_mapping_file),
+                                                   as_string(vid_mapping_file),
+                                                   as_vector(attributes),
+                                                   segment_size)
+
 
     def query_variant_calls(self,
                             array=None,
