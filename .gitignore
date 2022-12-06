@@ -114,4 +114,5 @@ TAGS
 
 #Ignore generated cpp files
 src/genomicsdb.cpp
-genomicsdb_data/lib
+genomicsdb/lib
+genomicsdb/include
