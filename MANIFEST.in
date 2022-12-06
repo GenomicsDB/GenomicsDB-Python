@@ -1,1 +1,12 @@
-recursive-include genomicsdb
+global-exclude .git*
+
+global-exclude *.pyc
+global-exclude *~
+global-exclude \#*
+global-exclude .DS_Store
+
+exclude MANIFEST.in
+
+prune package
+
+graft genomicsdb
