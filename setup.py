@@ -10,7 +10,7 @@ GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 
 # Specify genomicsdb install location via
 #     "--with-genomicsdb=<genomicsdb_install_path>" command line arg
-GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="/usr/local")
+GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="genomicsdb")
 
 copy_genomicsdb_libs = False
 copy_protobuf_definitions = False
@@ -34,6 +34,10 @@ GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
 GENOMICSDB_PROTOBUF_DIR = os.path.join(
     GENOMICSDB_INSTALL_PATH, "genomicsdb/protobuf/python"
 )
+
+if GENOMICSDB_INSTALL_PATH == "genomicsdb":
+    copy_genomicsdb_libs = False
+    copy_protobuf_definitions = False
 
 dst = os.path.join("genomicsdb/lib")
 if copy_genomicsdb_libs:
@@ -59,6 +63,12 @@ if sys.platform == "darwin":
     link_args = ["-Wl,-rpath," + dst]
 else:
     rpath = ["$ORIGIN/" + dst]
+
+dst = os.path.join("genomicsdb/include")
+if copy_genomicsdb_libs:
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    shutil.copytree(GENOMICSDB_INCLUDE_DIR, dst, dirs_exist_ok=True)
 
 dst = os.path.join("genomicsdb/protobuf")
 if copy_protobuf_definitions:

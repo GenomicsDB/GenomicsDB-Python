@@ -7,7 +7,7 @@ git clone https://github.com/GenomicsDB/GenomicsDB-Python.git
 cd GenomicsDB-Python
 ```
 
-To build the native library with python protobuf:
+To build the native library with python protobuf
 ```
 git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop GenomicsDB.native
 pushd GenomicsDB.native
@@ -19,7 +19,7 @@ popd
 popd
 ```
 
-To build and run tests in-place:
+To build the python bindings and run tests in-place:
 ```
 python3 -m venv env
 source env/bin/activate > /dev/null
