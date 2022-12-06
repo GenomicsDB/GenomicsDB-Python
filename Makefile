@@ -31,6 +31,8 @@ help:
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 	rm -fr genomicsdb/lib/lib*
+	rm -fr genomicsdb/include/*
+	rm -f genomicsdb/genomicsdb.cpython*so
 	rm -fr genomicsdb/protobuf/genomicsdb*.py
 
 clean-build: ## remove build artifacts
