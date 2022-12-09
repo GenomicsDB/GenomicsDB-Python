@@ -2,7 +2,7 @@
 [![pypi](https://img.shields.io/pypi/v/genomicsdb.svg)](https://pypi.org/project/genomicsdb/) 
 
 # GenomicsDB-Python
-Experimental Python Bindings to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library. Only queries are supported for now. For importing vcf files into GenomicsDB, use the command line tools - `vcf2genomicsdb` or `gatk GenomicsDBImport`.
+Experimental Python 3 Bindings to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library. Only queries are supported for now. For importing vcf files into GenomicsDB, use the command line tools - `vcf2genomicsdb` or `gatk GenomicsDBImport`.
 
 ## Installation : Only Linux and MacOS are currently supported
 Install `genomicsdb` binary wheels from PyPi with pip:

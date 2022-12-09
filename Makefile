@@ -102,3 +102,7 @@ install-dev: # install the package in place for debug purposes.
 #	python -m pip install -r requirements_dev.txt
 	python setup.py build_ext --inplace --with-libs --with-protobuf
 #       pip install -e .
+
+check:
+	python -c "import genomicsdb; print(genomicsdb.version())"
+	python -c "import genomicsdb.protobuf"
