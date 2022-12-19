@@ -102,6 +102,7 @@ fi
 install_python_version 3.7.10  && sanity_test_python 3.7 &&
 install_python_version 3.8.11 && sanity_test_python 3.8 &&
 install_python_version 3.9.6 && sanity_test_python 3.9 &&
+install_python_version 3.10.8 && sanity_test_python 3.10 &&
 echo "Python versions successfully installed"
 
 
