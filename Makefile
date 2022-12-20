@@ -31,7 +31,7 @@ help:
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 	rm -fr genomicsdb/lib/lib*
-	rm -fr genomicsdb/include/*
+	rm -fr genomicsdb/include/*.h
 	rm -f genomicsdb/genomicsdb.cpython*so
 	rm -fr genomicsdb/protobuf/genomicsdb*.py
 
@@ -94,11 +94,15 @@ dist: ## builds source and wheel package
 	python setup.py bdist_wheel --with-libs --with-protobuf
 	ls -l dist
 
-install: clean ## install the package to the active Python's site-packages
+install: ## install the package to the active Python's site-packages
 	python setup.py install --with-libs --with-protobuf
 
-install-dev: clean # install the package in place for debug purposes.
-	python -m pip install --upgrade pip
-	python -m pip install -r requirements_dev.txt
+install-dev: # install the package in place for debug purposes.
+#	python -m pip install --upgrade pip
+#	python -m pip install -r requirements_dev.txt
 	python setup.py build_ext --inplace --with-libs --with-protobuf
-	pip install -e .
+#       pip install -e .
+
+check:
+	python -c "import genomicsdb; print(genomicsdb.version())"
+	python -c "import genomicsdb.protobuf"

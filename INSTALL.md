@@ -24,6 +24,7 @@ To build the python bindings and run tests in-place:
 python3 -m venv env
 source env/bin/activate > /dev/null
 # Point GENOMICSDB_HOME to the installed native binaries built above
+python -m pip install -r requirements_dev.txt
 GENOMICSDB_HOME=GenomicsDB.native/install make install-dev
 python test/test.py
 deactivate

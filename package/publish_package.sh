@@ -9,7 +9,7 @@ if [ "$1" != "release" ] && [ "$1" != "test-release" ]; then
 	echo $USAGE
 	exit 1
 fi
-if [ "$2" != "macos" ] && [ "$1" != "linux" ]; then
+if [ "$2" != "macos" ] && [ "$2" != "linux" ]; then
   echo $USAGE
   exit 1
 fi
@@ -66,6 +66,7 @@ export CURRENT_UID="$(id -u):$(id -g)"
 docker-compose run -e PYTHON_VERSION="3.7" package
 docker-compose run -e PYTHON_VERSION="3.8" package
 docker-compose run -e PYTHON_VERSION="3.9" package
+docker-compose run -e PYTHON_VERSION="3.10" package
 echo "Building packages for Linux on CentOS 6 DONE"
 
 pushd ../

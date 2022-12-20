@@ -51,8 +51,6 @@ if copy_genomicsdb_libs:
     print("Adding the following libraries to the GenomicsDB Package :")
     print(lib_paths, sep="\n")
 
-    if not os.path.exists(dst):
-        os.makedirs(dst)
     for lib_path in lib_paths:
         print("Copying {0} to {1}".format(lib_path, dst))
         shutil.copy(lib_path, dst)
@@ -66,8 +64,6 @@ else:
 
 dst = os.path.join("genomicsdb/include")
 if copy_genomicsdb_libs:
-    if not os.path.exists(dst):
-        os.makedirs(dst)
     shutil.copytree(GENOMICSDB_INCLUDE_DIR, dst, dirs_exist_ok=True)
 
 dst = os.path.join("genomicsdb/protobuf")
@@ -139,5 +135,6 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 )
