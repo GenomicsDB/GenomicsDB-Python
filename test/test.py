@@ -75,6 +75,9 @@ def run_test_connect_with_protobuf():
     row_range_list.range_list.extend([range])
     query_config.query_row_ranges.extend([row_range_list])
 
+    del query_config.query_row_ranges[:]
+    query_config.query_sample_names.append("HG00141")
+
     # with loader.json
     gdb = genomicsdb.connect_with_protobuf(query_config, "loader.json")
     gdb.query_variant_calls()
@@ -83,7 +86,9 @@ def run_test_connect_with_protobuf():
     query_config.callset_mapping_file = "callset_t0_1_2.json"
     query_config.vid_mapping_file = "vid.json"
     gdb = genomicsdb.connect_with_protobuf(query_config)
-    gdb.query_variant_calls()
+    list = gdb.query_variant_calls()
+    x, y, calls = zip(*list)
+    print(pd.DataFrame(calls[0]))
 
 
 def run_test_connect_with_json():
