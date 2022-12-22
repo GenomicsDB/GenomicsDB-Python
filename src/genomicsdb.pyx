@@ -160,7 +160,7 @@ cdef class _GenomicsDB:
         cdef VariantCallProcessor processor
         processor.set_root(variant_calls)
         if array is None:
-            self._genomicsdb.query_variant_calls()
+            self._genomicsdb.query_variant_calls(processor)
         elif column_ranges is None:
             self._genomicsdb.query_variant_calls(processor, as_string(array))
         elif row_ranges is None:
