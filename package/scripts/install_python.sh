@@ -99,10 +99,10 @@ if [[ $PYTHON_USER_ID != 0  && $PYTHON_GROUP_ID != 0 ]]; then
   useradd -m $PYTHON_USER -u $PYTHON_USER_ID -g $PYTHON_GROUP_ID
 fi
 
-install_python_version 3.7.10  && sanity_test_python 3.7 &&
 install_python_version 3.8.11 && sanity_test_python 3.8 &&
 install_python_version 3.9.6 && sanity_test_python 3.9 &&
 install_python_version 3.10.8 && sanity_test_python 3.10 &&
+install_python_version 3.11.1  && sanity_test_python 3.11 &&
 echo "Python versions successfully installed"
 
 

@@ -8,5 +8,6 @@ global-exclude .DS_Store
 exclude MANIFEST.in
 
 prune package
+prune docs
 
 graft genomicsdb

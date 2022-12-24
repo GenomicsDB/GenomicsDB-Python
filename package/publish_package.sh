@@ -59,14 +59,13 @@ python setup.py sdist
 
 popd
 
-# Use centos6 based genomicsdb:all_python Docker image to create packages for 3.6/3.7/3.8
-# Current dependencies are zlib and jvm. TODO: Statically link in zlib too.
+# Use centos6 based genomicsdb:all_python Docker image to create packages for 3.8/3.9/3.10/1.11
 echo "Building packages for Linux on CentOS 6..."
 export CURRENT_UID="$(id -u):$(id -g)"
-docker-compose run -e PYTHON_VERSION="3.7" package
 docker-compose run -e PYTHON_VERSION="3.8" package
 docker-compose run -e PYTHON_VERSION="3.9" package
 docker-compose run -e PYTHON_VERSION="3.10" package
+docker-compose run -e PYTHON_VERSION="3.11" package
 echo "Building packages for Linux on CentOS 6 DONE"
 
 pushd ../
