@@ -1,0 +1,95 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Build and Test
+
+on:
+  push:
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.rst'
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.rst'
+env:
+  GENOMICSDB_BUILD_DIR: ${{github.workspace}}
+  GENOMICSDB_HOME: ${{github.workspace}}/install
+  GENOMICSDB_BRANCH: master
+  
+jobs:
+  native-build:
+    name: GenomicsDB Build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cache Native GenomicsDB
+        uses: actions/cache@v3
+        env:
+          GENOMICSDB_TARBALL: ${{env.GENOMICSDB_HOME}}_${{env.GENOMICSDB_BRANCH}}.tar
+        with:
+          path: ${{env.GENOMICSDB_TARBALL}}
+          key: ${{env.GENOMICSDB_TARBALL}}.v1
+            
+      - name: Native Build
+        env:
+          GENOMICSDB_TARBALL: ${{env.GENOMICSDB_HOME}}_${{env.GENOMICSDB_BRANCH}}.tar
+        run: |
+          echo "GENOMICSDB_TARBALL=$GENOMICSDB_TARBALL" >> $GITHUB_ENV
+          if [[ ! -f ${GENOMICSDB_TARBALL} ]]; then
+            sudo apt-get update -q && sudo apt install -y libcurl4-openssl-dev curl
+            git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GENOMICSDB_BUILD_DIR
+            cd $GENOMICSDB_BUILD_DIR
+            cmake -S . -B build -DBUILD_FOR_PYTHON=1 -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME 
+            cd build && make -j4 && make install
+            cd $(dirname $GENOMICSDB_HOME)
+            tar -cvf ${GENOMICSDB_TARBALL} $(basename $GENOMICSDB_HOME)
+          fi
+
+      - name: Upload GenomicsDB Tarball
+        uses: actions/upload-artifact@v3
+        with:
+          name: GenomicsDB-Tarball-${{runner.os}}
+          path: ${{env.GENOMICSDB_TARBALL}}
+          retention-days: 5
+      
+
+  python-build:
+    name: GenomicsDB Python Build
+    needs: native-build
+
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download GenomicsDB Tarball
+      uses: actions/download-artifact@v3
+      with:
+        name: GenomicsDB-Tarball-${{runner.os}}
+
+    - name: Extract GenomicsDB from Tarball
+      env:
+          GENOMICSDB_TARBALL: ${{env.GENOMICSDB_HOME}}_${{env.GENOMICSDB_BRANCH}}.tar
+      run: tar -xvf ${GENOMICSDB_TARBALL} -C $(dirname $GENOMICSDB_HOME)
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements_dev.txt
+
+    - name: Build
+      run: make install-dev
+        
+    - name: Test
+      run: |
+        PYTHONPATH=. pytest
+        PYTHONPATH=. python test/test.py
