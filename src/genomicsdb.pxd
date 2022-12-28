@@ -102,3 +102,10 @@ cdef extern from "genomicsdb_processor.h":
         void finalize() except +
         pass
 
+# FileSystem Utilities
+cdef extern from "genomicsdb_utils.h" namespace "genomicsdb":
+    cdef bint is_file(string)
+    cdef ssize_t file_size(string)
+    cdef int read_entire_file(string, void**, size_t*)
+    pass
+
