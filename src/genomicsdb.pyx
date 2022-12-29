@@ -206,24 +206,56 @@ cdef class _GenomicsDB:
         if self._genomicsdb != NULL:
             del self._genomicsdb
 
-from genomicsdb cimport is_file as _is_file
-from genomicsdb cimport file_size as _file_size
-from genomicsdb cimport read_entire_file as _read_entire_file
 
-class fs_utils:
-  def is_file(filename):
-    return _is_file(as_string(filename))
+# File Utilities
+
+def is_file(filename):
+  """
+  Check if the given filename(local or cloud URI) exists as a file
+
+  Parameters
+  ----------
+  filename : str
+
+  Returns
+  -------
+  true/false
+  """
+  return c_is_file(as_string(filename))
 
 
-  def file_size(filename):
-    return _file_size(as_string(filename))
+def file_size(filename):
+  """
+  Get the size of the file referenced by filename(local or cloud URI)
+
+  Parameters
+  ----------
+  filename : str
+
+  Returns
+  -------
+  size or -1 if file is not found
+  """
+  return c_file_size(as_string(filename))
   
-  def read_file(filename):
-    cdef char* contents = NULL
-    cdef size_t length
-    cdef int p = _read_entire_file(as_string(filename), <void**>&contents, &length)
-    if p == 0:
-      return contents.decode("utf-8") 
-    else:
-      return ""
+def read_entire_file(filename):
+  """
+  Retrieve the contents of the file referenced by filename(local or cloud URI). Use with relatively small, text files
+
+  Parameters
+  ----------
+  filename : str
+
+  Returns
+  -------
+  contents of file decoded with utf-8
+
+  """
+  cdef char* contents = NULL
+  cdef size_t length
+  cdef int p = c_read_entire_file(as_string(filename), <void**>&contents, &length)
+  if p == 0:
+    return contents.decode("utf-8")
+  else:
+    return ""
 
