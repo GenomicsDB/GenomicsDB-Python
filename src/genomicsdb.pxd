@@ -6,6 +6,7 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.functional cimport function
 from libc.stdint cimport (int32_t, uint32_t, int64_t, uint64_t, uintptr_t, INT64_MAX)
+from libc.stdlib cimport malloc, free
 from cpython cimport (PyObject, PyList_New)
 
 cdef extern from "genomicsdb.h":

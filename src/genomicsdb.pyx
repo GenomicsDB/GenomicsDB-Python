@@ -237,7 +237,7 @@ def file_size(filename):
   size or -1 if file is not found
   """
   return c_file_size(as_string(filename))
-  
+
 def read_entire_file(filename):
   """
   Retrieve the contents of the file referenced by filename(local or cloud URI). Use with relatively small, text files
@@ -248,14 +248,14 @@ def read_entire_file(filename):
 
   Returns
   -------
-  contents of file decoded with utf-8
+  contents of file decoded with utf-8 if the file could be found and read, otherwise return None
 
   """
   cdef char* contents = NULL
   cdef size_t length
   cdef int p = c_read_entire_file(as_string(filename), <void**>&contents, &length)
   if p == 0:
-    return contents.decode("utf-8")
-  else:
-    return ""
+    contents_str = contents.decode("utf-8")
+    free(contents)
+    return contents_str
 
