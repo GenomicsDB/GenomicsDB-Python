@@ -102,7 +102,7 @@ cdef extern from "genomicsdb_processor.h":
         void finalize() except +
         pass
 
-# FileSystem Utilities
+# Filesystem Utilities
 cdef extern from "genomicsdb_utils.h":
     cdef bint c_is_file "genomicsdb::is_file"(string)
     cdef ssize_t c_file_size "genomicsdb::file_size"(string)

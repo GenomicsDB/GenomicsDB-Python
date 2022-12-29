@@ -207,7 +207,7 @@ cdef class _GenomicsDB:
             del self._genomicsdb
 
 
-# File Utilities
+# Filesystem Utilities
 
 def is_file(filename):
   """
