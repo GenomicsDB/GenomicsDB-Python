@@ -13,7 +13,7 @@ def version():
     str
         GenomicsDB Version
     """
-    version_string = genomicsdb_version().decode("ascii")
+    version_string = c_version().decode("utf-8")
     return version_string
 
 class GenomicsDBException(Exception):
@@ -255,7 +255,7 @@ def read_entire_file(filename):
   cdef size_t length
   cdef int p = c_read_entire_file(as_string(filename), <void**>&contents, &length)
   if p == 0:
-    contents_str = contents.decode("utf-8")
+    contents_string = contents.decode("utf-8")
     free(contents)
-    return contents_str
+    return contents_string
 

@@ -103,8 +103,9 @@ cdef extern from "genomicsdb_processor.h":
         void finalize() except +
         pass
 
-# Filesystem Utilities
+# Filesystem and other Utilities
 cdef extern from "genomicsdb_utils.h":
+    cdef string c_version "genomicsdb::version"()
     cdef bint c_is_file "genomicsdb::is_file"(string)
     cdef ssize_t c_file_size "genomicsdb::file_size"(string)
     cdef int c_read_entire_file "genomicsdb::read_entire_file"(string, void**, size_t*)
