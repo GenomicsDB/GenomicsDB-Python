@@ -6,6 +6,7 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.functional cimport function
 from libc.stdint cimport (int32_t, uint32_t, int64_t, uint64_t, uintptr_t, INT64_MAX)
+from libc.stdlib cimport malloc, free
 from cpython cimport (PyObject, PyList_New)
 
 cdef extern from "genomicsdb.h":
@@ -101,4 +102,12 @@ cdef extern from "genomicsdb_processor.h":
         void process(uint32_t, genomic_interval_t, vector[genomic_field_t]) except +
         void finalize() except +
         pass
+
+# Filesystem and other Utilities
+cdef extern from "genomicsdb_utils.h":
+    cdef string c_version "genomicsdb::version"()
+    cdef bint c_is_file "genomicsdb::is_file"(string)
+    cdef ssize_t c_file_size "genomicsdb::file_size"(string)
+    cdef int c_read_entire_file "genomicsdb::read_entire_file"(string, void**, size_t*)
+    pass
 
