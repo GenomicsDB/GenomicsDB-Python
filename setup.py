@@ -122,7 +122,7 @@ setup(
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
     include_package_data=True,
-    version="0.0.8.17",
+    version="0.0.8.20",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
