@@ -18,7 +18,8 @@ class TestGenomicsDBDemo(unittest.TestCase):
   def test_genomicsdb_demo_with_interval(self):
     ws = os.getenv("GENOMICSDB_DEMO_WS")
     if ws is None:
-      sys.exit("Env GENOMICSDB_DEMO_WS not set.")
+      print("Env GENOMICSDB_DEMO_WS not set.")
+      return
       
     query_config = query_pb.ExportConfiguration()
     query_config.workspace = ws
@@ -61,7 +62,8 @@ class TestGenomicsDBDemo(unittest.TestCase):
   def test_genomicsdb_demo_without_interval(self):
     ws = os.getenv("GENOMICSDB_DEMO_WS")
     if ws is None:
-      sys.exit("Env GENOMICSDB_DEMO_WS not set.")
+      print("Env GENOMICSDB_DEMO_WS not set.")
+      return
   
     query_config = query_pb.ExportConfiguration()
     query_config.workspace = ws
