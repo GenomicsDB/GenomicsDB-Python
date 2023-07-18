@@ -4,6 +4,7 @@ import os
 import shutil
 import glob
 import sys
+import numpy
 
 # Directory where a copy of the CPP compiled object is found.
 GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
@@ -85,15 +86,15 @@ if copy_protobuf_definitions:
 def run_cythonize(src):
     from Cython.Build.Dependencies import cythonize
 
-    cythonize(src, include_path=[GENOMICSDB_INCLUDE_DIR], force=True)
+    cythonize(src, include_path=[GENOMICSDB_INCLUDE_DIR, numpy.get_include()], force=True)
     return os.path.splitext(src)[0] + ".cpp"
 
 
 genomicsdb_extension = Extension(
     "genomicsdb.genomicsdb",
     language="c++",
-    include_dirs=[GENOMICSDB_INCLUDE_DIR],
-    sources=[run_cythonize("src/genomicsdb.pyx"), "src/genomicsdb_processor.cpp"],
+    include_dirs=[GENOMICSDB_INCLUDE_DIR, numpy.get_include()],
+    sources=[run_cythonize("src/genomicsdb.pyx"), "src/genomicsdb_processor.cpp", "src/genomicsdb_processor_columnar.cpp"],
     libraries=["tiledbgenomicsdb"],
     library_dirs=[GENOMICSDB_LIB_DIR],
     runtime_library_dirs=rpath,
@@ -122,7 +123,7 @@ setup(
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
     include_package_data=True,
-    version="0.0.8.17",
+    version="0.0.8.18",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

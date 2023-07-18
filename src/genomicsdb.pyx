@@ -4,6 +4,8 @@
 include "utils.pxi"
 
 import tempfile
+import pandas
+import numpy as np
 
 def version():
     """Print out version of the GenomicsDB native library
@@ -153,25 +155,59 @@ cdef class _GenomicsDB:
     def query_variant_calls(self,
                             array=None,
                             column_ranges=None,
-                            row_ranges=None):
+                            row_ranges=None,
+                            flatten_intervals=False):
         """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
 
+        if flatten_intervals is True:
+            return self.query_variant_calls_columnar(array, column_ranges, row_ranges)
+        else:
+            return self.query_variant_calls_by_interval(array, column_ranges, row_ranges)
+
+    def query_variant_calls_by_interval(self,
+                                        array=None,
+                                        column_ranges=None,
+                                        row_ranges=None):
         cdef list variant_calls = []
         cdef VariantCallProcessor processor
         processor.set_root(variant_calls)
         if array is None:
-            self._genomicsdb.query_variant_calls(processor)
+          self._genomicsdb.query_variant_calls(processor)
         elif column_ranges is None:
-            self._genomicsdb.query_variant_calls(processor, as_string(array))
+          self._genomicsdb.query_variant_calls(processor, as_string(array))
         elif row_ranges is None:
-            self._genomicsdb.query_variant_calls(processor, as_string(array),
-                                                 as_ranges(column_ranges))
+          self._genomicsdb.query_variant_calls(processor, as_string(array),
+                                               as_ranges(column_ranges))
         else:
-            self._genomicsdb.query_variant_calls(processor, as_string(array),
+          self._genomicsdb.query_variant_calls(processor, as_string(array),
                                                  as_ranges(column_ranges),
                                                  as_ranges(row_ranges))
         return variant_calls
 
+    def query_variant_calls_columnar(self,
+                            array=None,
+                            column_ranges=None,
+                            row_ranges=None):
+      """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
+
+      cdef ColumnarVariantCallProcessor processor
+      if array is None:
+          self._genomicsdb.query_variant_calls(processor)
+      elif column_ranges is None:
+          self._genomicsdb.query_variant_calls(processor, as_string(array))
+      elif row_ranges is None:
+          self._genomicsdb.query_variant_calls(processor, as_string(array),
+                                               as_ranges(column_ranges))
+      else:
+          self._genomicsdb.query_variant_calls(processor, as_string(array),
+                                               as_ranges(column_ranges),
+                                               as_ranges(row_ranges))
+          
+      return pandas.DataFrame(processor.construct_data_frame()).replace(np.nan, '').replace(-99999, '');
+      
+
+
+      
     def to_vcf(self,
                array=None,
                column_ranges=None,
