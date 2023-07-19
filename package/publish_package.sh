@@ -59,10 +59,9 @@ python setup.py sdist
 
 popd
 
-# Use centos6 based genomicsdb:all_python Docker image to create packages for 3.8/3.9/3.10/1.11
+# Use centos6 based genomicsdb:all_python Docker image to create packages for 3.9/3.10/1.11
 echo "Building packages for Linux on CentOS 6..."
 export CURRENT_UID="$(id -u):$(id -g)"
-docker-compose run -e PYTHON_VERSION="3.8" package
 docker-compose run -e PYTHON_VERSION="3.9" package
 docker-compose run -e PYTHON_VERSION="3.10" package
 docker-compose run -e PYTHON_VERSION="3.11" package

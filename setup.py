@@ -118,8 +118,9 @@ setup(
     ext_modules=[genomicsdb_extension],
     zip_safe=False,
     setup_requires=["cython>=0.27"],
-    install_requires=["numpy>=1.7"],
-    python_requires=">=3.7",
+    install_requires=["numpy>=1.19.3", "pandas>=1.5.0"],
+    extras_require = {"protobuf": ["protobuf>=4.21.1"]},
+    python_requires=">=3.9",
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
     include_package_data=True,
@@ -133,9 +134,9 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Operating System :: POSIX :: Linux",
         "Operating System :: MacOS :: MacOS X",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
 )
+
