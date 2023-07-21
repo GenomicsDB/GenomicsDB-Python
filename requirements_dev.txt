@@ -1,9 +1,17 @@
-cython>=0.27.3
-numpy>=1.7.2
+-r requirements.txt
+
+# C/C++ bindings
+cython>=0.29.4
+
+# Building
 setuptools>=18.0.1
 setuptools-scm>=1.5.4
-wheel>=0.30.0
-protobuf>=3.16
-pytest
+wheel>=0.37.0
+
+# Linting
+flake8~=4.0.1
+bandit~=1.7.0
+
+# Testing
+pytest>==6.2.5
 pandas
-twine
