@@ -20,7 +20,8 @@
 #
 # Description: Base Docker file for creating PyPi Packages
 
-FROM ghcr.io/genomicsdb/genomicsdb:centos_6_prereqs
+#FROM ghcr.io/genomicsdb/genomicsdb:centos_6_prereqs
+FROM genomicsdb:centos_7_prereqs
 
 ARG user=genomicsdb
 ARG user_id=0
