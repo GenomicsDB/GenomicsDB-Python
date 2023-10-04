@@ -1,5 +1,9 @@
+#
+# install_python.sh
+#
 # The MIT License (MIT)
 # Copyright (c) 2022 Omics Data Automation, Inc.
+# Copyright (c) 2023 dātma, inc™
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -19,6 +23,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 # Description: Script to install python versions of interest
+#
 
 #!/bin/bash
 
@@ -28,7 +33,6 @@ PYTHON_USER_ID=$2
 PYTHON_GROUP_ID=$3
 
 PYTHON_MAJOR=3
-OPENSSL_VERSION=1.1.1o
 
 die() {
   if [[ $# -eq 1 ]]; then
@@ -52,7 +56,7 @@ install_python_version() {
     tar -xvzf Python-$VERSION.tgz
   check_rc $?
   pushd Python-$VERSION
-  ./configure --prefix=/usr/local --with-openssl=$OPENSSL_ROOT_DIR --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
+  ./configure --prefix=/usr/local --with-openssl=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
     make &&
     make altinstall
   RC=$?
@@ -77,15 +81,8 @@ sanity_test_python() {
   check_rc $RC
 }
 
-if [[ ! -f /etc/profile.d/genomicsdb_prereqs.sh ]]; then
-    echo "Missing genomicsdb_prereqs.sh. Start with a GenomicsDB prerequistes docker image"
-    exit 1
-fi
-source /etc/profile.d/genomicsdb_prereqs.sh
-if [[ -z ${OPENSSL_ROOT_DIR} ]]; then
-    echo "Point to a prerequistes docker image that has openssl installed and env OPENSSL_ROOT_DIR set"
-    exit 1
-fi
+source /opt/rh/devtoolset-11/enable
+export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH
 
 # Workaround for Centos 6 being EOL'ed
 WGET_NO_CERTIFICATE="--no-check-certificate"

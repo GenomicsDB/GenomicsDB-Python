@@ -1,5 +1,10 @@
+#
+# Dockerfile
+#
 # The MIT License (MIT)
+#
 # Copyright (c) 2020 Omics Data Automation, Inc.
+# Copyright (c) 2023 dātma, inc™
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -19,8 +24,9 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 # Description: Base Docker file for creating PyPi Packages
+#
 
-FROM ghcr.io/genomicsdb/genomicsdb:centos_6_prereqs
+FROM centos:7
 
 ARG user=genomicsdb
 ARG user_id=0
@@ -29,11 +35,12 @@ ARG group_id=0
 ARG genomicsdb_branch=develop
 
 COPY scripts /build
-WORKDIR /build
-RUN ./install_python.sh $user $user_id $group_id
 
 WORKDIR /build
 RUN ./install_genomicsdb.sh $user $genomicsdb_branch
+
+WORKDIR /build
+RUN ./install_python.sh $user $user_id $group_id
 
 USER ${user}
 WORKDIR /home/${user}
