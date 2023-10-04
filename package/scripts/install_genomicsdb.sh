@@ -98,6 +98,7 @@ git clone https://github.com/GenomicsDB/GenomicsDB.git --recursive -b $BRANCH Ge
 
 pushd GenomicsDB
 echo "Starting GenomicsDB build"
+export CMAKE_PREFIX_PATH=/usr/local/ssl
 DOCKER_BUILD=true ./scripts/install_genomicsdb.sh $USER /usr/local true python false
 popd
 
