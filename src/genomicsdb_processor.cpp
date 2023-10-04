@@ -33,7 +33,7 @@ PyObject* wrap_field(genomic_field_t field, genomic_field_type_t field_type, uin
   } else if (field_type.is_int()) {
     py_object = PyLong_FromLong(field.int_value_at(offset));
   } else if (field_type.is_float()) {
-    py_object = PyLong_FromLong(field.float_value_at(offset));
+    py_object = PyFloat_FromDouble(field.float_value_at(offset));
   } else if (field_type.is_string()) {
     assert(offset == 0);
     py_object = PyUnicode_FromString(field.to_string(field_type).c_str());
