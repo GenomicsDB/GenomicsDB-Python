@@ -1,5 +1,9 @@
+#
+# install_genomicsdb.sh
+#
 # The MIT License (MIT)
 # Copyright (c) 2022 Omics Data Automation, Inc.
+# Copyright (c) 2023 dātma, inc™
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -19,86 +23,68 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 # Description: Script to build GenomicsDB
+#
 
 #!/bin/bash
-
-USER=$1
-BRANCH=$2
 
 set -e
 
 . /etc/profile
 
+USER=$1
+BRANCH=$2
+
 INSTALL_PREFIX=/usr/local
-OPENSSL_VERSION=1.1.1o
-CURL_VERSION=7.83.1
 
-WGET_NO_CERTIFICATE=" --no-check-certificate"
-OPENSSL_PREFIX=$INSTALL_PREFIX/ssl
-install_openssl() {
-  if [[ ! -d $OPENSSL_PREFIX ]]; then
-    echo "Installing OpenSSL"
-    pushd /tmp
-    wget $WGET_NO_CERTIFICATE -nv https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz &&
-      tar -xvzf openssl-$OPENSSL_VERSION.tar.gz &&
-      cd openssl-$OPENSSL_VERSION &&
-      if [[ `uname` == "Linux" ]]; then
-	  CFLAGS=-fPIC ./config shared --prefix=$OPENSSL_PREFIX --openssldir=$OPENSSL_PREFIX
-      else
-	  ./Configure darwin64-x86_64-cc shared -fPIC --prefix=$OPENSSL_PREFIX
-      fi
-      make && make install && echo "Installing OpenSSL DONE"
-    rm -fr /tmp/openssl*
-    popd
-  fi
-}
+OPENSSL_VERSION=${OPENSSL_VERSION:-3.0.11}
 
-CURL_PREFIX=$INSTALL_PREFIX
-install_curl() {
-  if [[ `uname` == "Darwin" ]]; then
-    # curl is supported natively in macOS
-    return 0
-  fi
-  if [[ ! -f $CURL_PREFIX/libcurl.a ]]; then
-    echo "Installing CURL into $CURL_PREFIX"
-    pushd /tmp
-    CURL_VERSION_=$(echo $CURL_VERSION | sed -r 's/\./_/g')
-    wget -nv https://github.com/curl/curl/releases/download/curl-$CURL_VERSION_/curl-$CURL_VERSION.tar.gz &&
-    tar xzf curl-$CURL_VERSION.tar.gz &&
-    cd curl-$CURL_VERSION &&
-      ./configure --with-pic -without-zstd --with-ssl=$OPENSSL_PREFIX --prefix $CURL_PREFIX &&
-      make && make install && echo "Installing CURL DONE"
-    rm -fr /tmp/curl
-    popd
-  fi
-}
+echo "Installing minimal dependencies..."
+yum install -y centos-release-scl && yum install -y devtoolset-11 &&
+  yum install -y -q deltarpm &&
+  yum update -y -q &&
+  yum install -y -q epel-release &&
+  yum install -y -q which wget git &&
+  yum install -y -q autoconf automake libtool unzip &&
+  yum install -y -q cmake3 patch &&
+  yum install -y -q perl perl-IPC-Cmd
+  yum install -y -q libuuid libuuid-devel &&
+  yum install -y -q curl libcurl-devel &&
+  echo "Installing minimal dependencies DONE"
 
-#echo "Cleanup existing static libraries"
-#rm -fr $INSTALL_PREFIX/lib/libcurl*
-#rm -fr $INSTALL_PREFIX/lib/libuuid*
-#rm -fr $INSTALL_PREFIX/include/curl
-#rm -fr $INSTALL_PREFIX/include/uuid
-#rm -fr $INSTALL_PREFIX/ssl
+source /opt/rh/devtoolset-11/enable
 
-echo "Rebuilding openssl for shared libraries"
-install_openssl
-if [[ ! -f $OPENSSL_PREFIX/lib/libcrypto.a ]]; then
-   echo "Something wrong with OpenSSL installation"
-   exit 1
+echo "Building openssl..."
+OPENSSL_PREFIX=$INSTALL_PREFIX
+if [[ ! -d $OPENSSL_PREFIX/ssl ]]; then
+  pushd /tmp
+  wget $WGET_NO_CERTIFICATE https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz &&
+    tar -xvzf openssl-$OPENSSL_VERSION.tar.gz &&
+    cd openssl-$OPENSSL_VERSION &&
+    CFLAGS=-fPIC ./config no-tests -fPIC --prefix=$OPENSSL_PREFIX --openssldir=$OPENSSL_PREFIX &&
+    make && make install && echo "Installing OpenSSL DONE"
+  rm -fr /tmp/openssl*
+  popd
 fi
-echo "Rebuilding curl for shared libraries"
-install_curl
-if [[ ! -f $CURL_PREFIX/lib/libcurl.a ]]; then
-   echo "Something wrong with CURL installation"
-   exit 1
-fi
+export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX
+export LD_LIBRARY_PATH=$OPENSSL_PREFIX/lib64:$OPENSSL_PREFIX/lib:$LD_LIBRARY_PATH
 
 echo "git clone https://github.com/GenomicsDB/GenomicsDB.git --recursive -b $BRANCH GenomicsDB"
 git clone https://github.com/GenomicsDB/GenomicsDB.git --recursive -b $BRANCH GenomicsDB
 
+adduser $USER
+groupadd genomicsdb
+usermod -aG genomicsdb $USER
+
 pushd GenomicsDB
 echo "Starting GenomicsDB build"
-DOCKER_BUILD=true ./scripts/install_genomicsdb.sh $USER /usr/local true python false
+mkdir build && cd build &&
+  cmake3 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DUSE_HDFS=0 -DBUILD_EXAMPLES=False -DDISABLE_TESTING=1 -DBUILD_FOR_PYTHON=1 .. &&
+  make && make install
 popd
 
-echo "GenomicsDB for Python installed successfully"
+if [[ -f $INSTALL_PREFIX/lib/libtiledbgenomicsdb.so ]]; then
+  echo "GenomicsDB for Python installed successfully"
+else
+  echo "GenomicsDB does not seem to have installed properly"
+  exit 1
+fi

@@ -1,3 +1,30 @@
+#
+# setup.py
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2023 dātma, inc™
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+# Description: setup script to build the GenomicsDB python package
+#
+
 from setuptools import setup, Extension, find_packages
 
 import os
@@ -99,7 +126,7 @@ genomicsdb_extension = Extension(
     library_dirs=[GENOMICSDB_LIB_DIR],
     runtime_library_dirs=rpath,
     extra_link_args=link_args,
-    extra_compile_args=["-std=c++11"],
+    extra_compile_args=["-std=c++17"],
 )
 
 with open("README.md") as f:
@@ -118,13 +145,13 @@ setup(
     ext_modules=[genomicsdb_extension],
     zip_safe=False,
     setup_requires=["cython>=0.27"],
-    install_requires=["numpy>=1.19.3", "pandas>=1.5.0"],
+    install_requires=["numpy>=1.19.5", "pandas"],
     extras_require = {"protobuf": ["protobuf>=4.21.1"]},
     python_requires=">=3.9",
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
     include_package_data=True,
-    version="0.0.8.18",
+    version="0.0.9.1",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
