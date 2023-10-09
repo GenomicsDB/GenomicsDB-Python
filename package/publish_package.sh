@@ -66,17 +66,9 @@ fi
 
 # Copy genomicsdb artifacts created in docker image
 docker create -it --name genomicsdb genomicsdb:python bash &&
-  docker cp genomicsdb:/usr/local/genomicsdb/protobuf/python/ genomicsdb/protobuf &&
-  mv genomicsdb/protobuf/python/* genomicsdb/protobuf &&
-  rmdir genomicsdb/protobuf/python &&
   mkdir -p genomicsdb/lib &&
   docker cp -L genomicsdb:/usr/local/lib/libtiledbgenomicsdb.so genomicsdb/lib &&
   docker rm -fv genomicsdb &&
-  if [[ $(uname) == "Darwin" ]]; then
-    sed -i '' 's/import genomicsdb_/from . import genomicsdb_/g' genomicsdb/protobuf/*.py
-  else
-    sed -i 's/import genomicsdb_/from . import genomicsdb_/g' genomicsdb/protobuf/*.py
-  fi &&
   echo "Docker copy from genomicsdb:python successful"
 
 RC=$?
@@ -104,9 +96,6 @@ for linux_wheel in dist/*-linux_*.whl; do
   echo "Moving $linux_wheel to ${linux_wheel//-linux_/-manylinux_2_17_x86_64.manylinux2014_}"
   mv $linux_wheel ${linux_wheel//-linux_/-manylinux_2_17_x86_64.manylinux2014_}
 done
-
-# Publish
-make $1
 
 popd
 

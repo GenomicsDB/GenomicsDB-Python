@@ -78,7 +78,7 @@ publish_package() {
     pushd $GENOMICSDB_PYTHON_DIR &&
     pip install -r package/requirements_pkg.txt &&
     python setup.py sdist --with-genomicsdb=$GENOMICSDB_HOME &&
-	  python setup.py bdist_wheel --with-genomicsdb=$GENOMICSDB_HOME --with-libs --with-protobuf &&
+	  python setup.py bdist_wheel --with-genomicsdb=$GENOMICSDB_HOME --with-libs &&
     popd &&
 		deactivate
 	RC=$?
@@ -102,7 +102,7 @@ install_genomicsdb() {
   pushd $GENOMICSDB_DIR
   mkdir build
   cd build
-  cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR -DPROTOBUF_ROOT_DIR=./protobuf-install -DAWSSDK_ROOT_DIR=./aws-install -DGCSSDK_ROOT_DIR=./gcs-install -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DBUILD_DISTRIBUTABLE_LIBRARY=1 -DBUILD_FOR_PYTHON=1 .. &&
+  cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR -DPROTOBUF_ROOT_DIR=./protobuf-install -DAWSSDK_ROOT_DIR=./aws-install -DGCSSDK_ROOT_DIR=./gcs-install -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
     make && make install
   popd
   if [[ -f $GENOMICSDB_HOME/lib/libtiledbgenomicsdb.dylib ]]; then
