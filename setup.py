@@ -86,9 +86,9 @@ if copy_genomicsdb_libs:
 rpath = []
 link_args = []
 if sys.platform == "darwin":
-    link_args = ["-Wl,-rpath," + lib]
+    link_args = ["-Wl,-rpath,lib"]
 else:
-    rpath = ["$ORIGIN/" + lib]
+    rpath = ["$ORIGIN/lib"]
 
 dst = os.path.join("genomicsdb/include")
 if copy_genomicsdb_libs:
