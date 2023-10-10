@@ -56,7 +56,7 @@ install_prereqs() {
   HOMEBREW_NO_AUTO_UPDATE=1
   HOMEBREW_NO_INSTALL_CLEANUP=1
   check_rc $(brew list openssl@3 &> /dev/null || brew install openssl@3)
-  OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+  export OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
   brew list libcsv &> /dev/null && brew uninstall libcsv
   # Use the uuid from framework
   brew list ossp-uuid &> /dev/null && brew uninstall ossp-uuid
@@ -108,7 +108,7 @@ install_genomicsdb() {
   if [[ -f $GENOMICSDB_HOME/lib/libtiledbgenomicsdb.dylib ]]; then
     echo "Building GenomicsDB in $GENOMICSDB_DIR DONE"
   else
-    echo "Something wrong with building GenomicsDB ar $GENOMICSDB_HOME"
+    echo "Something wrong with building GenomicsDB at $GENOMICSDB_HOME"
     exit 1
   fi
 }

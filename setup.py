@@ -86,9 +86,9 @@ if copy_genomicsdb_libs:
 rpath = []
 link_args = []
 if sys.platform == "darwin":
-    link_args = ["-Wl,-rpath," + dst]
+    link_args = ["-Wl,-rpath," + lib]
 else:
-    rpath = ["$ORIGIN/" + dst]
+    rpath = ["$ORIGIN/" + lib]
 
 dst = os.path.join("genomicsdb/include")
 if copy_genomicsdb_libs:
@@ -151,7 +151,7 @@ setup(
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
     include_package_data=True,
-    version="0.0.9.2",
+    version="0.0.9.3",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
