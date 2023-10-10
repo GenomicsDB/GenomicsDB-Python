@@ -8,7 +8,7 @@ cd /path/to/GenomicsDB-Python/package
 In Python3 env: python -m pip install -r requirements_pkg.txt
  
 # Step1
-# This creates a base centos 6 box with the supported python versions and GenomicsDB installed. This may be built once and cached to
+# This creates a base centos 7 box with the supported python versions and GenomicsDB installed. This may be built once and cached to
 # be reused in Step 2
 docker build -t genomicsdb:python . --build-arg user=$USER --build-arg user_id=`id -u` --build-arg group_id=`id -g` --build-arg genomicsdb_branch=master
 

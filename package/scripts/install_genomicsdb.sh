@@ -55,7 +55,7 @@ source /opt/rh/devtoolset-11/enable
 
 echo "Building openssl..."
 OPENSSL_PREFIX=$INSTALL_PREFIX
-if [[ ! -d $OPENSSL_PREFIX/ssl ]]; then
+if [[ ! -d $OPENSSL_PREFIX/include/openssl ]]; then
   pushd /tmp
   wget $WGET_NO_CERTIFICATE https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz &&
     tar -xvzf openssl-$OPENSSL_VERSION.tar.gz &&
@@ -78,7 +78,7 @@ usermod -aG genomicsdb $USER
 pushd GenomicsDB
 echo "Starting GenomicsDB build"
 mkdir build && cd build &&
-  cmake3 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DUSE_HDFS=0 -DBUILD_EXAMPLES=False -DDISABLE_TESTING=1 -DBUILD_FOR_PYTHON=1 .. &&
+  cmake3 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
   make && make install
 popd
 
