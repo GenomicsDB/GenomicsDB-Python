@@ -59,7 +59,7 @@ jobs:
             echo GROUP_ID=$(id -g) >> $GITHUB_ENV
       - name: get into folder
         run: | 
-            cd $GITHUB_WORKSPACE/GenomicsDB-Python/package
+            cd $GITHUB_WORKSPACE/package
 
       - name: Build docker image with GenomicsDB and Python 
         uses: docker/build-push-action@v4
