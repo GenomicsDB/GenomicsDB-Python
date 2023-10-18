@@ -57,6 +57,9 @@ jobs:
         run: |
             echo USER_ID=$(id -u) >> $GITHUB_ENV
             echo GROUP_ID=$(id -g) >> $GITHUB_ENV
+      - name: get into folder
+        run: | 
+            cd $GITHUB_WORKSPACE/GenomicsDB-Python/package
 
       - name: Build docker image with GenomicsDB and Python 
         uses: docker/build-push-action@v4
@@ -101,7 +104,7 @@ jobs:
 
   test:
     #needs: [publish]
-    needs: [build-macos-dist, build-linux-dist]
+    needs: [build-linux-dist]
 
     runs-on: ubuntu-22.04
     strategy:
