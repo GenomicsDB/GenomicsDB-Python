@@ -34,6 +34,8 @@ ARG group_id=0
 
 ARG genomicsdb_branch=develop
 
+WORKDIR /scripts
+
 COPY scripts /build
 
 WORKDIR /build
