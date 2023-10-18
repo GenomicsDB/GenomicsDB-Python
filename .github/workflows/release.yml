@@ -2,8 +2,6 @@ name: Release
 
 on:
   push:
-    tags:
-      - v*
 
 jobs:
   build-macos-dist:
@@ -135,7 +133,7 @@ jobs:
     - name: Run test
       run: |
         echo test will run here after making sure
-        
+
         
 
 
