@@ -36,7 +36,7 @@ ARG genomicsdb_branch=develop
 
 WORKDIR /scripts
 
-COPY scripts /build
+COPY ./scripts /build
 
 WORKDIR /build
 RUN ./install_genomicsdb.sh $user $genomicsdb_branch
