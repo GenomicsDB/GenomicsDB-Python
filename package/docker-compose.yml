@@ -31,4 +31,4 @@ services:
     user: ${USER}
     volumes: 
       - ..:/home/${USER}/GenomicsDB-Python:delegated
-    command: "/home/${USER}/GenomicsDB-Python/package/scripts/create_package.sh"
+    command: "/home/${USER}/GenomicsDB-Python/package/scripts/create_package.sh && python /home/${USER}/GenomicsDB-Python/test/test.py"

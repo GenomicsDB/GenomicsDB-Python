@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build-macos-dist:
+    runs-on: macos-12
+    outputs: 
+      tag_message: ${{env.TAG_MESSAGE}}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set version number
+        run: echo VERSION_NUMBER=${GITHUB_REF_NAME:1} >> $GITHUB_ENV
+      
+      - name: Set tag messsage
+        run: | 
+          git fetch --tags --force
+          echo "TAG_MESSAGE=$(git tag -l --sort=-taggerdate --format='%(contents)' $(git describe --tags $(git branch --show-current) ))" >> $GITHUB_ENV
+        
+      - name: Build GenomicsDB python distribution
+        shell: bash
+        working-directory: ${{github.workspace}}/package
+        run: ./publish_package_local.sh
+
+      - name: Archive macos python distribution as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-dist-$VERSION_NUMBER
+          path: dist
+
+  build-linux-dist:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Set version number
+        run: |
+            echo USER_ID=$(id -u) >> $GITHUB_ENV
+            echo GROUP_ID=$(id -g) >> $GITHUB_ENV
+
+      - name: Build docker image with GenomicsDB and Python 
+        uses: docker/build-push-action@v4
+        with:
+          file: package/Dockerfile
+          tags: genomicsdb:python
+          build-args:
+            user=${USER}
+            user_id=${USER_ID}
+            group_id=${GROUP_ID}
+            genomicsdb_branch=develop
+
+      - name: Build GenomicsDB linux distribution
+        shell: bash
+        working-directory: ${{github.workspace}}/package
+        run: ./publish_package.sh test-release linux
+    
+      - name: Archive macos python distribution as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-dist-$VERSION_NUMBER
+          path: dist
+
+
+  #publish:
+    #runs-on: ubuntu-22.04
+    #needs: [build-macos-dist, build-linux-dist]
+    
+    #steps:
+      #- name: Download macos distribution archive
+        #uses: actions/download-artifact@v3
+        #with:
+          #name: macos-dist-$VERSION_NUMBER
+
+      #- name: Download ubuntu distribution archive
+        #uses: actions/download-artifact@v3
+        #with:
+          #name: ubuntu-dist-$VERSION_NUMBER
+
+      #- name: Release
+        #run: twine upload -r testpypi -u "__TOKEN__" -p  {{secrets.TESTPYPI}}
+
+  test:
+    #needs: [publish]
+    needs: [build-macos-dist, build-linux-dist]
+
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+
+    - name: Download ubuntu distribution archive
+      uses: actions/download-artifact@v3
+      with:
+        name: ubuntu-dist-$VERSION_NUMBER
+    
+    - name: Install package
+      run: |
+        pip install $(find genomicsdb-*-cp311*.whl) || python -m pip install $(find genomicsdb-*-cp311*.whl)
+        pip show genomicsdb || python -m pip show genomicsdb
+        
+         
+    - name: Run test
+      run: |
+        echo test will run here after making sure
+        
+        
+
+
+    
+    
+      
