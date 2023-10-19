@@ -46,9 +46,6 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
@@ -59,10 +56,11 @@ jobs:
             echo GROUP_ID=$(id -g) >> $GITHUB_ENV
 
       - name: Build docker image with GenomicsDB and Python 
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           file: package/Dockerfile
           tags: genomicsdb:python
+          context: package
           build-args:
             user=${USER}
             user_id=${USER_ID}
