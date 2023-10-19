@@ -38,10 +38,10 @@ ARG genomicsdb_branch=develop
 COPY scripts /build
 
 WORKDIR /build
-RUN ./install_genomicsdb.sh $user $genomicsdb_branch
+RUN ./install_genomicsdb.sh ${user} ${genomicsdb_branch}
 
 WORKDIR /build
-RUN ./install_python.sh $user $user_id $group_id
+RUN ./install_python.sh ${user} ${user_id} ${group_id}
 
 USER ${user}
 WORKDIR /home/${user}
