@@ -57,8 +57,6 @@ jobs:
         run: |
             echo USER_ID=$(id -u) >> $GITHUB_ENV
             echo GROUP_ID=$(id -g) >> $GITHUB_ENV
-            echo ${USER}
-            echo $USER
 
       - name: Build docker image with GenomicsDB and Python 
         uses: docker/build-push-action@v5
@@ -67,7 +65,6 @@ jobs:
           tags: genomicsdb:python
           context: package
           build-args: |
-            user=${USER}
             user_id=${USER_ID}
             group_id=${GROUP_ID}
             genomicsdb_branch=develop
