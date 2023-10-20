@@ -68,8 +68,8 @@ fi
 export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX
 export LD_LIBRARY_PATH=$OPENSSL_PREFIX/lib64:$OPENSSL_PREFIX/lib:$LD_LIBRARY_PATH
 
-echo "git clone https://github.com/GenomicsDB/GenomicsDB.git --recursive -b $BRANCH GenomicsDB"
-git clone https://github.com/GenomicsDB/GenomicsDB.git --recursive -b $BRANCH GenomicsDB
+echo "git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB"
+git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB
 
 adduser $USER
 groupadd genomicsdb

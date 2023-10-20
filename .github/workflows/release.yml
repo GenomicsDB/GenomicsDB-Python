@@ -64,10 +64,7 @@ jobs:
           file: package/Dockerfile
           tags: genomicsdb:python
           context: package
-          build-args: |
-            user_id=${USER_ID}
-            group_id=${GROUP_ID}
-            genomicsdb_branch=develop
+          build-args: genomicsdb_branch=develop
 
       - name: Build GenomicsDB linux distribution
         shell: bash
