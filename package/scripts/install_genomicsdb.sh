@@ -38,39 +38,14 @@ INSTALL_PREFIX=/usr/local
 
 OPENSSL_VERSION=${OPENSSL_VERSION:-3.0.11}
 
-echo "Installing minimal dependencies..."
-yum install -y centos-release-scl && yum install -y devtoolset-11 &&
-  yum install -y -q deltarpm &&
-  yum update -y -q &&
-  yum install -y -q epel-release &&
-  yum install -y -q which wget git &&
-  yum install -y -q autoconf automake libtool unzip &&
-  yum install -y -q cmake3 patch &&
-  yum install -y -q perl perl-IPC-Cmd
-  yum install -y -q libuuid libuuid-devel &&
-  yum install -y -q curl libcurl-devel &&
-  echo "Installing minimal dependencies DONE"
-
-source /opt/rh/devtoolset-11/enable
-
-echo "Building openssl..."
-OPENSSL_PREFIX=$INSTALL_PREFIX
-if [[ ! -d $OPENSSL_PREFIX/include/openssl ]]; then
-  pushd /tmp
-  wget $WGET_NO_CERTIFICATE https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz &&
-    tar -xvzf openssl-$OPENSSL_VERSION.tar.gz &&
-    cd openssl-$OPENSSL_VERSION &&
-    CFLAGS=-fPIC ./config no-tests -fPIC --prefix=$OPENSSL_PREFIX --openssldir=$OPENSSL_PREFIX &&
-    make && make install && echo "Installing OpenSSL DONE"
-  rm -fr /tmp/openssl*
-  popd
-fi
-export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX
-export LD_LIBRARY_PATH=$OPENSSL_PREFIX/lib64:$OPENSSL_PREFIX/lib:$LD_LIBRARY_PATH
 
 echo "git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB"
 git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB
 
+./GenomicsDB/scripts/prereqs/install_prereqs.sh
+
+export OPENSSL_ROOT_DIR=$INSTALL_PREFIX
+export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 adduser $USER
 groupadd genomicsdb
 usermod -aG genomicsdb $USER
