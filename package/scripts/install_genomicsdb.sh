@@ -57,7 +57,7 @@ source /opt/rh/devtoolset-11/enable
 echo "git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB"
 git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB
 
-./GenomicsDB/scripts/prereqs/install_prereqs.sh
+./GenomicsDB/scripts/prereqs/install_prereqs.sh "release"
 
 export OPENSSL_ROOT_DIR=$INSTALL_PREFIX
 export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
