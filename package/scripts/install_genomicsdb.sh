@@ -63,14 +63,14 @@ export OPENSSL_ROOT_DIR=$INSTALL_PREFIX
 export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 adduser $USER
 groupadd genomicsdb
-# usermod -aG genomicsdb $USER
+usermod -aG genomicsdb $USER
 echo "genomicsdb added as user"
-pushd GenomicsDB
+cd GenomicsDB
 echo "Starting GenomicsDB build"
 mkdir build && cd build &&
   cmake3 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
   make && make install
-popd
+cd ..
 
 if [[ -f $INSTALL_PREFIX/lib/libtiledbgenomicsdb.so ]]; then
   echo "GenomicsDB for Python installed successfully"
