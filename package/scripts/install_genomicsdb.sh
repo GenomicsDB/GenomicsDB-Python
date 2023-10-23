@@ -63,7 +63,7 @@ export OPENSSL_ROOT_DIR=$INSTALL_PREFIX
 export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 adduser $USER
 groupadd genomicsdb
-usermod -aG genomicsdb $USER
+# usermod -aG genomicsdb $USER
 echo "genomicsdb added as user"
 pushd GenomicsDB
 echo "Starting GenomicsDB build"
