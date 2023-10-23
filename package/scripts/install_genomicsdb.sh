@@ -61,9 +61,8 @@ echo "clone successful"
 
 export OPENSSL_ROOT_DIR=$INSTALL_PREFIX
 export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
-adduser $USER
-groupadd genomicsdb
-usermod -aG genomicsdb $USER
+useradd -r -U -m $USER
+#usermod -aG genomicsdb $USER
 echo "genomicsdb added as user"
 cd GenomicsDB
 echo "Starting GenomicsDB build"
