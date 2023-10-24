@@ -77,6 +77,9 @@ if [[ $RC != 0 ]]; then
   exit $RC
 fi
 
+python -m pip install --upgrade pip
+python -m pip install -r requirements_dev.txt
+python -m pip install -r requirements.txt
 # Run setup for source distribution of genomicsdb api and binary distribution of protobuf bindings
 python setup.py sdist
 
