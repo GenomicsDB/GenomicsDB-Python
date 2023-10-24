@@ -28,7 +28,7 @@ version: "3"
 services:
   package:
     image: genomicsdb:python
-    user: ${USER}
+    user: genomicsdb
     volumes: 
-      - ..:/home/${USER}/GenomicsDB-Python:delegated
-    command: "/home/${USER}/GenomicsDB-Python/package/scripts/create_package.sh && python /home/${USER}/GenomicsDB-Python/test/test.py"
+      - ..:/home/genomicsdb/GenomicsDB-Python:delegated
+    command: "/home/genomicsdb/GenomicsDB-Python/package/scripts/create_package.sh && python /home/genomicsdb/GenomicsDB-Python/test/test.py"
