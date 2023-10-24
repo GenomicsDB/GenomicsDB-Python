@@ -56,20 +56,18 @@ source /opt/rh/devtoolset-11/enable
 
 echo "git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB"
 git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB
-echo "clone successful"
+BUILD_DISTRIBUTABLE_LIBRARY=true
 ./GenomicsDB/scripts/prereqs/install_prereqs.sh "release"
 
 export OPENSSL_ROOT_DIR=$INSTALL_PREFIX
 export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 useradd -r -U -m $USER
-#usermod -aG genomicsdb $USER
-echo "genomicsdb added as user"
-cd GenomicsDB
+pushd GenomicsDB
 echo "Starting GenomicsDB build"
 mkdir build && cd build &&
   cmake3 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
   make && make install
-cd ..
+popd
 
 if [[ -f $INSTALL_PREFIX/lib/libtiledbgenomicsdb.so ]]; then
   echo "GenomicsDB for Python installed successfully"

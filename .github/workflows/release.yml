@@ -61,7 +61,7 @@ jobs:
       - name: Build docker image with GenomicsDB and Python 
         uses: docker/build-push-action@v5
         with:
-          file: Dockerfile
+          file: package/Dockerfile
           tags: genomicsdb:python
           context: package
           build-args: genomicsdb_branch=develop
