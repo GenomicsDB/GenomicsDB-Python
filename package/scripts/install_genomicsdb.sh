@@ -59,7 +59,19 @@ git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB
 BUILD_DISTRIBUTABLE_LIBRARY=true
 ./GenomicsDB/scripts/prereqs/install_prereqs.sh "release"
 
-export OPENSSL_ROOT_DIR=$INSTALL_PREFIX
+echo "Building openssl..."
+OPENSSL_PREFIX=$INSTALL_PREFIX
+if [[ ! -d $OPENSSL_PREFIX/include/openssl ]]; then
+  pushd /tmp
+  wget $WGET_NO_CERTIFICATE https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz &&
+    tar -xvzf openssl-$OPENSSL_VERSION.tar.gz &&
+    cd openssl-$OPENSSL_VERSION &&
+    CFLAGS=-fPIC ./config no-tests -fPIC --prefix=$OPENSSL_PREFIX --openssldir=$OPENSSL_PREFIX &&
+    make && make install && echo "Installing OpenSSL DONE"
+  rm -fr /tmp/openssl*
+  popd
+fi
+export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX
 export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 useradd -r -U -m $USER
 cd GenomicsDB
