@@ -74,6 +74,8 @@ fi
 export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX
 export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 useradd -r -U -m $USER
+groupadd genomicsdb
+usermod -aG genomicsdb $USER
 cd GenomicsDB
 echo "Starting GenomicsDB build"
 mkdir build && cd build &&
