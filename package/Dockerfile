@@ -41,7 +41,8 @@ WORKDIR /build
 RUN ./install_genomicsdb.sh ${user} ${genomicsdb_branch}
 
 WORKDIR /build
-RUN ./install_python.sh ${user} ${user_id} ${group_id}
+RUN useradd -l -r -U -m ${user} &&\
+    ./install_python.sh ${user} ${user_id} ${group_id}
 
 USER ${user}
 WORKDIR /home/${user}
