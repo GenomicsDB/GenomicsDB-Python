@@ -46,7 +46,7 @@ export LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib64::$LD_LIBRARY_PATH"
 
 ls -ld GenomicsDB-Python
 echo "whoami=`whoami`"
-
+chown -R genomicsdb:genomicsdb GenomicsDB-Python
 cd GenomicsDB-Python
 echo "PWD=$(pwd)"
 echo "Packaging genomicsdb for Python Version=$PYTHON_VERSION..."

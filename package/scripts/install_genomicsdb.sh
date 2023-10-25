@@ -73,7 +73,6 @@ if [[ ! -d $OPENSSL_PREFIX/include/openssl ]]; then
 fi
 export OPENSSL_ROOT_DIR=$OPENSSL_PREFIX
 export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
-useradd -l -r -U -m $USER
 
 cd GenomicsDB
 echo "Starting GenomicsDB build"
