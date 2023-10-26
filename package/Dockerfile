@@ -34,12 +34,12 @@ ARG group_id=0
 
 ARG genomicsdb_branch=develop
 
-
+RUN useradd -l -r -U -m ${user}
+RUN chown -R genomicsdb ../
 COPY scripts /build
 
 WORKDIR /build
-RUN useradd -l -r -U -m ${user} &&\
-    ./install_genomicsdb.sh ${user} ${genomicsdb_branch}
+RUN ./install_genomicsdb.sh ${user} ${genomicsdb_branch}
 
 WORKDIR /build
 RUN ./install_python.sh ${user} ${user_id} ${group_id}
