@@ -35,7 +35,7 @@ ARG group_id=0
 ARG genomicsdb_branch=develop
 
 RUN useradd -l -r -U -m ${user}
-RUN chown -R genomicsdb /home/runner/work/GenomicsDB-Python/GenomicsDB-Python
+RUN chown -R genomicsdb /home/runner/work/GenomicsDB-Python
 COPY scripts /build
 
 WORKDIR /build
