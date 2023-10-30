@@ -58,6 +58,7 @@ jobs:
             echo VERSION_NUMBER=${GITHUB_REF_NAME:1} >> $GITHUB_ENV
             echo USER_ID=$(id -u) >> $GITHUB_ENV
             echo GROUP_ID=$(id -g) >> $GITHUB_ENV
+            chown -R a+w .
 
       - name: Build docker image with GenomicsDB and Python 
         uses: docker/build-push-action@v5
@@ -72,7 +73,7 @@ jobs:
         working-directory: ${{github.workspace}}/package
         run: ./publish_package.sh test-release linux
     
-      - name: Archive macos python distribution as Artifact
+      - name: Archive linux python distribution as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: ubuntu-dist-$VERSION_NUMBER
