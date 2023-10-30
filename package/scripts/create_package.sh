@@ -52,7 +52,7 @@ echo "PWD=$(pwd)"
 echo "Packaging genomicsdb for Python Version=$PYTHON_VERSION..."
 
 touch foo || echo "foo not created"
-exit 1 
+
 
 python$PYTHON_VERSION -m venv env-dist-$PYTHON_VERSION &&
   source env-dist-$PYTHON_VERSION/bin/activate &&
