@@ -58,7 +58,7 @@ jobs:
             echo VERSION_NUMBER=${GITHUB_REF_NAME:1} >> $GITHUB_ENV
             echo USER_ID=$(id -u) >> $GITHUB_ENV
             echo GROUP_ID=$(id -g) >> $GITHUB_ENV
-            chown -R a+w .
+            chmod -R a+w .
 
       - name: Build docker image with GenomicsDB and Python 
         uses: docker/build-push-action@v5
