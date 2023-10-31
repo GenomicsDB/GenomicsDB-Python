@@ -54,7 +54,7 @@ from genomicsdb.protobuf import genomicsdb_coordinates_pb2 as query_coords
 
 
 def run_test_connect_with_protobuf():
-    print("run_test_connect_with_protobuf")
+    print("*** run_test_connect_with_protobuf")
     query_config = query_pb.ExportConfiguration()
     query_config.workspace = "ws"
     query_config.array_name = "t0_1_2"
@@ -92,6 +92,7 @@ def run_test_connect_with_protobuf():
     print(pd.DataFrame(calls[0]))
 
 def run_test_connect_and_query_with_protobuf():
+    print("*** run_test_connect_and_query_with_protobuf")
     export_config = query_pb.ExportConfiguration()
     export_config.workspace = "ws"
     export_config.segment_size = 40
@@ -122,14 +123,16 @@ def run_test_connect_and_query_with_protobuf():
     
 
 def run_test_connect_with_json():
-    print("run_test_connect_with_json")
+    print("*** run_test_connect_with_json")
     try:
         gdb = genomicsdb.connect_with_json("query.json")
     except Exception as e:
         print(e)
 
     gdb = genomicsdb.connect_with_json("query.json", "loader.json")
-    gdb.query_variant_calls()
+    list = gdb.query_variant_calls()
+    x, y, calls = zip(*list)
+    print(pd.DataFrame(calls[0]))
 
 
 tmp_dir = tempfile.TemporaryDirectory().name

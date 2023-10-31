@@ -182,14 +182,13 @@ cdef class _GenomicsDB:
         elif array is None:
           self._genomicsdb.query_variant_calls(processor, as_string(""), GENOMICSDB_NONE)
         elif column_ranges is None:
-          self._genomicsdb.query_variant_calls(processor, as_string(array), as_ranges([(0, 1000000000)]), as_ranges([]))
+          self._genomicsdb.query_variant_calls(processor, as_string(array), scan_full())
         elif row_ranges is None:
-          self._genomicsdb.query_variant_calls(processor, as_string(array),
-                                               as_ranges(column_ranges), as_ranges([]))
+          self._genomicsdb.query_variant_calls(processor, as_string(array), as_ranges(column_ranges))
         else:
           self._genomicsdb.query_variant_calls(processor, as_string(array),
-                                                 as_ranges(column_ranges),
-                                                 as_ranges(row_ranges))
+                                               as_ranges(column_ranges),
+                                               as_ranges(row_ranges))
         return variant_calls
 
     def query_variant_calls_columnar(self,
@@ -207,10 +206,9 @@ cdef class _GenomicsDB:
       elif array is None:
           self._genomicsdb.query_variant_calls(processor, as_string(""), GENOMICSDB_NONE)
       elif column_ranges is None:
-          self._genomicsdb.query_variant_calls(processor, as_string(array), as_ranges([(0, 1000000000)]), as_ranges([]))
+          self._genomicsdb.query_variant_calls(processor, as_string(array), scan_full())
       elif row_ranges is None:
-          self._genomicsdb.query_variant_calls(processor, as_string(array),
-                                               as_ranges(column_ranges), as_ranges([]))
+          self._genomicsdb.query_variant_calls(processor, as_string(array), as_ranges(column_ranges))
       else:
           self._genomicsdb.query_variant_calls(processor, as_string(array),
                                                as_ranges(column_ranges),
