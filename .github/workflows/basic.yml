@@ -15,7 +15,7 @@ on:
 env:
   GENOMICSDB_BUILD_DIR: ${{github.workspace}}
   GENOMICSDB_HOME: ${{github.workspace}}/install
-  GENOMICSDB_BRANCH: develop 
+  GENOMICSDB_BRANCH: ng_query_variant_calls_1023
   
 jobs:
   native-build:

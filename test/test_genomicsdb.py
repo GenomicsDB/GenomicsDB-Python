@@ -1,6 +1,5 @@
-import unittest
-
 import os
+import pytest
 import shutil
 import sys
 import tarfile
@@ -8,16 +7,123 @@ import tempfile
 
 import genomicsdb
 
-class TestGenomicsDBVersion(unittest.TestCase):
-    def test_version(self):
-        version = genomicsdb.version()
-        self.assertIsInstance(version, str)
-        self.assertTrue(len(version) > 0)
-        # Should contain major.minor.patch in version string
-        version_components = version.split('.')
-        self.assertTrue(len(version_components) == 3)
-        self.assertTrue(int(version_components[0]) > 0)
-        self.assertTrue(int(version_components[1]) >= 0)
+from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
+from genomicsdb.protobuf import genomicsdb_coordinates_pb2 as query_coords
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.fixture()
+def setup():
+  tmp_dir = tempfile.TemporaryDirectory().name
+  print("tmp_dir")
+  if not os.path.exists(tmp_dir):
+    os.makedirs(tmp_dir)
+  else:
+    sys.exit("Aborting as temporary directory seems to exist!")
+  tar = tarfile.open("test/inputs/sanity.test.tgz")
+  tar.extractall(tmp_dir)
+  os.chdir(tmp_dir)
+  yield
+  shutil.rmtree(tmp_dir)
+
+def test_version():
+  version = genomicsdb.version()
+  assert len(version) > 0
+  # Should contain major.minor.patch in version string
+  version_components = version.split('.')
+  assert len(version_components) == 3
+  assert int(version_components[0]) > 0
+  assert int(version_components[1]) >= 0
+
+def test_connect_and_query_with_protobuf(setup):
+  export_config = query_pb.ExportConfiguration()
+  export_config.workspace = "ws"
+  export_config.segment_size = 40
+  export_config.callset_mapping_file = "callset_t0_1_2.json"
+  export_config.vid_mapping_file = "vid.json"
+  export_config.attributes.extend(["GT", "DP"])
+  gdb = genomicsdb.connect_with_protobuf(export_config)
+
+  # test basic
+  list = gdb.query_variant_calls()
+  assert len(list) == 1
+  x, y, calls = zip(*list)
+  assert len(calls[0]) == 5
+
+  # test all
+  query_config = query_pb.QueryConfiguration()
+  list = gdb.query_variant_calls(query_protobuf=query_config)
+  assert len(list) == 1
+  x, y, calls = zip(*list)
+  assert len(calls[0]) == 5
+
+  # test with flatten intervals
+  calls = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
+  assert len(calls) == 5
+  
+  # test with query contig interval
+  interval = query_coords.ContigInterval()
+  interval.contig = "1"
+  interval.begin = 1
+  interval.end = 13000
+  query_config.query_contig_intervals.extend([interval])
+  list = gdb.query_variant_calls(query_protobuf=query_config)
+  assert len(list) == 1
+  x, y, calls = zip(*list)
+  assert len(calls[0]) == 2
+
+  # test with query row range
+  range = query_pb.RowRange()
+  range.low = 0
+  range.high = 1
+  row_range_list = query_pb.RowRangeList()
+  row_range_list.range_list.extend([range])
+  query_config.query_row_ranges.extend([row_range_list])
+  list = gdb.query_variant_calls(query_protobuf=query_config)
+  assert len(list) == 1
+  x, y, calls = zip(*list)
+  assert len(calls[0]) == 2
+
+  # test with query sample names
+  query_config = query_pb.QueryConfiguration()
+  query_config.query_sample_names.append("HG00141")
+  query_config.query_sample_names.append("HG01958")
+  list = gdb.query_variant_calls(query_protobuf=query_config)
+  assert len(list) == 1
+  x, y, calls = zip(*list)
+  assert len(calls[0]) == 4
+
+  # test exception when query row and sample names are specified together
+  range = query_pb.RowRange()
+  range.low = 0
+  range.high = 1
+  row_range_list = query_pb.RowRangeList()
+  row_range_list.range_list.extend([range])
+  query_config.query_row_ranges.extend([row_range_list])
+  with pytest.raises(Exception):
+    gdb.query_variant_calls(query_protobuf=query_config)
+
+
+  # test with two query contig intervals
+  query_config = query_pb.QueryConfiguration()
+  interval = query_coords.ContigInterval()
+  interval.contig = "1"
+  interval.begin = 1
+  interval.end = 13000
+  interval1 = query_coords.ContigInterval()
+  interval1.contig = "1"
+  interval1.begin = 13000
+  interval1.end = 18000
+  query_config.query_contig_intervals.extend([interval, interval1])
+  list = gdb.query_variant_calls(query_protobuf=query_config)
+  assert len(list) == 2
+  x, y, calls = zip(*list)
+  assert len(calls[0]) == 2
+  assert len(calls[1]) == 3
+
+  # test with two query contig intervals and flatten intervals
+  calls = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
+  assert len(calls) == 5
+
+  # test exception when query protobuf and array/column_ranges/row_ranges are specified together
+  query_config = query_pb.QueryConfiguration()
+  with pytest.raises(Exception):
+    gdb.query_variant_calls(query_protobuf=query_config, array="t0_1_2", column_ranges=[], row_ranges=[])
