@@ -59,7 +59,7 @@ jobs:
             echo USER_ID=$(id -u) >> $GITHUB_ENV
             echo GROUP_ID=$(id -g) >> $GITHUB_ENV
             chmod -R a+w .
-            apt-get update -q && apt install libcurl4-openssl-dev 
+            sudo apt-get update -q && sudo apt install -y libcurl4-openssl-dev curl
 
       - name: Build docker image with GenomicsDB and Python 
         uses: docker/build-push-action@v5
