@@ -42,18 +42,14 @@ if [ ! -d GenomicsDB-Python ]; then
 fi
 
 source /opt/rh/devtoolset-11/enable
-export LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib64::$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH"
 
-ls -ld GenomicsDB-Python
-echo "whoami=`whoami`"
 
 cd GenomicsDB-Python
 echo "PWD=$(pwd)"
 echo "Packaging genomicsdb for Python Version=$PYTHON_VERSION..."
 
-touch foo || echo "foo not created"
-
-
+python$PYTHON_VERSION -m ssl
 python$PYTHON_VERSION -m venv env-dist-$PYTHON_VERSION &&
   source env-dist-$PYTHON_VERSION/bin/activate &&
   echo "Installing required dependencies for $PYTHON_VERSION..." &&

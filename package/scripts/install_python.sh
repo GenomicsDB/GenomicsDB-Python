@@ -59,6 +59,8 @@ install_python_version() {
   ./configure --prefix=/usr/local --with-openssl=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
     make &&
     make altinstall
+  echo "python version $VERSION is successful"
+  python3 -m ssl
   RC=$?
   popd
   rm -fr Python-$VERSION Python-$VERSION.tgz
@@ -82,8 +84,7 @@ sanity_test_python() {
 }
 
 source /opt/rh/devtoolset-11/enable
-export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH
-
+export LD_LIBRARY_PATH=/usr/local/lib64:/usr/local/lib:$LD_LIBRARY_PATH
 # Workaround for Centos 6 being EOL'ed
 WGET_NO_CERTIFICATE="--no-check-certificate"
 
