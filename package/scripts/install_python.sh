@@ -56,7 +56,7 @@ install_python_version() {
     tar -xvzf Python-$VERSION.tgz
   check_rc $?
   pushd Python-$VERSION
-  ./configure --prefix=/usr/local --with-openssl=$LD_LIBRARY_PATH --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
+  ./configure --prefix=/usr/local --with-openssl=/usr/local/lib64 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
     make &&
     make altinstall
   echo "python version $VERSION is successful"
@@ -91,6 +91,9 @@ WGET_NO_CERTIFICATE="--no-check-certificate"
 yum install -y bzip2-devel libffi libffi-devel
 openssl version
 which openssl
+echo "check folders"
+ls /usr/local/lib
+ls /usr/local/lib64
 
 if [[ $PYTHON_USER_ID != 0  && $PYTHON_GROUP_ID != 0 ]]; then
   echo "groupadd -g $PYTHON_GROUP_ID genomicsdb"
