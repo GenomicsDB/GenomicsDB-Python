@@ -86,7 +86,7 @@ popd
 
 # Use centos6 based genomicsdb:all_python Docker image to create packages for 3.9/3.10/3.11
 echo "Building packages for Linux on CentOS 7..."
-docker-compose run -e PYTHON_VERSION="3.9" package
+# docker-compose run -e PYTHON_VERSION="3.9" package
 docker-compose run -e PYTHON_VERSION="3.10" package
 docker-compose run -e PYTHON_VERSION="3.11" package
 echo "Building packages for Linux on CentOS 7 DONE"
