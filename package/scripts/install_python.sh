@@ -60,7 +60,7 @@ install_python_version() {
     make &&
     make altinstall
   echo "python version $VERSION is successful"
-  python3 -m ssl
+  
   RC=$?
   popd
   rm -fr Python-$VERSION Python-$VERSION.tgz

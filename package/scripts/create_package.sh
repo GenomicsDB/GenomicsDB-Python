@@ -49,7 +49,6 @@ cd GenomicsDB-Python
 echo "PWD=$(pwd)"
 echo "Packaging genomicsdb for Python Version=$PYTHON_VERSION..."
 
-python$PYTHON_VERSION -m ssl
 python$PYTHON_VERSION -m venv env-dist-$PYTHON_VERSION &&
   source env-dist-$PYTHON_VERSION/bin/activate &&
   echo "Installing required dependencies for $PYTHON_VERSION..." &&
