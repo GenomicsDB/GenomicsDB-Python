@@ -41,3 +41,4 @@ bandit~=1.7.0
 
 # Testing
 pytest>==6.2.5
+ssl
