@@ -105,7 +105,7 @@ if [[ $PYTHON_USER_ID != 0  && $PYTHON_GROUP_ID != 0 ]]; then
 fi
 
 # install_python_version 3.9.6 && sanity_test_python 3.9 &&
-install_python_version 3.10.8 && sanity_test_python 3.10 &&
+# install_python_version 3.10.8 && sanity_test_python 3.10 &&
 install_python_version 3.11.4  && sanity_test_python 3.11 &&
 echo "Python versions successfully installed"
 
