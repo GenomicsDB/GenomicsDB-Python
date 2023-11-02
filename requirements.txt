@@ -28,3 +28,4 @@
 numpy>=1.19.5
 pandas
 protobuf>=4.21.1
+ssl
