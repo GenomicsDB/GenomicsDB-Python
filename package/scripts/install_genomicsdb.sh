@@ -58,7 +58,7 @@ source /opt/rh/devtoolset-11/enable
 echo "git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB"
 git clone https://github.com/GenomicsDB/GenomicsDB.git -b $BRANCH GenomicsDB
 
-./GenomicsDB/scripts/prereqs/install_prereqs.sh "test"
+./GenomicsDB/scripts/prereqs/install_prereqs.sh "full"
 
 echo "Building openssl..."
 OPENSSL_PREFIX=$INSTALL_PREFIX
