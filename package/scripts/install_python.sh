@@ -90,12 +90,15 @@ WGET_NO_CERTIFICATE="--no-check-certificate"
 
 yum install -y bzip2-devel libffi libffi-devel
 openssl version
+echo "which openssl"
 which openssl
 echo "check folders"
 echo "lib folder"
 ls /usr/local/lib
 echo "lib64 folder"
 ls /usr/local/lib64
+echo "check opt folder"
+ls /usr/local/opt
 locate ssl.h | grep '/openssl/ssl.h'
 if [[ $PYTHON_USER_ID != 0  && $PYTHON_GROUP_ID != 0 ]]; then
   echo "groupadd -g $PYTHON_GROUP_ID genomicsdb"
