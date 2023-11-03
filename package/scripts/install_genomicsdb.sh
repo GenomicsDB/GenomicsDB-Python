@@ -49,6 +49,7 @@ yum install -y centos-release-scl && yum install -y devtoolset-11 &&
   yum install -y -q perl perl-IPC-Cmd &&
   yum install -y -q libuuid libuuid-devel &&
   yum install -y -q curl libcurl-devel &&
+  yum install -y -q bzip2-libs &&
   echo "Installing minimal dependencies DONE"
 
 source /opt/rh/devtoolset-11/enable
