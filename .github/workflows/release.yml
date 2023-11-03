@@ -60,6 +60,8 @@ jobs:
             echo GROUP_ID=$(id -g) >> $GITHUB_ENV
             chmod -R a+w .
             sudo apt-get update -q && sudo apt install -y libcurl4-openssl-dev curl libssl-dev
+            export BUILDKIT_STEP_LOG_MAX_SPEED=10240000
+            export BUILDKIT_STEP_LOG_MAX_SIZE=1073741824
 
       - name: Build docker image with GenomicsDB and Python 
         uses: docker/build-push-action@v5
