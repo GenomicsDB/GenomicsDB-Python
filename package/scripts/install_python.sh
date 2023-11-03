@@ -56,7 +56,7 @@ install_python_version() {
     tar -xvzf Python-$VERSION.tgz
   check_rc $?
   pushd Python-$VERSION
-  ./configure --prefix=/usr/local --with-openssl=/usr/local/lib64 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
+  ./configure --prefix=/usr/local/lib64 --with-openssl=/usr/local/lib64 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
     make &&
     make altinstall
   echo "python version $VERSION is successful"
@@ -99,6 +99,8 @@ echo "lib64 folder"
 ls /usr/local/lib64
 echo "check opt folder"
 ls /usr/local/opt
+echo "check usr/local folder"
+ls /usr/local
 locate ssl.h | grep '/openssl/ssl.h'
 if [[ $PYTHON_USER_ID != 0  && $PYTHON_GROUP_ID != 0 ]]; then
   echo "groupadd -g $PYTHON_GROUP_ID genomicsdb"
