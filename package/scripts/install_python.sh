@@ -96,7 +96,7 @@ echo "lib folder"
 ls /usr/local/lib
 echo "lib64 folder"
 ls /usr/local/lib64
-
+locate ssl.h | grep '/openssl/ssl.h'
 if [[ $PYTHON_USER_ID != 0  && $PYTHON_GROUP_ID != 0 ]]; then
   echo "groupadd -g $PYTHON_GROUP_ID genomicsdb"
   echo "useradd -m $PYTHON_USER -u $PYTHON_USER_ID -g $PYTHON_GROUP_ID"
