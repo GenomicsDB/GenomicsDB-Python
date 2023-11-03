@@ -56,7 +56,7 @@ install_python_version() {
     tar -xvzf Python-$VERSION.tgz
   check_rc $?
   pushd Python-$VERSION
-  ./configure --prefix=/usr/local/lib64 --with-openssl=/usr/local/lib64 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
+  ./configure --prefix=/usr/local --with-openssl=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib" &&
     make &&
     make altinstall
   echo "python version $VERSION is successful"
