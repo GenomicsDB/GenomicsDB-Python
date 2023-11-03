@@ -84,7 +84,7 @@ sanity_test_python() {
 }
 
 source /opt/rh/devtoolset-11/enable
-export LD_LIBRARY_PATH=/usr/local/lib64:/usr/local/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local:/usr/local/lib64:/usr/local/lib:$LD_LIBRARY_PATH
 # Workaround for Centos 6 being EOL'ed
 WGET_NO_CERTIFICATE="--no-check-certificate"
 
