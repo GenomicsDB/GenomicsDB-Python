@@ -19,7 +19,7 @@ def run_test():
         print(e)
 
     gdb = genomicsdb.connect("ws", "callset_t0_1_2.json", "vid.json", ["DP"], 10)
-    list = gdb.query_variant_calls("t0_1_2", [(0, 1000000000)], [(0, 3)])
+    list = gdb.query_variant_calls(row_ranges=[(0, 3)], array="t0_1_2")
     print(list)
 
     list = gdb.query_variant_calls(
@@ -28,9 +28,10 @@ def run_test():
     print(list)
     x, y, calls = zip(*list)
     print(pd.DataFrame(calls[0]))
+    print(pd.DataFrame(calls[1]))
 
     gdb.query_variant_calls("t0_1_2", [(0, 1000000000)])
-    gdb.query_variant_calls("t0_1_2")
+    list = gdb.query_variant_calls("t0_1_2")
 
     output = "out.vcf.gz"
     gdb.to_vcf(
@@ -53,7 +54,7 @@ from genomicsdb.protobuf import genomicsdb_coordinates_pb2 as query_coords
 
 
 def run_test_connect_with_protobuf():
-    print("run_test_connect_with_protobuf")
+    print("*** run_test_connect_with_protobuf")
     query_config = query_pb.ExportConfiguration()
     query_config.workspace = "ws"
     query_config.array_name = "t0_1_2"
@@ -90,16 +91,48 @@ def run_test_connect_with_protobuf():
     x, y, calls = zip(*list)
     print(pd.DataFrame(calls[0]))
 
+def run_test_connect_and_query_with_protobuf():
+    print("*** run_test_connect_and_query_with_protobuf")
+    export_config = query_pb.ExportConfiguration()
+    export_config.workspace = "ws"
+    export_config.segment_size = 40
+    export_config.callset_mapping_file = "callset_t0_1_2.json"
+    export_config.vid_mapping_file = "vid.json"
+    export_config.attributes.extend(["GT", "DP"])
+    gdb = genomicsdb.connect_with_protobuf(export_config)
+
+    query_config = query_pb.QueryConfiguration()
+    # query column interval
+    interval = query_coords.ContigInterval()
+    interval.contig = "1"
+    interval.begin = 1
+    interval.end = 13000
+    query_config.query_contig_intervals.extend([interval])
+
+    # query row range
+    range = query_pb.RowRange()
+    range.low = 0
+    range.high = 3
+    row_range_list = query_pb.RowRangeList()
+    row_range_list.range_list.extend([range])
+    query_config.query_row_ranges.extend([row_range_list])
+
+    list = gdb.query_variant_calls(query_protobuf=query_config)
+    x, y, calls = zip(*list)
+    print(pd.DataFrame(calls[0]))
+    
 
 def run_test_connect_with_json():
-    print("run_test_connect_with_json")
+    print("*** run_test_connect_with_json")
     try:
         gdb = genomicsdb.connect_with_json("query.json")
     except Exception as e:
         print(e)
 
     gdb = genomicsdb.connect_with_json("query.json", "loader.json")
-    gdb.query_variant_calls()
+    list = gdb.query_variant_calls()
+    x, y, calls = zip(*list)
+    print(pd.DataFrame(calls[0]))
 
 
 tmp_dir = tempfile.TemporaryDirectory().name
@@ -116,6 +149,7 @@ os.chdir(tmp_dir)
 
 run_test()
 run_test_connect_with_protobuf()
+run_test_connect_and_query_with_protobuf()
 run_test_connect_with_json()
 
 shutil.rmtree(tmp_dir)

@@ -46,7 +46,7 @@ class TestGenomicsDBDemo(unittest.TestCase):
     query_config.bypass_intersecting_intervals_phase = True
     query_config.enable_shared_posixfs_optimizations = True
     
-    filters = ["", "REF==\"A\"", "REF==\"A\" && ALT|=\"T\"", "REF==\"A\" && ALT|=\"T\" && GT&=\"1/1\""]
+    filters = ["", "REF==\"A\"", "REF==\"A\" && ALT|=\"T\"", "REF==\"A\" && ALT|=\"T\" && resolve(GT,REF,ALT)&=\"T/T\""]
     
     for filter in filters:
       start = time.time()
@@ -93,7 +93,7 @@ class TestGenomicsDBDemo(unittest.TestCase):
     #attributes
     query_config.attributes.extend(["REF", "ALT", "GT"])
 
-    filters = ["", "REF==\"A\"", "REF==\"A\" && ALT|=\"T\"", "REF==\"A\" && ALT|=\"T\" && GT&=\"1/1\""]
+    filters = ["", "ISHOMALT", "ISHOMREF", "ISHET", "REF==\"A\" && ALT|=\"T\" && resolve(GT, REF, ALT)&=\"T/T\""]
 
     for filter in filters:
       start = time.time()

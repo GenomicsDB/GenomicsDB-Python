@@ -15,7 +15,7 @@ on:
 env:
   GENOMICSDB_BUILD_DIR: ${{github.workspace}}
   GENOMICSDB_HOME: ${{github.workspace}}/install
-  GENOMICSDB_BRANCH: develop 
+  GENOMICSDB_BRANCH: develop
   
 jobs:
   native-build:

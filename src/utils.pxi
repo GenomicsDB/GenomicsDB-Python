@@ -52,3 +52,8 @@ cdef genomicsdb_ranges_t as_ranges(l_ranges):
         for low, high in l_ranges:
             ranges.push_back(pair[int64_t, int64_t](low, high))
     return ranges
+
+cdef genomicsdb_ranges_t scan_full():
+    cdef vector[pair[int64_t, int64_t]] ranges
+    ranges.push_back(pair[int64_t, int64_t](0, INT64_MAX-1))
+    return ranges
