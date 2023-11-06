@@ -52,8 +52,8 @@ echo "Packaging genomicsdb for Python Version=$PYTHON_VERSION..."
 python$PYTHON_VERSION -m venv env-dist-$PYTHON_VERSION &&
   source env-dist-$PYTHON_VERSION/bin/activate &&
   echo "Installing required dependencies for $PYTHON_VERSION..." &&
-  pip install --upgrade pip &&
-  pip install -r package/requirements_pkg.txt &&
+  pip install --upgrade --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org pip &&
+  pip install -r --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org package/requirements_pkg.txt &&
   echo "Installing required dependencies for $PYTHON_VERSION DONE"
 
 if [[ $? -ne 0 ]]; then
