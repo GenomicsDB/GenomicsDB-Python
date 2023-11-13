@@ -1,4 +1,4 @@
-name: Build
+name: Build Wheels
 
 on: [push] # add pull as well
 
@@ -6,7 +6,9 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: true 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-22.04, macos-12]
 

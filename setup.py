@@ -42,6 +42,15 @@ GENOMICSDB_INSTALL_PATH = "/usr/local"
 copy_genomicsdb_libs = True
 copy_protobuf_definitions = False
 
+args = sys.argv[:]
+for arg in args:
+    if arg.find("--with-genomicsdb=") == 0:
+        sys.argv.remove(arg)
+    if arg.find("--with-libs") == 0:
+        sys.argv.remove(arg)
+    if arg.find("--with-protobuf") == 0:
+        sys.argv.remove(arg)
+
 print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
 
 GENOMICSDB_INCLUDE_DIR = "/usr/local/include"
