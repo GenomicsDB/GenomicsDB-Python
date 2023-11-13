@@ -1,8 +1,8 @@
 #!/bin/bash
 INSTALL_PREFIX=/usr/local
 export OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
-git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop GenomicsDB
-cd GenomicsDB
+git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop GenomicsDB-build
+cd GenomicsDB-build
 echo "Starting GenomicsDB build"
 mkdir build && cd build &&
 cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
