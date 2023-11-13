@@ -53,8 +53,8 @@ for arg in args:
 
 print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
 
-GENOMICSDB_INCLUDE_DIR = "/usr/local/include"
-GENOMICSDB_LIB_DIR = "/usr/local/lib"
+GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
+GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
 GENOMICSDB_PROTOBUF_DIR = os.path.join(
     GENOMICSDB_INSTALL_PATH, "genomicsdb/protobuf/python"
 )
