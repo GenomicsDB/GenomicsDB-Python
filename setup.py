@@ -38,27 +38,14 @@ GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 
 # Specify genomicsdb install location via
 #     "--with-genomicsdb=<genomicsdb_install_path>" command line arg
-GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="genomicsdb")
-
-copy_genomicsdb_libs = False
+GENOMICSDB_INSTALL_PATH = "/usr/local"
+copy_genomicsdb_libs = True
 copy_protobuf_definitions = False
-
-args = sys.argv[:]
-for arg in args:
-    if arg.find("--with-genomicsdb=") == 0:
-        GENOMICSDB_INSTALL_PATH = os.path.expanduser(arg.split("=")[1])
-        sys.argv.remove(arg)
-    if arg.find("--with-libs") == 0:
-        copy_genomicsdb_libs = True
-        sys.argv.remove(arg)
-    if arg.find("--with-protobuf") == 0:
-        copy_protobuf_definitions = True
-        sys.argv.remove(arg)
 
 print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
 
-GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
-GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
+GENOMICSDB_INCLUDE_DIR = "/usr/local/include"
+GENOMICSDB_LIB_DIR = "/usr/local/lib"
 GENOMICSDB_PROTOBUF_DIR = os.path.join(
     GENOMICSDB_INSTALL_PATH, "genomicsdb/protobuf/python"
 )
@@ -91,8 +78,7 @@ else:
     rpath = ["$ORIGIN/lib"]
 
 dst = os.path.join("genomicsdb/include")
-if copy_genomicsdb_libs:
-    shutil.copytree(GENOMICSDB_INCLUDE_DIR, dst, dirs_exist_ok=True)
+
 
 dst = os.path.join("genomicsdb/protobuf")
 if copy_protobuf_definitions:
@@ -145,8 +131,7 @@ setup(
     ext_modules=[genomicsdb_extension],
     zip_safe=False,
     setup_requires=["cython>=0.27"],
-    install_requires=["numpy>=1.19.5", "pandas"],
-    extras_require = {"protobuf": ["protobuf>=4.21.1"]},
+    install_requires=["numpy>=1.19.5", "pandas","protobuf"],
     python_requires=">=3.9",
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
