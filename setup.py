@@ -38,7 +38,7 @@ GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 
 # Specify genomicsdb install location via
 #     "--with-genomicsdb=<genomicsdb_install_path>" command line arg
-GENOMICSDB_INSTALL_PATH = "/usr/local"
+GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="/usr/local")
 copy_genomicsdb_libs = True
 copy_protobuf_definitions = False
 
