@@ -10,7 +10,7 @@ pushd $GENOMICSDB_DIR
 echo "Starting GenomicsDB build"
 mkdir build && cd build &&
 cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR -DPROTOBUF_ROOT_DIR=./protobuf-install -DAWSSDK_ROOT_DIR=./aws-install -DGCSSDK_ROOT_DIR=./gcs-install -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
-	make -j4 && make install
+	make && make install
 popd
   if [[ -f $GENOMICSDB_HOME/lib/libtiledbgenomicsdb.dylib ]]; then
     echo "Building GenomicsDB in $$GENOMICSDB_DIR DONE"
