@@ -4,7 +4,7 @@ requires = ["setuptools", "wheel", "Cython","numpy","protobuf"]
 before-build = [
 "pip install -r requirements_dev.txt",
 ]
-test-command = "python {project}/test/test.py"
+test-command = "python {package}/test/test.py"
 [tool.cibuildwheel.linux]
 before-all = "bash install_prereqs.sh && bash install_openssl3.sh && bash install_genomicsdbforwheel.sh"
 environment = { LD_LIBRARY_PATH="/usr/local/lib64:/usr/local/lib:$LD_LIBRARY_PATH", OPENSSL_ROOT_DIR="/usr/local"}
