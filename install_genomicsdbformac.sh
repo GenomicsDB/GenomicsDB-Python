@@ -3,7 +3,7 @@ PREFIX_DIR=${PREFIX_DIR:-$(mktemp -d)}
 GENOMICSDB_DIR=$PREFIX_DIR/GenomicsDB
 GENOMICSDB_HOME=/usr/local
 export $GENOMICSDB_HOME
-export MACOSX_DEPLOYMENT_TARGET=10.13
+export MACOSX_DEPLOYMENT_TARGET=12.1
 export OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
 rm -fr $GENOMICSDB_DIR
 git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop $GENOMICSDB_DIR
