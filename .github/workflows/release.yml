@@ -25,7 +25,6 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: dist
           path: ./wheelhouse/*.whl
 
   make_sdist:
