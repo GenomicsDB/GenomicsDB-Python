@@ -1,0 +1,105 @@
+#!/bin/bash
+install_prereqs_for_mac() {
+  HOMEBREW_NO_AUTO_UPDATE=1
+  HOMEBREW_NO_INSTALL_CLEANUP=1
+  check_rc $(brew list openssl@3 &> /dev/null || brew install openssl@3)
+  brew list libcsv &> /dev/null && brew uninstall libcsv
+  # Use the uuid from framework
+  brew list ossp-uuid &> /dev/null && brew uninstall ossp-uuid
+
+  brew list cmake &>/dev/null || brew install cmake
+  brew list mpich &>/dev/null || brew install mpich
+  brew list automake &> /dev/null || brew install automake
+  brew list pkg-config &> /dev/null || brew install pkg-config
+
+# brew has started installing lcov 2.0 and some GenomicsDB sources are erroring out while running lcov
+# For example -
+# geninfo: ERROR: "/Users/runner/work/GenomicsDB/GenomicsDB/src/main/cpp/include/query_operations/variant_operations.h":50: function _ZN23RemappedDataWrapperBaseC2Ev end line 37 less than start line
+# The errors can be suppressed, but installing the older version 1.16 explicitly for now
+  wget https://github.com/Homebrew/homebrew-core/raw/e92d2ae54954ebf485b484d8522104700b144fee/Formula/lcov.rb
+  brew list lcov &> /dev/null && brew uninstall lcov
+  brew install -s lcov.rb
+
+  brew list zstd &> /dev/null || brew install zstd
+}
+
+install_prereqs_for_centos7() {
+  echo "Installing minimal dependencies..."
+  yum install -y centos-release-scl && yum install -y devtoolset-11 &&
+    yum install -y -q deltarpm &&
+    yum update -y -q &&
+    yum install -y -q epel-release &&
+    yum install -y -q which wget git &&
+    yum install -y -q autoconf automake libtool unzip &&
+    yum install -y -q cmake3 patch &&
+    yum install -y -q perl perl-IPC-Cmd &&
+    yum install -y -q libuuid libuuid-devel &&
+    yum install -y -q curl libcurl-devel &&
+    echo "Installing minimal dependencies DONE"
+}
+
+install_genomicsdb_for_mac() {
+    #!/bin/bash
+    PREFIX_DIR=${PREFIX_DIR:-$(mktemp -d)}
+    GENOMICSDB_DIR=$PREFIX_DIR/GenomicsDB
+    GENOMICSDB_HOME=/usr/local
+    export $GENOMICSDB_HOME
+    export MACOSX_DEPLOYMENT_TARGET=12.1
+    export OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+    rm -fr $GENOMICSDB_DIR
+    git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop $GENOMICSDB_DIR
+    pushd $GENOMICSDB_DIR
+    echo "Starting GenomicsDB build"
+    mkdir build && cd build &&
+    cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR -DPROTOBUF_ROOT_DIR=./protobuf-install -DAWSSDK_ROOT_DIR=./aws-install -DGCSSDK_ROOT_DIR=./gcs-install -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
+        make -j4 && make install
+    popd
+    if [[ -f $GENOMICSDB_HOME/lib/libtiledbgenomicsdb.dylib ]]; then
+        echo "Building GenomicsDB in $GENOMICSDB_DIR DONE"
+    else
+        echo "Something wrong with building GenomicsDB at $GENOMICSDB_HOME"
+        exit 1
+    fi
+}
+
+install_genomicsdb_for_centos7() {
+    source /opt/rh/devtoolset-11/enable
+    INSTALL_PREFIX=/usr/local
+    export OPENSSL_ROOT_DIR=$INSTALL_PREFIX
+    export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
+    git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop GenomicsDB-build
+    push GenomicsDB-build
+    echo "Starting GenomicsDB build"
+    mkdir build && cd build &&
+    cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
+        make -j4 && make install
+    popd
+}
+
+install_openssl3_for_centos7() {
+  source /opt/rh/devtoolset-11/enable
+  echo "Building openssl..."
+  OPENSSL_PREFIX=/usr/local
+  OPENSSL_VERSION=3.0.11
+  if [[ ! -d $OPENSSL_PREFIX/include/openssl ]]; then
+    pushd /tmp
+    wget $WGET_NO_CERTIFICATE https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz &&
+      tar -xvzf openssl-$OPENSSL_VERSION.tar.gz &&
+      cd openssl-$OPENSSL_VERSION &&
+      CFLAGS=-fPIC ./config no-tests -fPIC --prefix=$OPENSSL_PREFIX --openssldir=$OPENSSL_PREFIX &&
+      make -j4 && make install && echo "Installing OpenSSL DONE"
+    rm -fr /tmp/openssl*
+    popd
+  fi
+}
+
+
+
+if [[ `uname` != "Darwin" ]]; then
+  install_prereqs_for_mac
+  install_genomicsdb_for_mac
+else
+  install_prereqs_for_centos7
+  install_openssl3_for_centos7
+  install_genomicsdb_for_centos7
+fi
