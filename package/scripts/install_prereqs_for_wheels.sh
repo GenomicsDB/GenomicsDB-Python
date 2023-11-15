@@ -96,10 +96,10 @@ install_openssl3_for_centos7() {
 
 
 if [[ `uname` != "Darwin" ]]; then
-  install_prereqs_for_mac
-  install_genomicsdb_for_mac
-else
   install_prereqs_for_centos7
   install_openssl3_for_centos7
   install_genomicsdb_for_centos7
+else
+  install_prereqs_for_mac
+  install_genomicsdb_for_mac
 fi
