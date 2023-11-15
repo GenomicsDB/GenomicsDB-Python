@@ -14,4 +14,4 @@ repair-wheel-command = "DEST=`awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); prin
 before-build = "echo $GENOMICSDB_HOME"
 before-all = "bash install_prereqs_mac.sh && bash install_genomicsdbformac.sh"
 skip = "pp*"
-CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
+archs = ["x86_64", "universal2", "arm64"]
