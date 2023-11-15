@@ -43,17 +43,17 @@ jobs:
         with:
           path: dist/*.tar.gz
 
-  upload_all:
-    needs: [build_wheels,make_sdist]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/download-artifact@v3
-      with:
-        name: artifact
-        path: dist
+#   upload_all:
+#     needs: [build_wheels,make_sdist]
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/download-artifact@v3
+#       with:
+#         name: artifact
+#         path: dist
 
-    - name: Publish package to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.TESTPYPI }}
-        repository-url: https://test.pypi.org/legacy/
+#     - name: Publish package to TestPyPI
+#       uses: pypa/gh-action-pypi-publish@release/v1
+#       with:
+#         password: ${{ secrets.TESTPYPI }}
+#         repository-url: https://test.pypi.org/legacy/
