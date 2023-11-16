@@ -89,9 +89,6 @@ if sys.platform == "darwin":
 else:
     rpath = ["$ORIGIN/lib"]
 
-dst = os.path.join("genomicsdb/include")
-
-
 dst = os.path.join("genomicsdb/protobuf")
 if copy_protobuf_definitions:
     shutil.copytree(GENOMICSDB_PROTOBUF_DIR, dst, dirs_exist_ok=True)
