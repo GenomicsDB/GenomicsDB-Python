@@ -39,7 +39,6 @@ install_prereqs_for_centos7() {
 }
 
 install_genomicsdb_for_mac() {
-    #!/bin/bash
     PREFIX_DIR=${PREFIX_DIR:-$(mktemp -d)}
     GENOMICSDB_DIR=$PREFIX_DIR/GenomicsDB
     GENOMICSDB_HOME=/usr/local
