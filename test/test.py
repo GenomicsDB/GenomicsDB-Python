@@ -142,7 +142,6 @@ if not os.path.exists(tmp_dir):
 else:
     sys.exit("Aborting as temporary directory seems to exist!")
 tar = tarfile.open(os.path.abspath(os.path.dirname(__file__)) + "/inputs/sanity.test.tgz")
-tar = tarfile.open(testfile)
 tar.extractall(tmp_dir)
 
 os.chdir(tmp_dir)
