@@ -1,9 +1,9 @@
 name: Build Wheels
 
-on: [push]
-#   push:
-#     tags:
-#       - v*
+on:
+  push:
+    tags:
+      - v*
 
 jobs:
   build_wheels:
@@ -37,6 +37,7 @@ jobs:
           path: dist/*.tar.gz
 
   upload_all:
+    name: Publish wheels
     needs: [build_wheels,make_sdist]
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +46,7 @@ jobs:
         name: artifact
         path: dist
 
-    # - name: Publish package to PyPI
-    #   uses: pypa/gh-action-pypi-publish@release/v1
-    #   with:
-    #     password: ${{ secrets.PYPI }}
+    - name: Publish package to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI }}
