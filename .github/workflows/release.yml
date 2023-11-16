@@ -1,9 +1,9 @@
 name: Build Wheels
 
-on:
-  push:
-    tags:
-      - v*
+on: [push]
+#   push:
+#     tags:
+#       - v*
 
 jobs:
   build_wheels:
@@ -45,7 +45,7 @@ jobs:
         name: artifact
         path: dist
 
-    - name: Publish package to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI }}
+    # - name: Publish package to PyPI
+    #   uses: pypa/gh-action-pypi-publish@release/v1
+    #   with:
+    #     password: ${{ secrets.PYPI }}
