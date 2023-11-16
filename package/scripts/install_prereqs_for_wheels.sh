@@ -6,6 +6,10 @@ install_prereqs_for_mac() {
   brew list libcsv &> /dev/null && brew uninstall libcsv
   # Use the uuid from framework
   brew list ossp-uuid &> /dev/null && brew uninstall ossp-uuid
+  brew list cmake &>/dev/null || brew install cmake
+  brew list automake &> /dev/null || brew install automake
+  brew list pkg-config &> /dev/null || brew install pkg-config
+  brew list zstd &> /dev/null || brew install zstd
 }
 
 install_prereqs_for_centos7() {
