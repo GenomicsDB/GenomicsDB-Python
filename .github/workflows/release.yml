@@ -22,7 +22,7 @@ jobs:
             if [ $(echo "${VERSION_NUMBER##*.}") == "test" ]; then
                 VERSION_NUMBER=${VERSION_NUMBER%.*}
             fi
-            echo ${VERSION_NUMBER} >> $GITHUB_ENV
+            echo VERSION_NUMBER=${VERSION_NUMBER} >> $GITHUB_ENV
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
