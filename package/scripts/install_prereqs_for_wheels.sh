@@ -34,7 +34,7 @@ install_genomicsdb_for_mac() {
     export MACOSX_DEPLOYMENT_TARGET=12.1
     export OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
     rm -fr $GENOMICSDB_DIR
-    git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop $GENOMICSDB_DIR
+    git clone https://github.com/GenomicsDB/GenomicsDB.git $GENOMICSDB_DIR
     pushd $GENOMICSDB_DIR
     echo "Starting GenomicsDB build"
     mkdir build && cd build &&
@@ -54,7 +54,7 @@ install_genomicsdb_for_centos7() {
     INSTALL_PREFIX=/usr/local
     export OPENSSL_ROOT_DIR=$INSTALL_PREFIX
     export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
-    git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop GenomicsDB-build
+    git clone https://github.com/GenomicsDB/GenomicsDB.git GenomicsDB-build
     pushd GenomicsDB-build
     echo "Starting GenomicsDB build"
     mkdir build && cd build &&
