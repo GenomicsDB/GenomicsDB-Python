@@ -1,2 +1,19 @@
 [build-system]
-requires = ["setuptools", "wheel", "Cython"]
+requires = ["setuptools", "wheel", "Cython","numpy"]
+[tool.cibuildwheel]
+# linux uses manylinux2014 as default which uses Centos 7 image
+manylinux-x86_64-image = "manylinux2014"
+before-all = "bash package/scripts/install_prereqs_for_wheels.sh"
+before-build = [
+"pip install -r requirements_dev.txt",
+]
+test-command = "python {project}/test/test.py"
+[tool.cibuildwheel.linux]
+skip = "pp* *-manylinux_i686 *_ppc64le *_s390x *musll*"
+build = "cp*"
+repair-wheel-command = "DEST=`awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< {wheel}` && mv {wheel} {dest_dir} && mv {dest_dir}/${DEST} {dest_dir}/${DEST//-linux_/-manylinux_2_17_x86_64.manylinux2014_}"
+[tool.cibuildwheel.macos]
+skip = "pp*"
+build = "cp*"
+[tool.cibuildwheel.config-settings]
+--build-option = "--with-libs --with-genomicsdb=/usr/local"

@@ -39,7 +39,6 @@ GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 # Specify genomicsdb install location via
 #     "--with-genomicsdb=<genomicsdb_install_path>" command line arg
 GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="genomicsdb")
-
 copy_genomicsdb_libs = False
 copy_protobuf_definitions = False
 
@@ -89,10 +88,6 @@ if sys.platform == "darwin":
     link_args = ["-Wl,-rpath,lib"]
 else:
     rpath = ["$ORIGIN/lib"]
-
-dst = os.path.join("genomicsdb/include")
-if copy_genomicsdb_libs:
-    shutil.copytree(GENOMICSDB_INCLUDE_DIR, dst, dirs_exist_ok=True)
 
 dst = os.path.join("genomicsdb/protobuf")
 if copy_protobuf_definitions:
@@ -145,8 +140,7 @@ setup(
     ext_modules=[genomicsdb_extension],
     zip_safe=False,
     setup_requires=["cython>=0.27"],
-    install_requires=["numpy>=1.19.5", "pandas"],
-    extras_require = {"protobuf": ["protobuf>=4.21.1"]},
+    install_requires=["numpy>=1.19.5", "pandas","protobuf>=4.21.1"],
     python_requires=">=3.9",
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
