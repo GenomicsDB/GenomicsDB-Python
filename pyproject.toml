@@ -1,6 +1,8 @@
 [build-system]
 requires = ["setuptools", "wheel", "Cython","numpy"]
 [tool.cibuildwheel]
+# linux uses manylinux2014 as default which uses Centos 7 image
+manylinux-x86_64-image = "manylinux2014"
 before-all = "bash package/scripts/install_prereqs_for_wheels.sh"
 before-build = [
 "pip install -r requirements_dev.txt",
