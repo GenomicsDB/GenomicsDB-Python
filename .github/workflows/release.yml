@@ -27,7 +27,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
-            CIBW_CONFIG_SETTINGS: "--build-option=--with_version=$VERSION_NUMBER"
+            CIBW_CONFIG_SETTINGS: "--build-option=--with-version=$VERSION_NUMBER --with-libs --with-genomicsdb=/usr/local"
 
       - uses: actions/upload-artifact@v3
         with:

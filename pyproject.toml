@@ -15,5 +15,3 @@ repair-wheel-command = "DEST=`awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); prin
 [tool.cibuildwheel.macos]
 skip = "pp*"
 build = "cp*"
-[tool.cibuildwheel.config-settings]
---build-option = "--with-libs --with-genomicsdb=/usr/local"
