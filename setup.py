@@ -54,7 +54,7 @@ for arg in args:
     if arg.find("--with-protobuf") == 0:
         copy_protobuf_definitions = True
         sys.argv.remove(arg)
-    if arg.find("--with-version") == 0 and len(arg.split("=")[1]) > 0 :
+    if arg.find("--with-version=") == 0 and len(arg.split("=")[1]) > 0 :
         with_version = arg.split("=")[1]
         sys.argv.remove(arg)
 
