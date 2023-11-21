@@ -41,6 +41,7 @@ GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="genomicsdb")
 copy_genomicsdb_libs = False
 copy_protobuf_definitions = False
+with_version = "0.0.9.3"
 
 args = sys.argv[:]
 for arg in args:
@@ -52,6 +53,9 @@ for arg in args:
         sys.argv.remove(arg)
     if arg.find("--with-protobuf") == 0:
         copy_protobuf_definitions = True
+        sys.argv.remove(arg)
+    if arg.find("--with-version=") == 0 and len(arg.split("=")[1]) > 0 :
+        with_version = arg.split("=")[1]
         sys.argv.remove(arg)
 
 print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
@@ -145,7 +149,7 @@ setup(
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
     include_package_data=True,
-    version="0.0.9.3",
+    version=with_version,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
