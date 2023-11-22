@@ -69,6 +69,7 @@ jobs:
       if: ${{ contains(github.ref_name,'.test') }}
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
+        password: ${{ secrets.TESTPYPI }}
         repository-url: https://test.pypi.org/legacy/
     
     - name: Publish package to PyPI
