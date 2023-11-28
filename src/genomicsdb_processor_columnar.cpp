@@ -82,12 +82,9 @@ void ColumnarVariantCallProcessor::process(const std::string& sample_name,
                                            const int64_t* coordinates,
                                            const genomic_interval_t& genomic_interval,
                                            const std::vector<genomic_field_t>& genomic_fields) {
-  m_rows.push_back(coordinates[0]);
-  m_cols.push_back(coordinates[1]);
   m_sample_names.push_back(PyUnicode_FromString(sample_name.c_str()));
   m_chrom.push_back(PyUnicode_FromString(genomic_interval.contig_name.c_str()));
   m_pos.push_back(genomic_interval.interval.first);
-  m_end.push_back(genomic_interval.interval.second);
   process_fields(genomic_fields);
 }
 

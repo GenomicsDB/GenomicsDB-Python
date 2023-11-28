@@ -64,14 +64,11 @@ class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
                const std::vector<genomic_field_t>& genomic_fields);
   PyObject* construct_data_frame() {
     int dims = 1;
-    npy_intp sizes[1] = { static_cast<npy_intp>(m_rows.size()) };
+    npy_intp sizes[1] = { static_cast<npy_intp>(m_sample_names.size()) };
     PyObject *calls = PyDict_New();
-    PyDict_SetItem(calls, PyUnicode_FromString("Row"), PyArray_SimpleNewFromData(dims, sizes, NPY_INT64, m_rows.data()));
-    PyDict_SetItem(calls, PyUnicode_FromString("Col"), PyArray_SimpleNewFromData(dims, sizes, NPY_INT64, m_cols.data()));
     PyDict_SetItem(calls, PyUnicode_FromString("Sample"), PyArray_SimpleNewFromData(dims, sizes, NPY_OBJECT, m_sample_names.data()));
     PyDict_SetItem(calls, PyUnicode_FromString("CHROM"), PyArray_SimpleNewFromData(dims, sizes, NPY_OBJECT, m_chrom.data()));
     PyDict_SetItem(calls, PyUnicode_FromString("POS"), PyArray_SimpleNewFromData(dims, sizes, NPY_INT64, m_pos.data()));
-    PyDict_SetItem(calls, PyUnicode_FromString("END"), PyArray_SimpleNewFromData(dims, sizes, NPY_INT64, m_end.data()));
 
     for (auto field_name: m_field_names) {
       if (m_string_fields.find(field_name) != m_string_fields.end()) {
@@ -94,12 +91,9 @@ class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
  private:
   bool m_is_initialized = false;
   
-  std::vector<int64_t> m_rows;
-  std::vector<int64_t> m_cols;
   std::vector<PyObject *> m_sample_names;
   std::vector<PyObject *> m_chrom;
   std::vector<uint64_t> m_pos;
-  std::vector<uint64_t> m_end;
   std::vector<std::string> m_field_names;
   std::map<std::string, std::vector<PyObject *>> m_string_fields;
   std::map<std::string, std::vector<int>> m_int_fields;
