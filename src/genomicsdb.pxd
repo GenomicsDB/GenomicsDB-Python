@@ -11,7 +11,6 @@ from libc.stdlib cimport malloc, free
 from cpython cimport (PyObject, PyList_New)
 
 cdef extern from "genomicsdb.h":
-    cdef string genomicsdb_version()
 
 #   GenomicsDB typedefs
     ctypedef pair[uint64_t, uint64_t] interval_t;
