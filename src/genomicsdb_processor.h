@@ -67,7 +67,7 @@ class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
     npy_intp sizes[1] = { static_cast<npy_intp>(m_sample_names.size()) };
     PyObject *calls = PyDict_New();
     PyDict_SetItem(calls, PyUnicode_FromString("Sample"), PyArray_SimpleNewFromData(dims, sizes, NPY_OBJECT, m_sample_names.data()));
-    PyDict_SetItem(calls, PyUnicode_FromString("CHROM"), PyArray_SimpleNewFromData(dims, sizes, NPY_OBJECT, m_chrom.data()));
+    PyDict_SetItem(calls, PyUnicode_FromString("CHR"), PyArray_SimpleNewFromData(dims, sizes, NPY_OBJECT, m_chrom.data()));
     PyDict_SetItem(calls, PyUnicode_FromString("POS"), PyArray_SimpleNewFromData(dims, sizes, NPY_INT64, m_pos.data()));
 
     for (auto field_name: m_field_names) {

@@ -73,7 +73,7 @@ void VariantCallProcessor::process(const std::string& sample_name,
   PyObject *call = PyDict_New();
   if (call) {
     int rc = PyDict_SetItem(call, PyUnicode_FromString("Sample"), PyUnicode_FromString(sample_name.c_str())) ||
-        PyDict_SetItem(call, PyUnicode_FromString("CHROM"), PyUnicode_FromString(genomic_interval.contig_name.c_str())) ||
+        PyDict_SetItem(call, PyUnicode_FromString("CHR"), PyUnicode_FromString(genomic_interval.contig_name.c_str())) ||
         PyDict_SetItem(call, PyUnicode_FromString("POS"), PyLong_FromLong(genomic_interval.interval.first)) ||
         wrap_fields(call, fields);
     if (rc ) {
