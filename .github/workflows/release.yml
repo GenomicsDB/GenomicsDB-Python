@@ -1,4 +1,4 @@
-name: Build And Publish Wheels
+name: Publish Wheels
 
 on:
   push:
