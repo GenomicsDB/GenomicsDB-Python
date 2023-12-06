@@ -6,6 +6,7 @@ include "utils.pxi"
 import tempfile
 import pandas
 import numpy as np
+from enum import Enum
 
 from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
 
@@ -22,6 +23,12 @@ def version():
 
 class GenomicsDBException(Exception):
     pass
+
+class json_output_mode(Enum):
+    ALL = 0
+    ALL_BY_CALLS = 1
+    SAMPLES_WITH_NUM_CALLS = 2
+    NUM_CALLS = 3
 
 def connect(workspace,
             callset_mapping_file = "callset.json",
@@ -153,19 +160,56 @@ cdef class _GenomicsDB:
                                                    as_vector(attributes),
                                                    segment_size)
 
-
     def query_variant_calls(self,
                             array=None,
                             column_ranges=None,
                             row_ranges=None,
                             query_protobuf: query_pb.QueryConfiguration=None,
-                            flatten_intervals=False):
+                            flatten_intervals=False,
+                            json_output=None):
         """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
 
-        if flatten_intervals is True:
+        if json_output is not None:
+            return self.query_variant_calls_json(array, column_ranges, row_ranges, query_protobuf, json_output);
+        elif flatten_intervals is True:
             return self.query_variant_calls_columnar(array, column_ranges, row_ranges, query_protobuf)
         else:
             return self.query_variant_calls_by_interval(array, column_ranges, row_ranges, query_protobuf)
+
+    def query_variant_calls_json(self,
+                                 array=None,
+                                 column_ranges=None,
+                                 row_ranges=None,
+                                 query_protobuf: query_pb.QueryConfiguration=None,
+                                 json_output=json_output_mode.ALL):
+        cdef payload_mode
+        if json_output == json_output_mode.ALL:
+            payload_mode = PAYLOAD_ALL
+        elif json_output == json_output_mode.ALL_BY_CALLS:
+            payload_mode = PAYLOAD_ALL_BY_CALLS
+        elif json_output == json_output_mode.SAMPLES_WITH_NUM_CALLS:
+            payload_mode = PAYLOAD_SAMPLES_WITH_NUM_CALLS
+        elif json_output == json_output_mode.NUM_CALLS:
+            payload_mode = PAYLOAD_NUM_CALLS
+        else:
+            raise RuntimeError("Unknown json_output_mode")
+        cdef JSONVariantCallProcessor processor
+        processor.set_payload_mode(payload_mode)
+        if query_protobuf:
+          if array or column_ranges or row_ranges:
+              raise GenomicsDBException("Cannot specify query_protobuf and array/column_ranges/row_ranges together")
+          self._genomicsdb.query_variant_calls(processor, as_protobuf_string(query_protobuf.SerializeToString()), GENOMICSDB_PROTOBUF_BINARY_STRING)
+        elif array is None:
+          self._genomicsdb.query_variant_calls(processor, as_string(""), GENOMICSDB_NONE)
+        elif column_ranges is None:
+          self._genomicsdb.query_variant_calls(processor, as_string(array), scan_full())
+        elif row_ranges is None:
+          self._genomicsdb.query_variant_calls(processor, as_string(array), as_ranges(column_ranges))
+        else:
+          self._genomicsdb.query_variant_calls(processor, as_string(array),
+                                               as_ranges(column_ranges),
+                                               as_ranges(row_ranges))
+        return processor.construct_json_output()
 
     def query_variant_calls_by_interval(self,
                                         array=None,

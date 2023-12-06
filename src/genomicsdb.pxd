@@ -40,10 +40,27 @@ cdef extern from "genomicsdb.h":
     ctypedef GenomicsDBResults[genomicsdb_variant_t] GenomicsDBVariants
     ctypedef GenomicsDBResults[genomicsdb_variant_call_t] GenomicsDBVariantCalls
 
+    cdef string resolve_gt(vector[genomic_field_t])
+
     cdef cppclass GenomicsDBVariantCallProcessor:
         GenomicsDBVariantCallProcessor() except +
         void process(interval_t)
         void process(uint32_t, genomic_interval_t, vector[genomic_field_t])
+
+    cdef enum payload_t "JSONVariantCallProcessor::payload_t":
+        PAYLOAD_ALL " JSONVariantCallProcessor::all",
+        PAYLOAD_ALL_BY_CALLS "JSONVariantCallProcessor::all_by_calls",
+        PAYLOAD_SAMPLES_WITH_NUM_CALLS "JSONVariantCallProcessor::samples_with_ncalls",
+        PAYLOAD_NUM_CALLS "JSONVariantCallProcessor::just_ncalls",
+
+    cdef cppclass JSONVariantCallProcessor(GenomicsDBVariantCallProcessor):
+        JSONVariantCallProcessor() except +
+        JSONVariantCallProcessor(payload_t) except +
+        void set_payload_mode(payload_t)
+        void process(interval_t) except +
+        void process(uint32_t, genomic_interval_t, vector[genomic_field_t]) except +
+        string construct_json_output() except +
+        pass
 
     cdef enum query_config_type_t "GenomicsDB::query_config_type_t":
         GENOMICSDB_NONE "GenomicsDB::NONE",

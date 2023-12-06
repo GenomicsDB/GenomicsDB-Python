@@ -56,8 +56,23 @@ def test_connect_and_query_with_protobuf(setup):
   assert len(calls[0]) == 5
 
   # test with flatten intervals
-  calls = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
+  calls = gdb.query_variant_calls(query_protobuf=query_config,
+                                  flatten_intervals=True)
   assert len(calls) == 5
+
+  # test with query protobuf and json output
+  from genomicsdb import json_output_mode
+  assert len(gdb.query_variant_calls(query_protobuf=query_config,
+                                     json_output=json_output_mode.NUM_CALLS)) == 15
+  assert len(gdb.query_variant_calls(query_protobuf=query_config,
+                                     json_output=json_output_mode.SAMPLES_WITH_NUM_CALLS)) == 37
+  assert len(gdb.query_variant_calls(query_protobuf=query_config,
+                                     json_output=json_output_mode.ALL_BY_CALLS)) == 181
+  assert len(gdb.query_variant_calls(query_protobuf=query_config,
+                                     json_output=json_output_mode.ALL)) == 229
+  with pytest.raises(Exception):
+      output_json = gdb.query_variant_calls(query_protobuf=query_config,
+                                            json_output=9999)
   
   # test with query contig interval
   interval = query_coords.ContigInterval()
@@ -100,7 +115,6 @@ def test_connect_and_query_with_protobuf(setup):
   query_config.query_row_ranges.extend([row_range_list])
   with pytest.raises(Exception):
     gdb.query_variant_calls(query_protobuf=query_config)
-
 
   # test with two query contig intervals
   query_config = query_pb.QueryConfiguration()
