@@ -72,12 +72,9 @@ void VariantCallProcessor::process(const std::string& sample_name,
   errno = 0;
   PyObject *call = PyDict_New();
   if (call) {
-    int rc = PyDict_SetItem(call, PyUnicode_FromString("Row"), PyLong_FromLongLong(coordinates[0])) ||
-        PyDict_SetItem(call, PyUnicode_FromString("Col"), PyLong_FromLongLong(coordinates[1])) ||
-        PyDict_SetItem(call, PyUnicode_FromString("Sample"), PyUnicode_FromString(sample_name.c_str())) ||
-        PyDict_SetItem(call, PyUnicode_FromString("CHROM"), PyUnicode_FromString(genomic_interval.contig_name.c_str())) ||
+    int rc = PyDict_SetItem(call, PyUnicode_FromString("Sample"), PyUnicode_FromString(sample_name.c_str())) ||
+        PyDict_SetItem(call, PyUnicode_FromString("CHR"), PyUnicode_FromString(genomic_interval.contig_name.c_str())) ||
         PyDict_SetItem(call, PyUnicode_FromString("POS"), PyLong_FromLong(genomic_interval.interval.first)) ||
-        PyDict_SetItem(call, PyUnicode_FromString("END"), PyLong_FromLong(genomic_interval.interval.second)) ||
         wrap_fields(call, fields);
     if (rc ) {
       THROW_GENOMICSDB_EXCEPTION("Could not set up Python Dictionary for calls. rc=" + std::to_string(rc));
