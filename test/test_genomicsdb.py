@@ -67,9 +67,9 @@ def test_connect_and_query_with_protobuf(setup):
   assert len(gdb.query_variant_calls(query_protobuf=query_config,
                                      json_output=json_output_mode.SAMPLES_WITH_NUM_CALLS)) == 37
   assert len(gdb.query_variant_calls(query_protobuf=query_config,
-                                     json_output=json_output_mode.ALL_BY_CALLS)) == 181
+                                     json_output=json_output_mode.ALL_BY_CALLS)) == 207
   assert len(gdb.query_variant_calls(query_protobuf=query_config,
-                                     json_output=json_output_mode.ALL)) == 229
+                                     json_output=json_output_mode.ALL)) == 273
   with pytest.raises(Exception):
       output_json = gdb.query_variant_calls(query_protobuf=query_config,
                                             json_output=9999)
