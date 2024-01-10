@@ -57,6 +57,7 @@ class json_output_mode(Enum):
     ALL_BY_CALLS = 1
     SAMPLES_WITH_NUM_CALLS = 2
     NUM_CALLS = 3
+    SAMPLES = 4
 
 def connect(workspace,
             callset_mapping_file = "callset.json",
@@ -219,6 +220,8 @@ cdef class _GenomicsDB:
             payload_mode = PAYLOAD_SAMPLES_WITH_NUM_CALLS
         elif json_output == json_output_mode.NUM_CALLS:
             payload_mode = PAYLOAD_NUM_CALLS
+        elif json_output == json_output_mode.SAMPLES:
+            payload_mode = PAYLOAD_SAMPLES
         else:
             raise RuntimeError("Unknown json_output_mode")
         cdef JSONVariantCallProcessor processor
