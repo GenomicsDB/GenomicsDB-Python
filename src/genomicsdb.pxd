@@ -79,6 +79,7 @@ cdef extern from "genomicsdb.h":
         PAYLOAD_ALL " JSONVariantCallProcessor::all",
         PAYLOAD_ALL_BY_CALLS "JSONVariantCallProcessor::all_by_calls",
         PAYLOAD_SAMPLES_WITH_NUM_CALLS "JSONVariantCallProcessor::samples_with_ncalls",
+        PAYLOAD_SAMPLES "JSONVariantCallProcessor::just_samples",
         PAYLOAD_NUM_CALLS "JSONVariantCallProcessor::just_ncalls",
 
     cdef cppclass JSONVariantCallProcessor(GenomicsDBVariantCallProcessor):

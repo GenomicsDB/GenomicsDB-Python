@@ -85,7 +85,7 @@ class TestGenomicsDBDemo(unittest.TestCase):
     if self.query_config is None:
       return
     print("test_genomicsdb_demo_with_json_output")
-    modes = [json_output_mode.NUM_CALLS, json_output_mode.SAMPLES_WITH_NUM_CALLS, json_output_mode.ALL_BY_CALLS, json_output_mode.ALL]
+    modes = [json_output_mode.NUM_CALLS, json_output_mode.SAMPLES, json_output_mode.SAMPLES_WITH_NUM_CALLS, json_output_mode.ALL_BY_CALLS, json_output_mode.ALL]
     for mode in modes:
       start = time.time()
       gdb = genomicsdb.connect_with_protobuf(self.query_config)
