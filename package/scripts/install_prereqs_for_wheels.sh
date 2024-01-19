@@ -82,14 +82,15 @@ install_openssl3_for_centos7() {
 
 git clone https://github.com/GenomicsDB/GenomicsDB.git GenomicsDB-native
 pushd GenomicsDB-native
-scripts/prereqs/install_prereqs.sh
-echo "Runner HOME=$HOME"
-source $HOME/genomicsdb_prereqs.sh 
+PREREQS_ENV=$HOME/genomicsdb_prereqs.sh
+INSTALL_OPENSSL=true PREREQS_ENV=$PREREQS_ENV scripts/prereqs/install_prereqs.sh
+source $PREREQS_ENV
 echo "OPENSSL_ROOT_DIR=$OPENSSL_ROOT_DIR"
 mkdir build && cd build
 if [[ $(uname) == "Darwin" ]]; then
   cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False ..
 else
+  export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
   cmake -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False ..
 fi
 make && make install
