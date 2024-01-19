@@ -59,7 +59,7 @@ install_genomicsdb_for_centos7() {
     echo "Starting GenomicsDB build"
     mkdir build && cd build &&
     cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
-        make -j4 && make install
+        make && echo "Make succeded" && make install && find /usr/local -name *genomicsdb*
     popd
 }
 
