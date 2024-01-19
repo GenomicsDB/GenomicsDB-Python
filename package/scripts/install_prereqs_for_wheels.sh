@@ -80,8 +80,8 @@ install_openssl3_for_centos7() {
   fi
 }
 
-git clone https://github.com/GenomicsDB/GenomicsDB.git
-pushd GenomicsDB
+git clone https://github.com/GenomicsDB/GenomicsDB.git GenomicsDB-native
+pushd GenomicsDB-native
 scripts/prereqs/install_prereqs.sh
 echo "OPENSSL_ROOT_DIR=$OPENSSL_ROOT_DIR"
 mkdir build && cd build
