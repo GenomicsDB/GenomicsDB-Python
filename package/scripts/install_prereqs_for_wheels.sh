@@ -38,7 +38,7 @@ install_genomicsdb_for_mac() {
     pushd $GENOMICSDB_DIR
     echo "Starting GenomicsDB build"
     mkdir build && cd build &&
-    cmake -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR -DPROTOBUF_ROOT_DIR=./protobuf-install -DAWSSDK_ROOT_DIR=./aws-install -DGCSSDK_ROOT_DIR=./gcs-install -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
+    cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR -DPROTOBUF_ROOT_DIR=./protobuf-install -DAWSSDK_ROOT_DIR=./aws-install -DGCSSDK_ROOT_DIR=./gcs-install -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False .. &&
         make -j4 && make install
     popd
     if [[ -f $GENOMICSDB_HOME/lib/libtiledbgenomicsdb.dylib ]]; then
@@ -80,6 +80,20 @@ install_openssl3_for_centos7() {
   fi
 }
 
+git clone https://github.com/GenomicsDB/GenomicsDB.git
+pushd GenomicsDB
+scripts/prereqs/install_prereqs.sh
+echo "OPENSSL_ROOT_DIR=$OPENSSL_ROOT_DIR"
+mkdir build && cd build
+if [[ $(uname) == "Darwin" ]]; then
+  cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False ..
+else
+  cmake -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False ..
+fi
+make -j4 && make install
+popd
+
+exit 0
 
 
 if [[ `uname` != "Darwin" ]]; then
