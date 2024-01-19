@@ -89,18 +89,21 @@ release: dist ## package and upload a release
 	twine upload dist/*
 
 dist: ## builds source and wheel package
-	python setup.py sdist --with-libs --with-protobuf
-	python setup.py bdist_wheel --with-libs --with-protobuf
+	python setup.py sdist --with-libs
+	python setup.py bdist_wheel --with-libs
 	ls -l dist
 
 install: ## install the package to the active Python's site-packages
-	python setup.py install --with-libs --with-protobuf
+	python setup.py install --with-libs
 
 install-dev: # install the package in place for debug purposes.
 #	python -m pip install --upgrade pip
 #	python -m pip install -r requirements_dev.txt
-	python setup.py build_ext --inplace --with-libs --with-protobuf
+	python setup.py build_ext --inplace --with-libs
 #       pip install -e .
+
+install-dev-with-protobuf: # install the package in place for debug purpose. Use iff protobuf definitions have changed in GenomicsDB
+	python setup.py build_ext --inplace --with-libs --with-protobuf
 
 check:
 	python -c "import genomicsdb; print(genomicsdb.version())"
