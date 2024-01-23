@@ -85,7 +85,10 @@ pushd GenomicsDB-native
 PREREQS_ENV=$HOME/genomicsdb_prereqs.sh
 INSTALL_OPENSSL=true INSTALL_MINIMUM_DEPENDENCIES=true PREREQS_ENV=$PREREQS_ENV scripts/prereqs/install_prereqs.sh
 source $PREREQS_ENV
+echo "cat $PREREQS_ENV"
+cat $PREREQS_ENV
 echo "OPENSSL_ROOT_DIR=$OPENSSL_ROOT_DIR"
+export LD_LIBRARY_PATH=$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 mkdir build && cd build
 if [[ $(uname) == "Darwin" ]]; then
   cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False ..
