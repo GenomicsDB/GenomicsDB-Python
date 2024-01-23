@@ -82,8 +82,9 @@ install_openssl3_for_centos7() {
 
 git clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_scripts_01192024 GenomicsDB-native
 pushd GenomicsDB-native
+INSTALL_PREFIX=/usr/local
 PREREQS_ENV=$HOME/genomicsdb_prereqs.sh
-INSTALL_OPENSSL=true INSTALL_MINIMUM_DEPENDENCIES=true PREREQS_ENV=$PREREQS_ENV scripts/prereqs/install_prereqs.sh
+INSTALL_OPENSSL=true INSTALL_MINIMUM_DEPENDENCIES=true INSTALL_PREFIX=$INSTALL_PREFIX PREREQS_ENV=$PREREQS_ENV scripts/prereqs/install_prereqs.sh
 source $PREREQS_ENV
 echo "cat $PREREQS_ENV"
 cat $PREREQS_ENV
