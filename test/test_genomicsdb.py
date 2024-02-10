@@ -76,11 +76,25 @@ def test_connect_and_query_with_protobuf(setup):
       output_json = gdb.query_variant_calls(query_protobuf=query_config,
                                             json_output=9999)
 
-  query_config.query_row_ranges.extend([])
+  # test with query contig interval and no results
+  interval = query_coords.ContigInterval()
+  interval.contig = "22"
+  query_config.query_contig_intervals.extend([interval])
   print(gdb.query_variant_calls(query_protobuf=query_config,
                                 json_output=json_output_mode.NUM_CALLS))
+  assert len(gdb.query_variant_calls(query_protobuf=query_config,
+                                     json_output=json_output_mode.NUM_CALLS)) == 15
+  assert len(gdb.query_variant_calls(query_protobuf=query_config,
+                                     json_output=json_output_mode.SAMPLES)) == 2
+  assert len(gdb.query_variant_calls(query_protobuf=query_config,
+                                     json_output=json_output_mode.SAMPLES_WITH_NUM_CALLS)) == 2
+  assert len(gdb.query_variant_calls(query_protobuf=query_config,
+                                     json_output=json_output_mode.ALL_BY_CALLS)) == 2
+  assert len(gdb.query_variant_calls(query_protobuf=query_config,
+                                     json_output=json_output_mode.ALL)) == 2
   
   # test with query contig interval
+  del query_config.query_contig_intervals[:]
   interval = query_coords.ContigInterval()
   interval.contig = "1"
   interval.begin = 1
