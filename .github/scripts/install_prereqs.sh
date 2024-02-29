@@ -173,8 +173,8 @@ case $(uname) in
 esac
 
 if [[ $1 == "release" ]]; then
-  git clone https://github.com/GenomicsDB/GenomicsDB.git 
-  pushd GenomicsDB
+  git clone https://github.com/GenomicsDB/GenomicsDB.git -b GenomicsDB-native
+  pushd GenomicsDB-native
   # Interested only in static openssl/curl/uuid libraries for a wheels release
   mkdir build &&
     pushd build &&
