@@ -173,12 +173,12 @@ case $(uname) in
 esac
 
 if [[ $1 == "release" ]]; then
-  git clone https://github.com/GenomicsDB/GenomicsDB.git -b GenomicsDB-native
+  git clone https://github.com/GenomicsDB/GenomicsDB.git GenomicsDB-native
   pushd GenomicsDB-native
   # Interested only in static openssl/curl/uuid libraries for a wheels release
   mkdir build &&
     pushd build &&
-    cmake .. -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False &&
+    cmake .. -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False -DOPENSSL_USE_STATIC_LIBS=True &&
     make -j4 && rm -fr dependencies/TileDB && make -j4 &&
     $SUDO make install &&
     popd
