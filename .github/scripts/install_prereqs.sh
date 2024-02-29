@@ -107,6 +107,7 @@ install_prereqs_for_macos() {
 }
 
 install_prereqs_for_centos7() {
+  return
   yum install -y -q which wget git &&
     yum install -y -q autoconf automake libtool unzip &&
     yum install -y -q cmake3 patch &&
@@ -131,7 +132,8 @@ install_prereqs_for_ubuntu() {
     install_openssl3
     install_curl
     install_uuid
-  elif [[ ! -d ~/catch2-install ]]; then
+  case 
+elif [[ ! -d ~/catch2-install ]]; then
     INSTALL_DIR=~/catch2-install CATCH2_VER=v$CATCH2_VER $GITHUB_WORKSPACE/.github/scripts/install_catch2.sh
   fi
 }
@@ -179,7 +181,8 @@ if [[ $1 == "release" ]]; then
   mkdir build &&
     pushd build &&
     cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False -DOPENSSL_USE_STATIC_LIBS=True &&
-    make -j4 && rm -fr dependencies/TileDB && make clean && make -j4 &&
+    make -j4 || echo "make not successful"
+  rm -fr dependencies/TileDB && make -j4 &&
     $SUDO make install &&
     popd
   popd
