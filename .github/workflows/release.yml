@@ -39,7 +39,7 @@ jobs:
           #CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_BUILD: "cp39-*"
           CIBW_SKIP: "*musllinux*"
-          CIBW_CONFIG_SETTINGS: "--build-option=--with-version=${{ env.VERSION_NUMBER }} --build-option=--with-genomicsdb=/usr/local"
+          CIBW_CONFIG_SETTINGS: "--build-option=--with-version=${{ env.VERSION_NUMBER }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
           CIBW_ENVIRONMENT: CMAKE_PREFIX_PATH=${{ env.INSTALL_PREFIX }}
           CIBW_ENVIRONMENT_MACOS: DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
           CIBW_TEST_REQUIRES: pytest
