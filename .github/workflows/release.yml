@@ -44,7 +44,7 @@ jobs:
           CIBW_ENVIRONMENT_MACOS: DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest {package}/tests
-:q
+
       - uses: actions/upload-artifact@v3
         name: Upload Wheel artifacts
         with:
