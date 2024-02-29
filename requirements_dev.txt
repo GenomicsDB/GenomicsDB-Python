@@ -3,7 +3,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2023 dātma, inc™
+# Copyright (c) 2023-2024 dātma, inc™
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -27,17 +27,15 @@
 
 -r requirements.txt
 
-# C/C++ bindings
-cython>=0.29.31
-
-# Building
-setuptools>=61
-setuptools-scm>=1.5.4
-wheel>=0.37.0
-
-# Linting
-flake8~=4.0.1
-bandit~=1.7.0
-
 # Testing
-pytest>==6.2.5
+pytest>=7.2.0
+
+# Linting & Formatting
+flake8>=6.0.0
+cython-lint>=0.12.0
+black>=23.1.0
+bandit>=1.7.0
+isort>=5.12.0
+
+# Package building
+build>=1.0.0
