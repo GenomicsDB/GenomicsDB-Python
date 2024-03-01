@@ -171,6 +171,7 @@ case $(uname) in
 esac
 
 if [[ $1 == "release" ]]; then
+  echo "PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)"
   git clone https://github.com/GenomicsDB/GenomicsDB.git GenomicsDB-native
   pushd GenomicsDB-native
   # Interested only in static openssl/curl/uuid libraries for a wheels release
