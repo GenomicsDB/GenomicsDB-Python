@@ -177,8 +177,9 @@ if [[ $1 == "release" ]]; then
   mkdir build &&
     pushd build &&
     cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False -DOPENSSL_USE_STATIC_LIBS=True &&
-    make -j4 || echo "GenomicsDB make may not have been successful"
-  rm -fr dependencies/TileDB && make clean && make -j4 &&
+    make || echo "GenomicsDB make may not have been successful"
+  echo "Continuing with a new make..."
+  make clean && make -j4 &&
     $SUDO make install &&
     popd
   popd

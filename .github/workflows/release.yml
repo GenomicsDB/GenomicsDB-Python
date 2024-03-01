@@ -13,7 +13,7 @@ jobs:
         version_output: ${{env.VERSION_NUMBER}}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-12]
+        os: [macos-12]
     env:
        INSTALL_PREFIX: ${{ github.workspace }}/prereqs
        MACOSX_DEPLOYMENT_TARGET: 12.1
@@ -42,7 +42,7 @@ jobs:
           CIBW_CONFIG_SETTINGS: "--build-option=--with-version=${{ env.VERSION_NUMBER }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
           CIBW_ENVIRONMENT: CMAKE_PREFIX_PATH=${{ env.INSTALL_PREFIX }}
           CIBW_ENVIRONMENT_MACOS: DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
-          CIBW_ENVIRONMENT_LINUX: LD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib:$LD_LIBRARY_PATH
+          CIBW_ENVIRONMENT_LINUX: LD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib64:${{ env.INSTALL_PREFIX }}/lib:$LD_LIBRARY_PATH
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest {package}/tests
 
