@@ -172,7 +172,7 @@ esac
 
 if [[ $1 == "release" ]]; then
   echo "PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)"
-  git clone https://github.com/GenomicsDB/GenomicsDB.git GenomicsDB-native
+  git clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_build_03012024 GenomicsDB-native 
   pushd GenomicsDB-native
   # Interested only in static openssl/curl/uuid libraries for a wheels release
   mkdir build &&
@@ -180,7 +180,7 @@ if [[ $1 == "release" ]]; then
     cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False -DOPENSSL_USE_STATIC_LIBS=True &&
     make || echo "GenomicsDB make may not have been successful"
   echo "Continuing with a new make..."
-  make clean && make &&
+  rm -fr dependencies/TileDB && make
     $SUDO make install &&
     popd && popd
 fi
