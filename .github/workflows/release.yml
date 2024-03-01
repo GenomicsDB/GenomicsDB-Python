@@ -13,7 +13,7 @@ jobs:
         version_output: ${{env.VERSION_NUMBER}}
     strategy:
       matrix:
-        os: [macos-12]
+        os: [ubuntu-22.04]
     env:
        INSTALL_PREFIX: ${{ github.workspace }}/prereqs
        MACOSX_DEPLOYMENT_TARGET: 12.1
@@ -44,7 +44,7 @@ jobs:
           CIBW_ENVIRONMENT_MACOS: DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
           CIBW_ENVIRONMENT_LINUX: LD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib64:${{ env.INSTALL_PREFIX }}/lib:$LD_LIBRARY_PATH
           CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: pytest {package}/tests
+          CIBW_TEST_COMMAND: pytest {package}/test
 
       - uses: actions/upload-artifact@v3
         name: Upload Wheel artifacts
