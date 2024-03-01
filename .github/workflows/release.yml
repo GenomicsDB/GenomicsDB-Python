@@ -13,7 +13,7 @@ jobs:
         version_output: ${{env.VERSION_NUMBER}}
     strategy:
       matrix:
-        os: [ubuntu-22.04]
+        os: [macos-12, ubuntu-22.04]
     env:
        INSTALL_PREFIX: ${{ github.workspace }}/prereqs
        MACOSX_DEPLOYMENT_TARGET: 12.1
@@ -36,8 +36,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_BEFORE_ALL: "INSTALL_PREFIX=${{ env.INSTALL_PREFIX }} .github/scripts/install_prereqs.sh release"
           CIBW_BEFORE_BUILD: "pip install -r {package}/requirements_dev.txt && cd {package}"
-          #CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
-          CIBW_BUILD: "cp39-*"
+          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_SKIP: "*musllinux*"
           CIBW_CONFIG_SETTINGS: "--build-option=--with-version=${{ env.VERSION_NUMBER }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
           CIBW_ENVIRONMENT: CMAKE_PREFIX_PATH=${{ env.INSTALL_PREFIX }}
@@ -45,9 +44,7 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: >
             LD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib64:${{ env.INSTALL_PREFIX }}/lib:$LD_LIBRARY_PATH
             PKG_CONFIG_PATH=${{ env.INSTALL_PREFIX }}/lib64/pkgconfig:${{ env.INSTALL_PREFIX }}/lib/pkgconfig
-          CIBW_TEST_SKIP: "*linux*"
           CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: pytest {package}/test
 
       - uses: actions/upload-artifact@v3
         name: Upload Wheel artifacts
