@@ -184,6 +184,6 @@ if [[ $1 == "release" ]]; then
   mkdir build &&
     pushd build &&
     cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False -DOPENSSL_USE_STATIC_LIBS=True &&
-    make || rebuild && $SUDO make install &&
+    make -j4 || rebuild && $SUDO make install &&
     popd && popd
 fi
