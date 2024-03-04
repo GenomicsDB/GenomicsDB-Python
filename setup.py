@@ -72,9 +72,10 @@ if GENOMICSDB_INSTALL_PATH == "genomicsdb":
 
 dst = os.path.join("genomicsdb/lib")
 if copy_genomicsdb_libs:
+    os.makedirs(dst, exist_ok=True)
     glob_paths = [
         os.path.join(GENOMICSDB_LIB_DIR, e)
-        for e in ["lib*genomicsdb*.so", "lib*genomicsdb*.dylib"]
+        for e in ["lib*genomicsdb*.so*", "lib*genomicsdb*.dylib"]
     ]
     lib_paths = []
     for paths in glob_paths:
@@ -86,12 +87,12 @@ if copy_genomicsdb_libs:
         print("Copying {0} to {1}".format(lib_path, dst))
         shutil.copy(lib_path, dst)
 
-rpath = []
-link_args = []
-if sys.platform == "darwin":
-    link_args = ["-Wl,-rpath,lib"]
-else:
-    rpath = ["$ORIGIN/lib"]
+    rpath = []
+    link_args = []
+    if sys.platform == "darwin":
+        link_args = ["-Wl,-rpath,"+dst]
+    else:
+        rpath = ["$ORIGIN/lib"]
 
 dst = os.path.join("genomicsdb/protobuf")
 if copy_protobuf_definitions:
