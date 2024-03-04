@@ -171,14 +171,14 @@ case $(uname) in
 esac
 
 rebuild() {
-  echo "GenomicsDB build may not have been successful"
+  echo "GenomicsDB build may not have been successful because of the way aws sdks are structured at least in Linux"
   echo "Trying again with a new make..."
   rm -fr dependencies/TileDB && make -j4
 }
 
 if [[ $1 == "release" ]]; then
   echo "PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)"
-  git clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_build_03012024 GenomicsDB-native 
+  git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop GenomicsDB-native
   pushd GenomicsDB-native
   # Interested only in static openssl/curl/uuid libraries for a wheels release
   mkdir build &&
