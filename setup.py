@@ -70,6 +70,8 @@ if GENOMICSDB_INSTALL_PATH == "genomicsdb":
     copy_genomicsdb_libs = False
     copy_protobuf_definitions = False
 
+rpath = []
+link_args = []
 dst = os.path.join("genomicsdb/lib")
 if copy_genomicsdb_libs:
     os.makedirs(dst, exist_ok=True)
@@ -87,8 +89,6 @@ if copy_genomicsdb_libs:
         print("Copying {0} to {1}".format(lib_path, dst))
         shutil.copy(lib_path, dst)
 
-    rpath = []
-    link_args = []
     if sys.platform == "darwin":
         link_args = ["-Wl,-rpath,"+dst]
     else:
