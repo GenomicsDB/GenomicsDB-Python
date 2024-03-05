@@ -54,7 +54,7 @@ for arg in args:
     if arg.find("--with-protobuf") == 0:
         copy_protobuf_definitions = True
         sys.argv.remove(arg)
-    if arg.find("--with-version=") == 0 and len(arg.split("=")[1]) > 0 :
+    if arg.find("--with-version=") == 0 and len(arg.split("=")[1]) > 0:
         with_version = arg.split("=")[1]
         sys.argv.remove(arg)
 
@@ -62,9 +62,7 @@ print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
 
 GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
 GENOMICSDB_LIB_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "lib")
-GENOMICSDB_PROTOBUF_DIR = os.path.join(
-    GENOMICSDB_INSTALL_PATH, "genomicsdb/protobuf/python"
-)
+GENOMICSDB_PROTOBUF_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "genomicsdb/protobuf/python")
 
 if GENOMICSDB_INSTALL_PATH == "genomicsdb":
     copy_genomicsdb_libs = False
@@ -90,7 +88,7 @@ if copy_genomicsdb_libs:
         shutil.copy(lib_path, dst)
 
     if sys.platform == "darwin":
-        link_args = ["-Wl,-rpath,"+dst]
+        link_args = ["-Wl,-rpath," + dst]
     else:
         rpath = ["$ORIGIN/lib"]
 
@@ -109,6 +107,9 @@ if copy_protobuf_definitions:
             with open(filename, "w") as file:
                 file.write(replaced_contents)
 
+if "OSX_ARCH" in os.environ:
+    os.environ["CFLAGS"] = "-arch " + os.environ["OSX_ARCH"]
+
 
 def run_cythonize(src):
     from Cython.Build.Dependencies import cythonize
@@ -121,7 +122,11 @@ genomicsdb_extension = Extension(
     "genomicsdb.genomicsdb",
     language="c++",
     include_dirs=[GENOMICSDB_INCLUDE_DIR, numpy.get_include()],
-    sources=[run_cythonize("src/genomicsdb.pyx"), "src/genomicsdb_processor.cpp", "src/genomicsdb_processor_columnar.cpp"],
+    sources=[
+        run_cythonize("src/genomicsdb.pyx"),
+        "src/genomicsdb_processor.cpp",
+        "src/genomicsdb_processor_columnar.cpp",
+    ],
     libraries=["tiledbgenomicsdb"],
     library_dirs=[GENOMICSDB_LIB_DIR],
     runtime_library_dirs=rpath,
@@ -145,7 +150,7 @@ setup(
     ext_modules=[genomicsdb_extension],
     zip_safe=False,
     setup_requires=["cython>=0.27"],
-    install_requires=["numpy>=1.19.5", "pandas","protobuf>=4.21.1"],
+    install_requires=["numpy>=1.19.5", "pandas", "protobuf>=4.21.1"],
     python_requires=">=3.9",
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
@@ -166,4 +171,3 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
 )
-
