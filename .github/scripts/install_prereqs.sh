@@ -31,10 +31,14 @@ install_openssl3() {
     echo "Installing OpenSSL3 into $OPENSSL_PREFIX"
     pushd /tmp
     wget -q $WGET_NO_CERTIFICATE https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz &&
-      tar -xvzf openssl-$OPENSSL_VERSION.tar.gz &&
+      tar -xzf openssl-$OPENSSL_VERSION.tar.gz &&
       cd openssl-$OPENSSL_VERSION &&
-      if [[ $(uname) == "darwin" ]]; then
-        ./Configure darwin64-$(uname -m)-cc no-tests no-shared -fPIC --prefix=$OPENSSL_PREFIX
+      if [[ $(uname) == "Darwin" ]]; then
+        if [[ -z $OSX_ARCH ]]; then
+          ./Configure darwin64-$(uname -m)-cc no-tests no-shared -fPIC --prefix=$OPENSSL_PREFIX
+        else
+          ./Configure darwin64-${OSX_ARCH}-cc no-tests no-shared -fPIC --prefix=$OPENSSL_PREFIX
+        fi
       else
         CFLAGS=-fPIC ./config no-tests no-shared -fPIC --prefix=$OPENSSL_PREFIX --openssldir=$OPENSSL_PREFIX
       fi
@@ -178,12 +182,16 @@ rebuild() {
 
 if [[ $1 == "release" ]]; then
   echo "PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)"
-  git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop GenomicsDB-native
+  git clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_arm64_build GenomicsDB-native
   pushd GenomicsDB-native
   # Interested only in static openssl/curl/uuid libraries for a wheels release
   mkdir build &&
     pushd build &&
-    cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DUSE_HDFS=False -DOPENSSL_USE_STATIC_LIBS=True &&
+    if [[ ! -z $OSX_ARCH ]]; then
+      echo "OSX_ARCH=$OSX_ARCH"
+      CMAKE_ARCH_ARG="-DCMAKE_OSX_ARCHITECTURES=${OSX_ARCH}"
+    fi
+    cmake .. $CMAKE_ARCH_ARG -DPROTOBUF_ROOT_DIR=./protobuf -DGCSSDK_ROOT_DIR=./gcssdk -DAWSSDK_ROOT_DIR=./awssdk -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DDISABLE_TOOLS=True -DDISABLE_EXAMPLES=True -DDISABLE_TESTING=True -DOPENSSL_USE_STATIC_LIBS=True &&
     make -j4 || rebuild && $SUDO make install &&
     popd && popd
 fi
