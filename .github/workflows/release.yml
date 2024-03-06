@@ -89,4 +89,28 @@ jobs:
         with:
           name: wheel_artifacts-macos-12-arm64
           path: ./wheelhouse/*.whl
+
+          
+  upload_all:
+    name: Publish wheels
+    needs: [build_wheels, build_macos_arm64_wheels]
+    runs-on: ubuntu-latest
+    permissions:
+        id-token: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: wheel_artifacts-*
+        merge-multiple: true
+        path: dist
+
+    - name: Publish package to TestPyPI
+      if: ${{ contains(github.ref_name,'.test') }}
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+    
+    - name: Publish package to PyPI
+      if: ${{ !contains(github.ref_name,'.test') }}
+      uses: pypa/gh-action-pypi-publish@release/v1
     
