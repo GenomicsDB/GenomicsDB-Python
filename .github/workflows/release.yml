@@ -53,9 +53,10 @@ jobs:
             PKG_CONFIG_PATH=${{ env.INSTALL_PREFIX }}/lib64/pkgconfig:${{ env.INSTALL_PREFIX }}/lib/pkgconfig
           CIBW_TEST_REQUIRES: pytest
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Upload Wheel artifacts
         with:
+          name: wheel_artifacts-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
   # Cross building arm64 on a macos-12 x64_64 box
@@ -83,8 +84,9 @@ jobs:
             CMAKE_PREFIX_PATH=${{ env.INSTALL_PREFIX }}
             DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Upload Wheel artifacts
         with:
+          name: wheel_artifacts-macos-12-arm64
           path: ./wheelhouse/*.whl
     
