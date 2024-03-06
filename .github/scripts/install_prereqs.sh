@@ -182,8 +182,13 @@ rebuild() {
 
 if [[ $1 == "release" ]]; then
   echo "PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)"
-  git clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_arm64_build GenomicsDB-native
-  pushd GenomicsDB-native
+  if [[ -z $OSX_ARCH ]]; then
+    GENOMICSDB_NATIVE="GenomicsDB-native"
+  else
+    GENOMICSDB_NATIVE="GenomicsDB-native-${OX_ARCH}"
+  fi
+  git clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_arm64_build $GENOMICSDB_NATIVE
+  pushd $GENOMICSDB_NATIVE
   # Interested only in static openssl/curl/uuid libraries for a wheels release
   mkdir build &&
     pushd build &&
