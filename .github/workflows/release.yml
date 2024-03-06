@@ -65,7 +65,7 @@ jobs:
     needs: version_number
     runs-on: macos-12
     env:
-       INSTALL_PREFIX: ${{ github.workspace }}/prereqs
+       INSTALL_PREFIX: ${{ github.workspace }}/prereqs_arm64
        MACOSX_DEPLOYMENT_TARGET: 12.1
 
     steps:
