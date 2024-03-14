@@ -65,8 +65,8 @@ jobs:
     needs: version_number
     runs-on: macos-12
     env:
-       INSTALL_PREFIX: ${{ github.workspace }}/prereqs_arm64
-       MACOSX_DEPLOYMENT_TARGET: 12.1
+      INSTALL_PREFIX: ${{ github.workspace }}/prereqs_arm64
+      MACOSX_DEPLOYMENT_TARGET: 12.1
 
     steps:
       - uses: actions/checkout@v4
@@ -80,6 +80,8 @@ jobs:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_CONFIG_SETTINGS: "--build-option=--with-version=${{ needs.version_number.outputs.version }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
           CIBW_ENVIRONMENT: >
+            NATIVE_BUILD_DIR=GenomicsDB-native_arm64
+            INSTALL_PREFIX=${{ env.INSTALL_PREFIX }}_arm64
             CMAKE_PREFIX_PATH=${{ env.INSTALL_PREFIX }}
             DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
 
