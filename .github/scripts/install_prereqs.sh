@@ -190,7 +190,7 @@ if [[ $1 == "release" ]]; then
   echo "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
   echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}"
   echo " LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
-  git clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_arm64_build $NATIVE_BUILD_DIR
+  git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop $NATIVE_BUILD_DIR
   pushd $NATIVE_BUILD_DIR
   # Interested only in static openssl/curl/uuid libraries for a wheels release
   mkdir build &&
