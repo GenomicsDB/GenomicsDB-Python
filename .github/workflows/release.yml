@@ -46,6 +46,7 @@ jobs:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_SKIP: "*musllinux*"
           CIBW_CONFIG_SETTINGS: "--build-option=--with-version=${{ needs.version_number.outputs.version }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
+          CIBW_ENVIRONMENT: PKG_CONFIG_PATH=${{ env.INSTALL_PREFIX }}/lib64/pkgconfig:${{ env.INSTALL_PREFIX }}/lib/pkgconfig
           CIBW_ENVIRONMENT_MACOS: DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
           CIBW_ENVIRONMENT_LINUX: LD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib64:${{ env.INSTALL_PREFIX }}/lib:$LD_LIBRARY_PATH
           CIBW_TEST_REQUIRES: pytest

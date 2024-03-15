@@ -182,6 +182,7 @@ rebuild() {
 
 if [[ $1 == "release" ]]; then
   echo "PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)"
+  echo "PKG_CONFIG_PATH1=${PKG_CONFIG_PATH}"
   echo "NATIVE_BUILD_DIR=${NATIVE_BUILD_DIR}"
   if [[ -z $OSX_ARCH ]]; then
     NATIVE_BUILD_DIR=GenomicsDB-native
