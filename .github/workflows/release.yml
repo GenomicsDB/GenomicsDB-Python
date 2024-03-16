@@ -79,9 +79,7 @@ jobs:
           CIBW_BEFORE_BUILD: "pip install -r {package}/requirements_dev.txt && cd {package}"
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_CONFIG_SETTINGS: "--build-option=--with-version=${{ needs.version_number.outputs.version }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
-          CIBW_ENVIRONMENT: >
-            NATIVE_BUILD_DIR=GenomicsDB-native_arm64
-            DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
+          CIBW_ENVIRONMENT: DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
 
       - uses: actions/upload-artifact@v3
         name: Upload Wheel artifacts
