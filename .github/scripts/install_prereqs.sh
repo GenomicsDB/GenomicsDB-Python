@@ -181,22 +181,22 @@ rebuild() {
 }
 
 if [[ $1 == "release" ]]; then
-  echo "PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)"
-  echo "PKG_CONFIG_PATH1=${PKG_CONFIG_PATH}"
-  echo "NATIVE_BUILD_DIR=${NATIVE_BUILD_DIR}"
+  echo "System PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)"
   if [[ -z $OSX_ARCH ]]; then
     NATIVE_BUILD_DIR=GenomicsDB-native
   else
-    NATIVE_BUILD_DIR=GenomicsDB-native_${OS_ARCH}
+    NATIVE_BUILD_DIR=GenomicsDB-native_${OSX_ARCH}
   fi
+  # For Debugging...
   echo "NATIVE_BUILD_DIR=${NATIVE_BUILD_DIR}"
   echo "INSTALL_PREFIX=${INSTALL_PREFIX}"
   echo "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
-  echo "DYLD_LIBRARY_PATH1=${DYLD_LIBRARY_PATH}"
-  echo " LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+  echo "PKG_CONFIG_PATH=${PKG_CONFIG_PATH}"
+  echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}"
+  echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+  # For Debugging
   git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop $NATIVE_BUILD_DIR
   pushd $NATIVE_BUILD_DIR
-  # Interested only in static openssl/curl/uuid libraries for a wheels release
   mkdir build &&
     pushd build &&
     if [[ ! -z $OSX_ARCH ]]; then
