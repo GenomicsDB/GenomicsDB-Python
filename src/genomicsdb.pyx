@@ -225,28 +225,37 @@ cdef class _GenomicsDB:
         else:
             raise RuntimeError("Unknown json_output_mode")
         cdef JSONVariantCallProcessor processor
+        cdef string configstring
+        cdef genomicsdb_ranges_t rows, columns
         processor.set_payload_mode(payload_mode)
         if query_protobuf:
           if array or column_ranges or row_ranges:
             raise GenomicsDBException("Cannot specify query_protobuf and array/column_ranges/row_ranges together")
+          configstring = as_protobuf_string(query_protobuf.SerializeToString())
           with nogil:
-              self._genomicsdb.query_variant_calls(processor, as_protobuf_string(query_protobuf.SerializeToString()), GENOMICSDB_PROTOBUF_BINARY_STRING)
+              self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_PROTOBUF_BINARY_STRING)
         elif array is None:
+          configstring = as_string("")
           with nogil:
-            self._genomicsdb.query_variant_calls(processor, as_string(""), GENOMICSDB_NONE)
+            self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_NONE)
         elif column_ranges is None:
+          configstring = as_string(array)
+          rows = scan_full()
           with nogil:
-            self._genomicsdb.query_variant_calls(processor, as_string(array), scan_full())
+            self._genomicsdb.query_variant_calls(processor, configstring, rows)
         elif row_ranges is None:
+          configstring = as_string(array)
+          columns = as_ranges(column_ranges)
           with nogil:
-            self._genomicsdb.query_variant_calls(processor, as_string(array), as_ranges(column_ranges))
+            self._genomicsdb.query_variant_calls(processor, configstring, columns)
         else:
+          configstring = as_string(array)
+          columns = as_ranges(column_ranges)
+          rows = as_ranges(row_ranges)
           with nogil:
-            self._genomicsdb.query_variant_calls(processor, as_string(array),
-                                                 as_ranges(column_ranges),
-                                                 as_ranges(row_ranges))
-        with nogil:
-            return processor.construct_json_output()
+            self._genomicsdb.query_variant_calls(processor, configstring,
+                                                 columns, rows)
+        return processor.construct_json_output()
 
     def query_variant_calls_by_interval(self,
                                         array=None,
@@ -255,26 +264,36 @@ cdef class _GenomicsDB:
                                         query_protobuf: query_pb.QueryConfiguration=None):
         cdef list variant_calls = []
         cdef VariantCallProcessor processor
+        cdef string configstring
+        cdef genomicsdb_ranges_t rows, columns
         processor.set_root(variant_calls)
         if query_protobuf:
           if array or column_ranges or row_ranges:
               raise GenomicsDBException("Cannot specify query_protobuf and array/column_ranges/row_ranges together")
+          configstring = as_protobuf_string(query_protobuf.SerializeToString())
           with nogil:
-            self._genomicsdb.query_variant_calls(processor, as_protobuf_string(query_protobuf.SerializeToString()), GENOMICSDB_PROTOBUF_BINARY_STRING)
+            self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_PROTOBUF_BINARY_STRING)
         elif array is None:
+          configstring = as_string("")
           with nogil:
-            self._genomicsdb.query_variant_calls(processor, as_string(""), GENOMICSDB_NONE)
+            self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_NONE)
         elif column_ranges is None:
+          configstring = as_string(array)
+          rows = scan_full()
           with nogil:
-            self._genomicsdb.query_variant_calls(processor, as_string(array), scan_full())
+            self._genomicsdb.query_variant_calls(processor, configstring, rows)
         elif row_ranges is None:
+          configstring = as_string(array)
+          columns = as_ranges(column_ranges)
           with nogil:
-            self._genomicsdb.query_variant_calls(processor, as_string(array), as_ranges(column_ranges))
+            self._genomicsdb.query_variant_calls(processor, configstring, columns)
         else:
+          configstring = as_string(array)
+          columns = as_ranges(column_ranges)
+          rows = as_ranges(row_ranges)
           with nogil:
-            self._genomicsdb.query_variant_calls(processor, as_string(array),
-                                                 as_ranges(column_ranges),
-                                                 as_ranges(row_ranges))
+            self._genomicsdb.query_variant_calls(processor, configstring,
+                                                 columns, rows)
         return variant_calls
 
     def query_variant_calls_columnar(self,
@@ -285,25 +304,35 @@ cdef class _GenomicsDB:
       """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
 
       cdef ColumnarVariantCallProcessor processor
+      cdef string configstring
+      cdef genomicsdb_ranges_t rows, columns
       if query_protobuf:
         if array or column_ranges or row_ranges:
             raise GenomicsDBException("Cannot specify query_protobuf and array/column_ranges/row_ranges together")
+        configstring = as_protobuf_string(query_protobuf.SerializeToString())
         with nogil:
-          self._genomicsdb.query_variant_calls(processor, as_protobuf_string(query_protobuf.SerializeToString()), GENOMICSDB_PROTOBUF_BINARY_STRING)
+          self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_PROTOBUF_BINARY_STRING)
       elif array is None:
+        configstring = as_string("")
         with nogil:
-          self._genomicsdb.query_variant_calls(processor, as_string(""), GENOMICSDB_NONE)
+          self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_NONE)
       elif column_ranges is None:
+        configstring = as_string(array)
+        rows = scan_full()
         with nogil:
-          self._genomicsdb.query_variant_calls(processor, as_string(array), scan_full())
+          self._genomicsdb.query_variant_calls(processor, configstring, rows)
       elif row_ranges is None:
+        configstring = as_string(array)
+        columns = as_ranges(column_ranges)
         with nogil:
-          self._genomicsdb.query_variant_calls(processor, as_string(array), as_ranges(column_ranges))
+          self._genomicsdb.query_variant_calls(processor, configstring, columns)
       else:
+        configstring = as_string(array)
+        columns = as_ranges(column_ranges)
+        rows = as_ranges(row_ranges)
         with nogil:
-          self._genomicsdb.query_variant_calls(processor, as_string(array),
-                                               as_ranges(column_ranges),
-                                               as_ranges(row_ranges))
+          self._genomicsdb.query_variant_calls(processor, configstring,
+                                               columns, rows)
       
       return pandas.DataFrame(processor.construct_data_frame()).replace(np.nan, '').replace(-99999, '');
       
@@ -323,20 +352,18 @@ cdef class _GenomicsDB:
         if output_format is None:
             output_format = ""
         if array is None:
-            with nogil:
-                self._genomicsdb.generate_vcf(as_string(output),
-                                              as_string(output_format),
-                                              overwrite)
+            self._genomicsdb.generate_vcf(as_string(output),
+                                          as_string(output_format),
+                                          overwrite)
         else:
-            with nogil:
-                self._genomicsdb.generate_vcf(as_string(array),
-                                              as_ranges(column_ranges),
-                                              as_ranges(row_ranges),
-                                              as_string(reference_genome),
-                                              as_string(vcf_header),
-                                              as_string(output),
-                                              as_string(output_format),
-                                              overwrite)
+            self._genomicsdb.generate_vcf(as_string(array),
+                                          as_ranges(column_ranges),
+                                          as_ranges(row_ranges),
+                                          as_string(reference_genome),
+                                          as_string(vcf_header),
+                                          as_string(output),
+                                          as_string(output_format),
+                                          overwrite)
 
 
     def __dealloc__(self):
