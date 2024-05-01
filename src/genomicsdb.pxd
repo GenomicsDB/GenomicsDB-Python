@@ -126,16 +126,16 @@ cdef extern from "genomicsdb.h":
         #                                                                const query_config_type_t query_configuration_type);
         GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string, query_config_type_t) except + nogil
 
-        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string, string, bool) except + nogil
-        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string, string) except + nogil
-        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string) except + nogil
-        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string) except + nogil
-        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string) except + nogil
-        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except + nogil
-        void generate_vcf(string, string, bool) except + nogil
-        void generate_vcf(string, string) except + nogil
-        void generate_vcf(string) except + nogil
-        void generate_vcf() except + nogil
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string, string, bool) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string, string) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string) except +
+        void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
+        void generate_vcf(string, string, bool) except +
+        void generate_vcf(string, string) except +
+        void generate_vcf(string) except +
+        void generate_vcf() except +
         pass
 
 #   GenomicsDB Helper Utilities
