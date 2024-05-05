@@ -111,20 +111,20 @@ cdef extern from "genomicsdb.h":
         GenomicsDBVariants query_variants()
 
         # query_variant_calls(const std::string& array, genomicsdb_ranges_t column_ranges=SCAN_FULL, genomicsdb_ranges_t row_ranges={});
-        GenomicsDBVariantCalls query_variant_calls(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
-        GenomicsDBVariantCalls query_variant_calls(string, genomicsdb_ranges_t) except +
-        GenomicsDBVariantCalls query_variant_calls(string) except +
+        GenomicsDBVariantCalls query_variant_calls(string, genomicsdb_ranges_t, genomicsdb_ranges_t) except + nogil
+        GenomicsDBVariantCalls query_variant_calls(string, genomicsdb_ranges_t) except + nogil
+        GenomicsDBVariantCalls query_variant_calls(string) except + nogil
 
-        GenomicsDBVariantCalls query_variant_calls() except +
+        GenomicsDBVariantCalls query_variant_calls() except + nogil
 
         # query_variant_calls(GenomicsDBVariantCallProcessor& processor, const std::string& array,
         #                       genomicsdb_ranges_t column_ranges=SCAN_FULL, genomicsdb_ranges_t row_ranges={});
-        GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string, genomicsdb_ranges_t, genomicsdb_ranges_t) except +
-        GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string, genomicsdb_ranges_t) except +
+        GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string, genomicsdb_ranges_t, genomicsdb_ranges_t) except + nogil
+        GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string, genomicsdb_ranges_t) except + nogil
 
         # query_variant_calls(GenomicsDBVariantCallProcessor& processor, const std::string& query_configuration,
         #                                                                const query_config_type_t query_configuration_type);
-        GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string, query_config_type_t) except +
+        GenomicsDBVariantCalls query_variant_calls(GenomicsDBVariantCallProcessor, string, query_config_type_t) except + nogil
 
         void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string, string, bool) except +
         void generate_vcf(string, genomicsdb_ranges_t, genomicsdb_ranges_t, string, string, string, string) except +
