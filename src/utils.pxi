@@ -62,6 +62,8 @@ cdef unicode to_unicode(s):
         raise TypeError("Could not convert to unicode.")
 
 cdef string as_string(s):
+    if s is None:
+        return PyBytes_AS_STRING("")
     return PyBytes_AS_STRING(to_unicode(s).encode('UTF-8'))
 
 cdef string as_protobuf_string(s):
