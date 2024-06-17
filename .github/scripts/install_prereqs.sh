@@ -112,7 +112,16 @@ install_prereqs_for_centos7() {
   yum install -y -q which wget git &&
     yum install -y -q autoconf automake libtool unzip &&
     yum install -y -q cmake3 patch &&
-    yum install -y -q perl perl-IPC-Cmd
+    yum install -y -q perl perl-IPC-Cmd &&
+    echo "Installing devtoolset-11-GCC" &&
+    yum install -y -q devtoolset-11-gcc devtoolset-11-gcc-c++ &&
+    echo "Installing devtoolset-11-gcc DONE"
+    export CC=/opt/rh/devtoolset-11/root/usr/bin/gcc &&
+    export CXX=/opt/rh/devtoolset-11/root/usr/bin/g++ &&
+    ls -l /opt/rh/devtoolset-11/root/usr/bin/gcc &&
+    ls -l /opt/rh/devtoolset-11/root/usr/bin/g++ &&
+    echo "Installing devtoolset DONE"
+  if [[ $? != 0 ]]; then exit 1; fi
   if [[ $1 == "release" ]]; then
     install_openssl3
     install_curl
@@ -195,7 +204,7 @@ if [[ $1 == "release" ]]; then
   echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}"
   echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
   # For Debugging
-  git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop $NATIVE_BUILD_DIR
+  git clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_nanoarrow $NATIVE_BUILD_DIR
   pushd $NATIVE_BUILD_DIR
   mkdir build &&
     pushd build &&
@@ -203,7 +212,7 @@ if [[ $1 == "release" ]]; then
       echo "OSX_ARCH=$OSX_ARCH"
       CMAKE_ARCH_ARG="-DCMAKE_OSX_ARCHITECTURES=${OSX_ARCH}"
     fi
-    cmake .. $CMAKE_ARCH_ARG -DPROTOBUF_ROOT_DIR=./protobuf -DGCSSDK_ROOT_DIR=./gcssdk -DAWSSDK_ROOT_DIR=./awssdk -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DDISABLE_TOOLS=True -DDISABLE_EXAMPLES=True -DDISABLE_TESTING=True -DOPENSSL_USE_STATIC_LIBS=True &&
+    cmake .. $CMAKE_ARCH_ARG -DBUILD_NANOARROW=1 -DPROTOBUF_ROOT_DIR=./protobuf -DGCSSDK_ROOT_DIR=./gcssdk -DAWSSDK_ROOT_DIR=./awssdk -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DDISABLE_TOOLS=True -DDISABLE_EXAMPLES=True -DDISABLE_TESTING=True -DOPENSSL_USE_STATIC_LIBS=True &&
     make -j4 || rebuild && $SUDO make install &&
     popd && popd
 fi

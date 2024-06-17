@@ -107,10 +107,15 @@ if copy_protobuf_definitions:
             with open(filename, "w") as file:
                 file.write(replaced_contents)
 
+os.environ["CFLAGS"] = "-DUSE_NANOARROW=1"
+
 if "OSX_ARCH" in os.environ:
     os.environ["CFLAGS"] = "-arch " + os.environ["OSX_ARCH"]
 
-
+EXTRA_COMPILE_ARGS=["-std=c++20"]
+if "CXX" in os.environ and os.environ["CXX"].find("devtoolset-11") > 0:
+    EXTRA_COMPILE_ARGS=["-std=c++2a"]
+        
 def run_cythonize(src):
     from Cython.Build.Dependencies import cythonize
 
@@ -126,12 +131,13 @@ genomicsdb_extension = Extension(
         run_cythonize("src/genomicsdb.pyx"),
         "src/genomicsdb_processor.cpp",
         "src/genomicsdb_processor_columnar.cpp",
+        "src/genomicsdb_arrow_utils.cpp",
     ],
     libraries=["tiledbgenomicsdb"],
     library_dirs=[GENOMICSDB_LIB_DIR],
     runtime_library_dirs=rpath,
     extra_link_args=link_args,
-    extra_compile_args=["-std=c++17"],
+    extra_compile_args=EXTRA_COMPILE_ARGS,
 )
 
 with open("README.md") as f:

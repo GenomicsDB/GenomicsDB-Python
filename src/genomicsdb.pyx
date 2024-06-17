@@ -31,9 +31,11 @@
 
 include "utils.pxi"
 
-import tempfile
 import pandas
 import numpy as np
+import pyarrow as pa
+import tempfile
+import threading
 from enum import Enum
 
 from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
@@ -195,11 +197,16 @@ cdef class _GenomicsDB:
                             row_ranges=None,
                             query_protobuf: query_pb.QueryConfiguration=None,
                             flatten_intervals=False,
-                            json_output=None):
+                            json_output=None,
+                            arrow_output=None,
+                            # non_blocking only used with arrow_output
+                            non_blocking=False):
         """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
 
         if json_output is not None:
             return self.query_variant_calls_json(array, column_ranges, row_ranges, query_protobuf, json_output);
+        elif arrow_output is not None:
+            return self.query_variant_calls_arrow(array, column_ranges, row_ranges, query_protobuf, non_blocking);
         elif flatten_intervals is True:
             return self.query_variant_calls_columnar(array, column_ranges, row_ranges, query_protobuf)
         else:
@@ -305,6 +312,55 @@ cdef class _GenomicsDB:
                                              as_ranges(row_ranges))
       
       return pandas.DataFrame(processor.construct_data_frame()).replace(np.nan, '').replace(-99999, '');
+
+    def query_variant_calls_arrow(self,
+                                  array=None,
+                                  column_ranges=None,
+                                  row_ranges=None,
+                                  query_protobuf: query_pb.QueryConfiguration=None,
+                                  non_blocking=False): 
+      """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
+
+      cdef ArrowVariantCallProcessor processor
+      cdef void *arrow_array = NULL
+      cdef void *arrow_schema = NULL
+
+      if non_blocking:
+        processor.set_threaded(1)
+
+      def query_calls():
+        array_name = as_string(array)
+        scan_range = scan_full()
+        with nogil:
+          self._genomicsdb.query_variant_calls(processor, array_name, scan_range)
+
+      if non_blocking:
+        query_thread = threading.Thread(target=query_calls)
+        query_thread.start()
+      else:
+        query_calls()
+
+      cdef object schema_capsule
+      while True:
+        arrow_array = processor.arrow_array()
+        if arrow_schema == NULL:
+          arrow_schema = processor.arrow_schema();
+          schema_capsule = pycapsule_get_arrow_schema(arrow_schema)
+          schema_obj = _ArrowSchemaWrapper._import_from_c_capsule(schema_capsule)
+          schema = pa.schema(schema_obj.children_schema)
+          yield schema.serialize().to_pybytes()
+        if arrow_array and arrow_schema:
+          array_capsule = pycapsule_get_arrow_array(arrow_array)
+          array_obj = _ArrowArrayWrapper._import_from_c_capsule(schema_capsule, array_capsule)
+          arrays = list()
+          for i in range(array_obj.n_children):
+            arrays.append(pa.array(array_obj.child(i)))
+          yield pa.RecordBatch.from_arrays(arrays, schema=schema).serialize().to_pybytes()
+        else:
+          break
+
+      if non_blocking:
+        query_thread.join()
       
     def to_vcf(self,
                array=None,

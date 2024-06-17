@@ -28,3 +28,4 @@
 numpy>=1.24.0
 pandas>=2.1.0
 protobuf>=4.21.1
+pyarrow

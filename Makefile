@@ -30,6 +30,7 @@ help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
+	rm -f src/genomicsdb.cc
 	rm -fr genomicsdb/lib/lib*
 	rm -fr genomicsdb/include/*.h
 	rm -f genomicsdb/genomicsdb.cpython*so
@@ -96,7 +97,7 @@ dist: ## builds source and wheel package
 install: ## install the package to the active Python's site-packages
 	python setup.py install --with-libs
 
-install-dev: # install the package in place for debug purposes.
+install-dev: clean # install the package in place for debug purposes.
 #	python -m pip install --upgrade pip
 #	python -m pip install -r requirements_dev.txt
 	python setup.py build_ext --inplace --with-libs
