@@ -39,7 +39,7 @@ jobs:
             sudo apt-get update -q && sudo apt install -y libcurl4-openssl-dev curl
             git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GENOMICSDB_BUILD_DIR
             cd $GENOMICSDB_BUILD_DIR
-            cmake -S . -B build -DBUILD_FOR_PYTHON=1 -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME 
+            cmake -S . -B build -DBUILD_FOR_PYTHON=1 -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_HOME -DBUILD_NANOARROW=1
             cd build && make -j4 && make install
             cd $(dirname $GENOMICSDB_HOME)
             tar -cvf ${GENOMICSDB_TARBALL} $(basename $GENOMICSDB_HOME)
