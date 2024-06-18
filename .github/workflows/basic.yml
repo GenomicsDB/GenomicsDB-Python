@@ -20,7 +20,7 @@ env:
 jobs:
   native-build:
     name: GenomicsDB Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Cache Native GenomicsDB
         uses: actions/cache@v3
@@ -57,7 +57,7 @@ jobs:
     name: GenomicsDB Python Build
     needs: native-build
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
       matrix:
