@@ -113,9 +113,12 @@ install_prereqs_for_centos7() {
     yum install -y -q autoconf automake libtool unzip &&
     yum install -y -q cmake3 patch &&
     yum install -y -q perl perl-IPC-Cmd &&
-    which gcc &&
-    gcc --version &&
-    echo "**** Hopefully this gcc works!"
+    yum install -y -q devtoolset-11-gcc &&
+    export CC=/opt/rh/devtoolset-11/root/usr/bin/gcc &&
+    export CXX=/opt/rh/devtoolset-11/root/usr/bin/g++ &&
+    ls -l /opt/rh/devtoolset-11/root/usr/bin/gcc &&
+    ls -l /opt/rh/devtoolset-11/root/usr/bin/g++ &&
+    echo "DONE"
   if [[ $1 == "release" ]]; then
     install_openssl3
     install_curl
