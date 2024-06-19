@@ -121,7 +121,7 @@ install_prereqs_for_centos7() {
     ls -l /opt/rh/devtoolset-11/root/usr/bin/gcc &&
     ls -l /opt/rh/devtoolset-11/root/usr/bin/g++ &&
     echo "Installing devtoolset DONE"
-  if [[ $? != 0 ]]; then exit 1
+  if [[ $? != 0 ]]; then exit 1; fi
   if [[ $1 == "release" ]]; then
     install_openssl3
     install_curl
