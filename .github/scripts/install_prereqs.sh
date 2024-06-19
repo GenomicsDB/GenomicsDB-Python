@@ -116,6 +116,7 @@ install_prereqs_for_centos7() {
     yum install devtoolset-10-toolchain &&
     echo "**** devtoolset installed" &&
     ls /opt/rh/* && echo "**** source toolset" &&
+    exit 1
     source /opt/rh/devtoolset-10/enable &&
     echo "**** clang version=$(clang --version)" &&
     exit 1
