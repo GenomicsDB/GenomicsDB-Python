@@ -115,7 +115,7 @@ install_prereqs_for_centos7() {
     yum install -y -q perl perl-IPC-Cmd &&
     which gcc &&
     gcc --version &&
-    echo "**** DONE"
+    echo "**** Hopefully this gcc works!"
   if [[ $1 == "release" ]]; then
     install_openssl3
     install_curl
