@@ -132,7 +132,7 @@ genomicsdb_extension = Extension(
     library_dirs=[GENOMICSDB_LIB_DIR],
     runtime_library_dirs=rpath,
     extra_link_args=link_args,
-    extra_compile_args=["-std=c++17"],
+    extra_compile_args=["-std=c++20],
 )
 
 with open("README.md") as f:
