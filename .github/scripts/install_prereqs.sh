@@ -113,9 +113,8 @@ install_prereqs_for_centos7() {
     yum install -y -q autoconf automake libtool unzip &&
     yum install -y -q cmake3 patch &&
     yum install -y -q perl perl-IPC-Cmd &&
-    echo "Installing devtoolset-11-GCC" &&
+    echo "Installing devtoolset-11-GCC for semaphore support for cibuildwheel manylinux2014 builds" &&
     yum install -y -q devtoolset-11-gcc devtoolset-11-gcc-c++ &&
-    echo "Installing devtoolset-11-gcc DONE"
     export CC=/opt/rh/devtoolset-11/root/usr/bin/gcc &&
     export CXX=/opt/rh/devtoolset-11/root/usr/bin/g++ &&
     ls -l /opt/rh/devtoolset-11/root/usr/bin/gcc &&
