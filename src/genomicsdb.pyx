@@ -329,10 +329,33 @@ cdef class _GenomicsDB:
         processor.set_threaded(1)
 
       def query_calls():
-        array_name = as_string(array)
-        scan_range = scan_full()
-        with nogil:
-          self._genomicsdb.query_variant_calls(processor, array_name, scan_range)
+        if query_protobuf:
+          if array or column_ranges or row_ranges:
+            raise GenomicsDBException("Cannot specify query_protobuf and array/column_ranges/row_ranges together")
+          configstring = as_protobuf_string(query_protobuf.SerializeToString())
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_PROTOBUF_BINARY_STRING)
+        elif array is None:
+          configstring = as_string("")
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_NONE)
+        elif column_ranges is None:
+          configstring = as_string(array)
+          rows = scan_full()
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring, rows)
+        elif row_ranges is None:
+          configstring = as_string(array)
+          columns = as_ranges(column_ranges)
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring, columns)
+        else:
+          configstring = as_string(array)
+          columns = as_ranges(column_ranges)
+          rows = as_ranges(row_ranges)
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring,
+                                                 columns, rows)
 
       if non_blocking:
         query_thread = threading.Thread(target=query_calls)
