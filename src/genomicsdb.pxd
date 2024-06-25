@@ -91,6 +91,14 @@ cdef extern from "genomicsdb.h":
         string construct_json_output() except +
         pass
 
+    cdef cppclass ArrowVariantCallProcessor(GenomicsDBVariantCallProcessor):
+        ArrowVariantCallProcessor() except +
+        ArrowVariantCallProcessor(bool) except +
+        void set_batching(bool)
+        void* arrow_schema() except + nogil
+        void* arrow_array() except + nogil
+        pass
+
     cdef enum query_config_type_t "GenomicsDB::query_config_type_t":
         GENOMICSDB_NONE "GenomicsDB::NONE",
         GENOMICSDB_JSON_FILE "GenomicsDB::JSON_FILE",
@@ -165,6 +173,78 @@ cdef extern from "genomicsdb_processor.h":
         void process(uint32_t, genomic_interval_t, vector[genomic_field_t]) except +
         object construct_data_frame() except +
         pass
+
+#   Apache Arrow C data structures so we do not have to import (nano)arrow_c
+
+    cdef struct ArrowSchema:
+        const char* format
+        const char* name
+        const char* metadata
+        int64_t flags
+        int64_t n_children
+        ArrowSchema** children
+        ArrowSchema* dictionary
+        void (*release)(ArrowSchema*)
+        pass
+
+    cdef struct ArrowArray:
+         int64_t length
+         int64_t null_count
+         int64_t offset
+         int64_t n_buffers
+         int64_t n_children;
+         const void** buffers
+         ArrowArray** children
+         ArrowArray* dictionary
+         void (*release)(ArrowArray*)
+         pass
+
+    cdef enum ArrowType:
+        NANOARROW_TYPE_UNINITIALIZED = 0
+        NANOARROW_TYPE_NA = 1
+        NANOARROW_TYPE_BOOL
+        NANOARROW_TYPE_UINT8
+        NANOARROW_TYPE_INT8
+        NANOARROW_TYPE_UINT16
+        NANOARROW_TYPE_INT16
+        NANOARROW_TYPE_UINT32
+        NANOARROW_TYPE_INT32
+        NANOARROW_TYPE_UINT64
+        NANOARROW_TYPE_INT64
+        NANOARROW_TYPE_HALF_FLOAT
+        NANOARROW_TYPE_FLOAT
+        NANOARROW_TYPE_DOUBLE
+        NANOARROW_TYPE_STRING
+        NANOARROW_TYPE_BINARY
+        NANOARROW_TYPE_FIXED_SIZE_BINARY
+        NANOARROW_TYPE_DATE32
+        NANOARROW_TYPE_DATE64
+        NANOARROW_TYPE_TIMESTAMP
+        NANOARROW_TYPE_TIME32
+        NANOARROW_TYPE_TIME64
+        NANOARROW_TYPE_INTERVAL_MONTHS
+        NANOARROW_TYPE_INTERVAL_DAY_TIME
+        NANOARROW_TYPE_DECIMAL128
+        NANOARROW_TYPE_DECIMAL256
+        NANOARROW_TYPE_LIST
+        NANOARROW_TYPE_STRUCT
+        NANOARROW_TYPE_SPARSE_UNION
+        NANOARROW_TYPE_DENSE_UNION
+        NANOARROW_TYPE_DICTIONARY
+        NANOARROW_TYPE_MAP
+        NANOARROW_TYPE_EXTENSION
+        NANOARROW_TYPE_FIXED_SIZE_LIST
+        NANOARROW_TYPE_DURATION
+        NANOARROW_TYPE_LARGE_STRING
+        NANOARROW_TYPE_LARGE_BINARY
+        NANOARROW_TYPE_LARGE_LIST
+        NANOARROW_TYPE_INTERVAL_MONTH_DAY_NANO
+
+    # Apache Arrow wrappers to (nano)arrow functionality via genomicsdb libraries
+
+    cdef void genomicsdb_cleanup_arrow_schema(void*)
+    cdef void genomicsdb_cleanup_arrow_array(void*)
+    cdef int genomicsdb_allocate_arrow_schema(ArrowSchema**, ArrowSchema*)
 
 # Filesystem and other Utilities
 cdef extern from "genomicsdb_utils.h":

@@ -51,6 +51,8 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: >
             LD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib64:${{ env.INSTALL_PREFIX }}/lib:$LD_LIBRARY_PATH
             PKG_CONFIG_PATH=${{ env.INSTALL_PREFIX }}/lib64/pkgconfig:${{ env.INSTALL_PREFIX }}/lib/pkgconfig
+            CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
+            CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
           CIBW_TEST_REQUIRES: pytest
 
       - uses: actions/upload-artifact@v4

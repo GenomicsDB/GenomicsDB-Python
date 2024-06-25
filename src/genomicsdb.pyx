@@ -31,9 +31,11 @@
 
 include "utils.pxi"
 
-import tempfile
 import pandas
 import numpy as np
+import pyarrow as pa
+import tempfile
+import threading
 from enum import Enum
 
 from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
@@ -195,11 +197,16 @@ cdef class _GenomicsDB:
                             row_ranges=None,
                             query_protobuf: query_pb.QueryConfiguration=None,
                             flatten_intervals=False,
-                            json_output=None):
+                            json_output=None,
+                            arrow_output=None,
+                            # batching only used with arrow_output
+                            batching=False):
         """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
 
         if json_output is not None:
             return self.query_variant_calls_json(array, column_ranges, row_ranges, query_protobuf, json_output);
+        elif arrow_output is not None:
+            return self.query_variant_calls_arrow(array, column_ranges, row_ranges, query_protobuf, batching);
         elif flatten_intervals is True:
             return self.query_variant_calls_columnar(array, column_ranges, row_ranges, query_protobuf)
         else:
@@ -305,6 +312,77 @@ cdef class _GenomicsDB:
                                              as_ranges(row_ranges))
       
       return pandas.DataFrame(processor.construct_data_frame()).replace(np.nan, '').replace(-99999, '');
+
+    def query_variant_calls_arrow(self,
+                                  array=None,
+                                  column_ranges=None,
+                                  row_ranges=None,
+                                  query_protobuf: query_pb.QueryConfiguration=None,
+                                  batching=False): 
+      """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
+
+      cdef ArrowVariantCallProcessor processor
+
+      if batching:
+        processor.set_batching(1)
+
+      def query_calls():
+        if query_protobuf:
+          if array or column_ranges or row_ranges:
+            raise GenomicsDBException("Cannot specify query_protobuf and array/column_ranges/row_ranges together")
+          configstring = as_protobuf_string(query_protobuf.SerializeToString())
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_PROTOBUF_BINARY_STRING)
+        elif array is None:
+          configstring = as_string("")
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring, GENOMICSDB_NONE)
+        elif column_ranges is None:
+          configstring = as_string(array)
+          rows = scan_full()
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring, rows)
+        elif row_ranges is None:
+          configstring = as_string(array)
+          columns = as_ranges(column_ranges)
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring, columns)
+        else:
+          configstring = as_string(array)
+          columns = as_ranges(column_ranges)
+          rows = as_ranges(row_ranges)
+          with nogil:
+            self._genomicsdb.query_variant_calls(processor, configstring,
+                                                 columns, rows)
+
+      if batching:
+        query_thread = threading.Thread(target=query_calls)
+        query_thread.start()
+      else:
+        query_calls()
+
+      cdef void* arrow_schema = processor.arrow_schema()
+      if arrow_schema:
+        schema_capsule = pycapsule_get_arrow_schema(arrow_schema)
+        schema_obj = _ArrowSchemaWrapper._import_from_c_capsule(schema_capsule)
+        schema = pa.schema(schema_obj.children_schema)
+        yield schema.serialize().to_pybytes()
+      else:
+        raise GenomicsDBException("Failed to retrieve arrow schema for query_variant_calls()")
+
+      cdef void* arrow_array = NULL
+      while True:
+        arrow_array = processor.arrow_array()
+        if arrow_array:
+          array_capsule = pycapsule_get_arrow_array(arrow_array)
+          array_obj = _ArrowArrayWrapper._import_from_c_capsule(schema_capsule, array_capsule)
+          arrays = [pa.array(array_obj.child(i)) for i in range(array_obj.n_children)]
+          yield pa.RecordBatch.from_arrays(arrays, schema=schema).serialize().to_pybytes()
+        else:
+          break
+
+      if batching:
+        query_thread.join()
       
     def to_vcf(self,
                array=None,

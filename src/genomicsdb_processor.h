@@ -40,6 +40,7 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
+#include <semaphore>
 
 #include <Python.h>
 
@@ -132,3 +133,89 @@ class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
   std::map<std::string, std::vector<int>> m_int_fields;
   std::map<std::string, std::vector<float>> m_float_fields;
 };
+
+// Forward declarations for Arrow types
+//struct ArrowSchema;
+//struct ArrowArray;
+
+struct ArrowSchema {
+  // Array type description
+  const char* format;
+  const char* name;
+  const char* metadata;
+  int64_t flags;
+  int64_t n_children;
+  struct ArrowSchema** children;
+  struct ArrowSchema* dictionary;
+
+  // Release callback
+  void (*release)(struct ArrowSchema*);
+  // Opaque producer-specific data
+  void* private_data;
+};
+
+struct ArrowArray {
+  // Array data description
+  int64_t length;
+  int64_t null_count;
+  int64_t offset;
+  int64_t n_buffers;
+  int64_t n_children;
+  const void** buffers;
+  struct ArrowArray** children;
+  struct ArrowArray* dictionary;
+
+  // Release callback
+  void (*release)(struct ArrowArray*);
+  // Opaque producer-specific data
+  void* private_data;
+};
+
+enum ArrowType {
+  NANOARROW_TYPE_UNINITIALIZED = 0,
+  NANOARROW_TYPE_NA = 1,
+  NANOARROW_TYPE_BOOL,
+  NANOARROW_TYPE_UINT8,
+  NANOARROW_TYPE_INT8,
+  NANOARROW_TYPE_UINT16,
+  NANOARROW_TYPE_INT16,
+  NANOARROW_TYPE_UINT32,
+  NANOARROW_TYPE_INT32,
+  NANOARROW_TYPE_UINT64,
+  NANOARROW_TYPE_INT64,
+  NANOARROW_TYPE_HALF_FLOAT,
+  NANOARROW_TYPE_FLOAT,
+  NANOARROW_TYPE_DOUBLE,
+  NANOARROW_TYPE_STRING,
+  NANOARROW_TYPE_BINARY,
+  NANOARROW_TYPE_FIXED_SIZE_BINARY,
+  NANOARROW_TYPE_DATE32,
+  NANOARROW_TYPE_DATE64,
+  NANOARROW_TYPE_TIMESTAMP,
+  NANOARROW_TYPE_TIME32,
+  NANOARROW_TYPE_TIME64,
+  NANOARROW_TYPE_INTERVAL_MONTHS,
+  NANOARROW_TYPE_INTERVAL_DAY_TIME,
+  NANOARROW_TYPE_DECIMAL128,
+  NANOARROW_TYPE_DECIMAL256,
+  NANOARROW_TYPE_LIST,
+  NANOARROW_TYPE_STRUCT,
+  NANOARROW_TYPE_SPARSE_UNION,
+  NANOARROW_TYPE_DENSE_UNION,
+  NANOARROW_TYPE_DICTIONARY,
+  NANOARROW_TYPE_MAP,
+  NANOARROW_TYPE_EXTENSION,
+  NANOARROW_TYPE_FIXED_SIZE_LIST,
+  NANOARROW_TYPE_DURATION,
+  NANOARROW_TYPE_LARGE_STRING,
+  NANOARROW_TYPE_LARGE_BINARY,
+  NANOARROW_TYPE_LARGE_LIST,
+  NANOARROW_TYPE_INTERVAL_MONTH_DAY_NANO
+};
+     
+void genomicsdb_cleanup_arrow_schema(void *schema);
+void genomicsdb_cleanup_arrow_array(void *array);
+void genomicsdb_print_array_children(void *array);
+int64_t get_nchildren(ArrowArray* array);
+ArrowArray** get_children(ArrowArray* array);
+int genomicsdb_allocate_arrow_schema(ArrowSchema** schema, ArrowSchema *src);
