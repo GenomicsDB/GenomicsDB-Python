@@ -322,8 +322,6 @@ cdef class _GenomicsDB:
       """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
 
       cdef ArrowVariantCallProcessor processor
-      cdef void *arrow_array = NULL
-      cdef void *arrow_schema = NULL
 
       if non_blocking:
         processor.set_threaded(1)
@@ -363,21 +361,22 @@ cdef class _GenomicsDB:
       else:
         query_calls()
 
-      cdef object schema_capsule
+      cdef void* arrow_schema = processor.arrow_schema()
+      if arrow_schema:
+        schema_capsule = pycapsule_get_arrow_schema(arrow_schema)
+        schema_obj = _ArrowSchemaWrapper._import_from_c_capsule(schema_capsule)
+        schema = pa.schema(schema_obj.children_schema)
+        yield schema.serialize().to_pybytes()
+      else:
+        raise GenomicsDBException("Failed to retrieve arrow schema for query_variant_calls()")
+
+      cdef void* arrow_array = NULL
       while True:
         arrow_array = processor.arrow_array()
-        if arrow_schema == NULL:
-          arrow_schema = processor.arrow_schema();
-          schema_capsule = pycapsule_get_arrow_schema(arrow_schema)
-          schema_obj = _ArrowSchemaWrapper._import_from_c_capsule(schema_capsule)
-          schema = pa.schema(schema_obj.children_schema)
-          yield schema.serialize().to_pybytes()
-        if arrow_array and arrow_schema:
+        if arrow_array:
           array_capsule = pycapsule_get_arrow_array(arrow_array)
           array_obj = _ArrowArrayWrapper._import_from_c_capsule(schema_capsule, array_capsule)
-          arrays = list()
-          for i in range(array_obj.n_children):
-            arrays.append(pa.array(array_obj.child(i)))
+          arrays = [pa.array(array_obj.child(i)) for i in range(array_obj.n_children)]
           yield pa.RecordBatch.from_arrays(arrays, schema=schema).serialize().to_pybytes()
         else:
           break
