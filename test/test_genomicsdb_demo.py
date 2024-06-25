@@ -107,12 +107,12 @@ class TestGenomicsDBDemo(unittest.TestCase):
     if self.query_config is None:
       return
     print("test_genomicsdb_demo_with_arrow_output")
-    for non_blocking_mode in [False, True]:
+    for batching_mode in [False, True]:
       start = time.time()
       gdb = genomicsdb.connect_with_protobuf(self.query_config)
-      print("\nSummary for non_blocking_mode=" + str(non_blocking_mode) + ":")
+      print("\nSummary for batching mode=" + str(batching_mode) + ":")
       first = True
-      for output in gdb.query_variant_calls(arrow_output=True, non_blocking=non_blocking_mode):
+      for output in gdb.query_variant_calls(arrow_output=True, batching=batching_mode):
         if first:
           schema = pa.ipc.read_schema(pa.py_buffer(output))
           first = False

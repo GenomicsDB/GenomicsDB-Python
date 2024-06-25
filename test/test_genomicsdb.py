@@ -92,7 +92,7 @@ def test_connect_and_query_with_protobuf(setup):
   first = True
   batch = None
   for output in gdb.query_variant_calls(
-      row_ranges=[(0, 3)], array="t0_1_2", arrow_output=True, non_blocking=True
+      row_ranges=[(0, 3)], array="t0_1_2", arrow_output=True, batching=True
   ):
     if first:
       schema = pa.ipc.read_schema(pa.py_buffer(output))

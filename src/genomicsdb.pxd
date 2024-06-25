@@ -94,7 +94,7 @@ cdef extern from "genomicsdb.h":
     cdef cppclass ArrowVariantCallProcessor(GenomicsDBVariantCallProcessor):
         ArrowVariantCallProcessor() except +
         ArrowVariantCallProcessor(bool) except +
-        void set_threaded(bool)
+        void set_batching(bool)
         void* arrow_schema() except + nogil
         void* arrow_array() except + nogil
         pass

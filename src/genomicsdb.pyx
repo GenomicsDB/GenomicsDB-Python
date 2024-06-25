@@ -199,14 +199,14 @@ cdef class _GenomicsDB:
                             flatten_intervals=False,
                             json_output=None,
                             arrow_output=None,
-                            # non_blocking only used with arrow_output
-                            non_blocking=False):
+                            # batching only used with arrow_output
+                            batching=False):
         """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
 
         if json_output is not None:
             return self.query_variant_calls_json(array, column_ranges, row_ranges, query_protobuf, json_output);
         elif arrow_output is not None:
-            return self.query_variant_calls_arrow(array, column_ranges, row_ranges, query_protobuf, non_blocking);
+            return self.query_variant_calls_arrow(array, column_ranges, row_ranges, query_protobuf, batching);
         elif flatten_intervals is True:
             return self.query_variant_calls_columnar(array, column_ranges, row_ranges, query_protobuf)
         else:
@@ -318,13 +318,13 @@ cdef class _GenomicsDB:
                                   column_ranges=None,
                                   row_ranges=None,
                                   query_protobuf: query_pb.QueryConfiguration=None,
-                                  non_blocking=False): 
+                                  batching=False): 
       """ Query for variant calls from the GenomicsDB workspace using array, column_ranges and row_ranges for subsetting """
 
       cdef ArrowVariantCallProcessor processor
 
-      if non_blocking:
-        processor.set_threaded(1)
+      if batching:
+        processor.set_batching(1)
 
       def query_calls():
         if query_protobuf:
@@ -355,7 +355,7 @@ cdef class _GenomicsDB:
             self._genomicsdb.query_variant_calls(processor, configstring,
                                                  columns, rows)
 
-      if non_blocking:
+      if batching:
         query_thread = threading.Thread(target=query_calls)
         query_thread.start()
       else:
@@ -381,7 +381,7 @@ cdef class _GenomicsDB:
         else:
           break
 
-      if non_blocking:
+      if batching:
         query_thread.join()
       
     def to_vcf(self,
