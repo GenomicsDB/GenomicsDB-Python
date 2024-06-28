@@ -92,6 +92,7 @@ release: dist ## package and upload a release
 dist: ## builds source and wheel package
 	python setup.py sdist --with-libs
 	python setup.py bdist_wheel --with-libs
+	package/scripts/delocate_wheel_local.sh
 	ls -l dist
 
 install: ## install the package to the active Python's site-packages
