@@ -41,7 +41,7 @@ GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="genomicsdb")
 copy_genomicsdb_libs = False
 copy_protobuf_definitions = False
-with_version = "0.0.9.3"
+with_version = "0.0.9.14"
 
 args = sys.argv[:]
 for arg in args:
@@ -143,6 +143,9 @@ genomicsdb_extension = Extension(
 with open("README.md") as f:
     long_description = f.read()
 
+with open("requirements.txt") as f:
+    install_requirements = f.readlines()
+
 setup(
     name="genomicsdb",
     description="Experimental Python Bindings for querying GenomicsDB",
@@ -156,7 +159,7 @@ setup(
     ext_modules=[genomicsdb_extension],
     zip_safe=False,
     setup_requires=["cython>=0.27"],
-    install_requires=["numpy>=1.19.5", "pandas", "protobuf>=4.21.1"],
+    install_requires=install_requirements,
     python_requires=">=3.9",
     packages=find_packages(exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
