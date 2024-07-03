@@ -109,6 +109,9 @@ install_prereqs_for_macos() {
 }
 
 install_prereqs_for_centos7() {
+  # Centos 7 has been EOL'ed as of 07/01/2024. Use vault.centos.org instead of mirrorlist.centos.org
+  sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+  sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
   yum install -y -q which wget git &&
     yum install -y -q autoconf automake libtool unzip &&
     yum install -y -q cmake3 patch &&
