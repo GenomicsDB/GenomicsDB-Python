@@ -372,14 +372,17 @@ cdef class _GenomicsDB:
 
       cdef void* arrow_array = NULL
       while True:
-        arrow_array = processor.arrow_array()
-        if arrow_array:
-          array_capsule = pycapsule_get_arrow_array(arrow_array)
-          array_obj = _ArrowArrayWrapper._import_from_c_capsule(schema_capsule, array_capsule)
-          arrays = [pa.array(array_obj.child(i)) for i in range(array_obj.n_children)]
-          yield pa.RecordBatch.from_arrays(arrays, schema=schema).serialize().to_pybytes()
-        else:
-          break
+        try:
+          arrow_array = processor.arrow_array()
+          if arrow_array:
+            array_capsule = pycapsule_get_arrow_array(arrow_array)
+            array_obj = _ArrowArrayWrapper._import_from_c_capsule(schema_capsule, array_capsule)
+            arrays = [pa.array(array_obj.child(i)) for i in range(array_obj.n_children)]
+            yield pa.RecordBatch.from_arrays(arrays, schema=schema).serialize().to_pybytes()
+          else:
+            break
+        except Exception as e:
+          raise GenomicsDBException("Exception from processing of arrow arrays", e)
 
       if batching:
         query_thread.join()
