@@ -111,14 +111,10 @@ class TestGenomicsDBDemo(unittest.TestCase):
       start = time.time()
       gdb = genomicsdb.connect_with_protobuf(self.query_config)
       print("\nSummary for batching mode=" + str(batching_mode) + ":")
-      first = True
       for output in gdb.query_variant_calls(arrow_output=True, batching=batching_mode):
-        if first:
-          schema = pa.ipc.read_schema(pa.py_buffer(output))
-          first = False
-        else:
-          batch = pa.ipc.read_record_batch(pa.py_buffer(output), schema)
-          print("batch num_rows="+str(batch.num_rows)+" num_columns="+str(batch.num_columns))
+        reader = pa.ipc.open_stream(output)
+        batch = reader.read_next_batch()
+        print("batch num_rows="+str(batch.num_rows)+" num_columns="+str(batch.num_columns))
       print("\tElapsed time: " + str(time.time() - start))
 
 if __name__ == '__main__':
