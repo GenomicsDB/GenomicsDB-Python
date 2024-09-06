@@ -108,9 +108,11 @@ if copy_protobuf_definitions:
                 file.write(replaced_contents)
 
 os.environ["CFLAGS"] = "-DUSE_NANOARROW=1"
+os.environ["CXXFLAGS"] = "-DUSE_NANOARROW=1"
 
 if "OSX_ARCH" in os.environ:
     os.environ["CFLAGS"] = "-arch " + os.environ["OSX_ARCH"]
+    os.environ["CXXFLAGS"] = "-arch " + os.environ["OSX_ARCH"]
 
 EXTRA_COMPILE_ARGS=["-std=c++20"]
 if "CXX" in os.environ and os.environ["CXX"].find("devtoolset-11") > 0:
