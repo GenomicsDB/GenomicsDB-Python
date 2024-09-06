@@ -78,29 +78,21 @@ def test_connect_and_query_with_protobuf(setup):
                                             json_output=9999)
 
   # test with query protobuf and arrow output
-  first = True
   schema = pa.schema([("null_field", pa.string())])
   for output in gdb.query_variant_calls(row_ranges=[(0, 3)], array="t0_1_2", arrow_output=True):
-    if first:
-      schema = pa.ipc.read_schema(pa.py_buffer(output))
-      first = False
-    else:
-      batch = pa.ipc.read_record_batch(pa.py_buffer(output), schema)
-      assert batch.num_columns == 6
-      assert batch.num_rows == 5
+    reader = pa.ipc.open_stream(output)
+    batch = reader.read_next_batch()
+    assert batch.num_columns == 6
+    assert batch.num_rows == 5
       
-  first = True
   batch = None
   for output in gdb.query_variant_calls(
       row_ranges=[(0, 3)], array="t0_1_2", arrow_output=True, batching=True
   ):
-    if first:
-      schema = pa.ipc.read_schema(pa.py_buffer(output))
-      first = False
-    else:
-      batch = pa.ipc.read_record_batch(pa.py_buffer(output), schema)
-      assert batch.num_columns == 6
-      assert batch.num_rows == 1 or batch.num_rows == 3
+    reader = pa.ipc.open_stream(output)
+    batch = reader.read_next_batch()
+    assert batch.num_columns == 6
+    assert batch.num_rows == 1 or batch.num_rows == 3
 
   # test with query contig interval and no results
   interval = query_coords.ContigInterval()
