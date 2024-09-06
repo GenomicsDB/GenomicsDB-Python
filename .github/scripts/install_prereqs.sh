@@ -216,6 +216,6 @@ if [[ $1 == "release" ]]; then
     fi
     cmake .. $CMAKE_ARCH_ARG -DBUILD_NANOARROW=1 -DPROTOBUF_ROOT_DIR=./protobuf -DGCSSDK_ROOT_DIR=./gcssdk -DAWSSDK_ROOT_DIR=./awssdk -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DDISABLE_TOOLS=True -DDISABLE_EXAMPLES=True -DDISABLE_TESTING=True -DOPENSSL_USE_STATIC_LIBS=True &&
     make -j4 || rebuild && $SUDO make install &&
-    if [[ -f $INSTALL_PREFIX/lib/libtiledbgenomicsdb.so ]]; then nm $INSTALL_PREFIX/lib/libtiledbgenomicsdb.so | grep Processor fi
+    if [[ -f $INSTALL_PREFIX/lib/libtiledbgenomicsdb.so ]]; then nm $INSTALL_PREFIX/lib/libtiledbgenomicsdb.so | grep Processor; fi
     popd && popd
 fi
