@@ -206,7 +206,7 @@ if [[ $1 == "release" ]]; then
   echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}"
   echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
   # For Debugging
-  git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop $NATIVE_BUILD_DIR
+  git clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_debug_09232024 $NATIVE_BUILD_DIR
   pushd $NATIVE_BUILD_DIR
   mkdir build &&
     pushd build &&
@@ -214,7 +214,7 @@ if [[ $1 == "release" ]]; then
       echo "OSX_ARCH=$OSX_ARCH"
       CMAKE_ARCH_ARG="-DCMAKE_OSX_ARCHITECTURES=${OSX_ARCH}"
     fi
-    cmake .. $CMAKE_ARCH_ARG -DBUILD_NANOARROW=1 -DPROTOBUF_ROOT_DIR=./protobuf -DGCSSDK_ROOT_DIR=./gcssdk -DAWSSDK_ROOT_DIR=./awssdk -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DDISABLE_TOOLS=True -DDISABLE_EXAMPLES=True -DDISABLE_TESTING=True -DOPENSSL_USE_STATIC_LIBS=True &&
+    cmake .. $CMAKE_ARCH_ARG -DCMAKE_BUILD_TYPE=Debug -DBUILD_NANOARROW=1 -DPROTOBUF_ROOT_DIR=./protobuf -DGCSSDK_ROOT_DIR=./gcssdk -DAWSSDK_ROOT_DIR=./awssdk -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH=$INSTALL_PREFIX -DBUILD_EXAMPLES=False -DDISABLE_MPI=True -DDISABLE_OPENMP=True -DDISABLE_TOOLS=True -DDISABLE_EXAMPLES=True -DDISABLE_TESTING=True -DOPENSSL_USE_STATIC_LIBS=True &&
     make -j4 || rebuild && $SUDO make install &&
     popd && popd
 fi
