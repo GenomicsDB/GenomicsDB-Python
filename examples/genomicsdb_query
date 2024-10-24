@@ -74,6 +74,7 @@ def main():
                       action="append",
                       required=True,
                       help="One or more genomic intervals over which to operate. This argument may be specified 1 or more times e.g -L chr1:1-10000 -L chr2 -L chr3:1000")
+  parser.add_argument("-f", "--filter", required=False, help="Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == \"G\" && resolve(GT, REF, ALT) &= \"T/T\" && ALT |= \"T\"'")
   parser.add_argument("-o", "--output", required=True, help="a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv")
   
 
@@ -94,6 +95,7 @@ def main():
   if not genomicsdb.is_file(vidmap_file) or not genomicsdb.is_file(loader_file):
     raise RuntimeError(f"vidmap({vidmap_file}) or loader({loader_file}) not found")
   intervals=args.interval
+  filter=args.filter
   output=args.output
   
   #parse vidmap.json
@@ -114,9 +116,13 @@ def main():
   export_config.vid_mapping_file = workspace+"/vidmap.json"
   export_config.bypass_intersecting_intervals_phase = False
   export_config.enable_shared_posixfs_optimizations = True
+  if filter:
+    export_config.query_filter = filter
   gdb = genomicsdb.connect_with_protobuf(export_config)
-  
+
+  print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
   for interval in intervals:
+    print(f"Processing interval({interval})...")
     # query column interval
     # get tiledb offsets for interval
     contig, start, end = parse_interval(interval)
@@ -124,7 +130,7 @@ def main():
       contig_offset = start+contigs_map[contig]["tiledb_column_offset"]-1
       length = contigs_map[contig]["length"]
       if end and end<length+1:
-        contig_end = contig_offset + end - 1
+        contig_end = contig_offset + end - start
       else:
         end = length
         contig_end = length - 1
@@ -133,14 +139,16 @@ def main():
 
     arrays=[]
     for partition in partitions:
-      if contig_offset >= partition["begin"]["tiledb_column"] and contig_end <= partition["end"]["tiledb_column"]:
-        if partition["workspace"] != workspace:
+      if contig_end < partition["begin"]["tiledb_column"] or contig_offset > partition["end"]["tiledb_column"]:
+          continue
+      if partition["workspace"] != workspace:
           raise RuntimeError(f"Partiton workspaces({partition['workspace']} different from input workspace{workspace} not supported")
-        arrays.append(partition["array_name"])
-
+      arrays.append(partition["array_name"])
+    print(f"Arrays:{arrays} under consideration for interval({interval})")
     arrays_length = len(arrays)
     if arrays_length == 0:
-      print(f"No arrays in the workspace matched with the input interval(${interval})")
+      print(f"No arrays in the workspace matched input interval({interval})")
+      continue
 
     for idx, array in enumerate(arrays):
       query_config = query_pb.QueryConfiguration()
@@ -152,9 +160,9 @@ def main():
       contig_interval.end = end
       query_config.query_contig_intervals.extend([contig_interval])
       df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
-      df.to_csv(generate_output_filename(output, interval, idx))
-
-
+      df.to_csv(generate_output_filename(output, interval, idx), index=False)
+  
+  print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals}) DONE")
 
 if __name__ == "__main__":
     main()

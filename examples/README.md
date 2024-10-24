@@ -4,7 +4,7 @@ Simple GenomicsDB query tool, given a workspace and genomic intervals of the for
 
 Assumption : The workspace should have been created with the `vcf2genomicsdb` tool or with `gatk GenomicsDBImport` and should exist.
 
-For ease of use, open run.sh and change the `WORKSPACE` and the `INTERVALS` variables to what is desired before invoking it. run.sh calls genomicsdb_query, the tool does the querying of the workspace for the intervals specified and outputs one csv file per input interval.
+For ease of use, open run.sh and change the `WORKSPACE`, `INTERVALS` and optionally `FILTER` variables to what is desired before invoking it. Variables `VIDMAP_FILE` and `LOADER_FILE` need to be set only if they are not in the workspace. run.sh calls genomicsdb_query, the tool does the querying of the workspace for the intervals specified and outputs one csv file per input interval.
 
 ``` 
 ~/GenomicsDB-Python/examples: ./genomicsdb_query --help
@@ -22,6 +22,8 @@ options:
                         Optional - URL to vid mapping file. Defaults to vidmap.json in workspace
   -l LOADER, --loader LOADER
                         Optional - URL to loader file. Defaults to loader.json in workspace
+  -f FILTER, --filter FILTER
+                        Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == "G" && resolve(GT, REF, ALT) &= "T/T" && ALT |= "T"'
   -L INTERVAL, --interval INTERVAL
                         One or more genomic intervals over which to operate. This argument may be specified 1 or more times e.g -L chr1:1-10000 -L 1:100001 -L chr2 -L chr3:1000
   -o OUTPUT, --output OUTPUT
