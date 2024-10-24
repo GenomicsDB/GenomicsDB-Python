@@ -155,7 +155,8 @@ def main():
                 end = length
                 contig_end = contigs_map[contig]["tiledb_column_offset"] + length - 1
         else:
-            raise RuntimeError(f"Contig({contig} not found in vidmap.json")
+            print(f"Contig({contig}) not found in vidmap.json")
+            continue
 
         arrays = []
         for partition in partitions:
@@ -167,26 +168,26 @@ def main():
                 )
             arrays.append(partition["array_name"])
 
-            print(f"\tArrays:{arrays} under consideration for interval({interval})")
-            arrays_length = len(arrays)
-            if arrays_length == 0:
-                print(f"No arrays in the workspace matched input interval({interval})")
-                continue
+        arrays_length = len(arrays)
+        if arrays_length == 0:
+            print(f"No arrays in the workspace matched input interval({interval})")
+            continue
+        print(f"\tArrays:{arrays} under consideration for interval({interval})")
 
-            for idx, array in enumerate(arrays):
-                if not genomicsdb.is_file(workspace + "/" + array + "/__array_schema.tdb"):
-                    print(f"\tArray({array}) not imported into workspace({workspace}) for interval({interval})")
-                    continue
-                query_config = query_pb.QueryConfiguration()
-                query_config.array_name = array
-                # query column interval
-                contig_interval = query_coords.ContigInterval()
-                contig_interval.contig = contig
-                contig_interval.begin = start
-                contig_interval.end = end
-                query_config.query_contig_intervals.extend([contig_interval])
-                df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
-                df.to_csv(generate_output_filename(output, interval, idx), index=False)
+        for idx, array in enumerate(arrays):
+            if not genomicsdb.is_file(workspace + "/" + array + "/__array_schema.tdb"):
+                print(f"\tArray({array}) not imported into workspace({workspace}) for interval({interval})")
+                continue
+            query_config = query_pb.QueryConfiguration()
+            query_config.array_name = array
+            # query column interval
+            contig_interval = query_coords.ContigInterval()
+            contig_interval.contig = contig
+            contig_interval.begin = start
+            contig_interval.end = end
+            query_config.query_contig_intervals.extend([contig_interval])
+            df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
+            df.to_csv(generate_output_filename(output, interval, idx), index=False)
 
     print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals}) DONE")
 
