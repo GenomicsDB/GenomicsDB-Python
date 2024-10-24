@@ -55,7 +55,7 @@ if [[ -z ${VIDMAP_FILE} && -z ${LOADER_FILE} ]]; then
 elif  [[ -z ${VIDMAP_FILE} ]]; then
   echo ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -v $VIDMAP_FILE $FILTER_EXPR -o $OUTPUT_FILE
 else
-  echo ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -v $VIDMAP_FILE $LOADER_FILE $FILTER_EXPR -o $OUTPUT_FILE
+  echo ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -v $VIDMAP_FILE -l $LOADER_FILE $FILTER_EXPR -o $OUTPUT_FILE
 fi
 
 deactivate
