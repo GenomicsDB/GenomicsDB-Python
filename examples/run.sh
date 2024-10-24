@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #
 # query script
 #
@@ -28,7 +27,7 @@
 # Description : Python bindings to the native GenomicsDB Library
 #
 
-WORKSPACE=~/GenomicsDB.develop.1/install/bin/ws
+WORKSPACE=my_workspace
 declare -a INTERVALS=("1:100-100000" "1:100001" "2")
 #VIDMAP_FILE=my_vidmap_file.json
 #LOADER_FILE=my_loader_file.json
