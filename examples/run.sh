@@ -27,12 +27,18 @@
 # Description : Python bindings to the native GenomicsDB Library
 #
 
-WORKSPACE=/nfs6/nalini/1000g/ws
-declare -a INTERVALS=("1:1-40000000" "2:3000" "3")
+WORKSPACE=my_workspace
+declare -a INTERVALS
+INTERVALS=("1:1-40000000" "2:3000" "3")
 #VIDMAP_FILE=my_vidmap_file.json
 #LOADER_FILE=my_loader_file.json
 #FILTER='resolve(GT, REF, ALT) &= "T/T"'
 OUTPUT_FILE=query_output
+
+
+###########################################
+# Should not have to change anything below
+###########################################
 
 if [[ ! -d env ]]; then
   python3.11 -m venv env
@@ -47,15 +53,16 @@ do
    INTERVAL_ARGS="$INTERVAL_ARGS -L $INTERVAL"
 done
 
-if [[ ! -z FILTER ]]; then
-  FILTER_EXPR = "-f $FILTER"
+if [[ ! -z ${FILTER} ]]; then
+  FILTER_EXPR="-f $FILTER"
+fi
 
 if [[ -z ${VIDMAP_FILE} && -z ${LOADER_FILE} ]]; then
-  echo ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS $FILTER_EXPR -o $OUTPUT_FILE
+  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS $FILTER_EXPR -o $OUTPUT_FILE
 elif  [[ -z ${VIDMAP_FILE} ]]; then
-  echo ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -v $VIDMAP_FILE $FILTER_EXPR -o $OUTPUT_FILE
+  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -v $VIDMAP_FILE $FILTER_EXPR -o $OUTPUT_FILE
 else
-  echo ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -v $VIDMAP_FILE -l $LOADER_FILE $FILTER_EXPR -o $OUTPUT_FILE
+  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -v $VIDMAP_FILE -l $LOADER_FILE $FILTER_EXPR -o $OUTPUT_FILE
 fi
 
 deactivate
