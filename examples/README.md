@@ -30,7 +30,7 @@ options:
 ```
 
 ```
-~/GenomicsDB-Python/examples: ./genomicsdb_query -w  /Users/nalini/GenomicsDB.develop.1/install/bin/ws  -L 1:100-100000 -L 1:100001 -L 2 -o query_output
+~/GenomicsDB-Python/examples: ./genomicsdb_query -w my_workspace  -L 1:100-100000 -L 1:100001 -L 2 -o query_output
 ~/GenomicsDB-Python/examples: ls query_output*
 query_output_1-100-100000.csv  query_output_1-100001.csv      query_output_2.csv
 
