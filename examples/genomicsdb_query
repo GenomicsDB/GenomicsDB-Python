@@ -189,7 +189,7 @@ def main():
             df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
             df.to_csv(generate_output_filename(output, interval, idx), index=False)
 
-    print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals}) DONE")
+    print(f"DONE genomicsdb_query for workspace({workspace}) and intervals({intervals})")
 
 
 if __name__ == "__main__":
