@@ -28,7 +28,7 @@
 #
 
 WORKSPACE=/nfs6/nalini/1000g/ws
-declare -a INTERVALS=("1:1-40000000")
+declare -a INTERVALS=("1:1-40000000" "2:3000" "3")
 #VIDMAP_FILE=my_vidmap_file.json
 #LOADER_FILE=my_loader_file.json
 #FILTER='resolve(GT, REF, ALT) &= "T/T"'
