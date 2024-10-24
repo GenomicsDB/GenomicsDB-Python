@@ -4,7 +4,7 @@ Simple GenomicsDB query tool, given a workspace and genomic intervals of the for
 
 Assumption : The workspace should have been created with the `vcf2genomicsdb` tool or with `gatk GenomicsDBImport` and should exist.
 
-For ease of use, open run.sh and change the `WORKSPACE` and the `INTERVALS` variables to what is desired before invoking it. run.sh calls genomicsdb_query, the program that contains the guts of actually querying the workspace for the intervals specified and outputs one csv file per input interval.
+For ease of use, open run.sh and change the `WORKSPACE` and the `INTERVALS` variables to what is desired before invoking it. run.sh calls genomicsdb_query, the tool does the querying of the workspace for the intervals specified and outputs one csv file per input interval.
 
 ``` 
 ~/GenomicsDB-Python/examples: ./genomicsdb_query --help
