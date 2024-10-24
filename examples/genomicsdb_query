@@ -143,7 +143,6 @@ def main():
     print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
     for interval in intervals:
         print(f"Processing interval({interval})...")
-        # query column interval
         # get tiledb offsets for interval
         contig, start, end = parse_interval(interval)
         if contig in contigs_map:
@@ -180,7 +179,6 @@ def main():
                 continue
             query_config = query_pb.QueryConfiguration()
             query_config.array_name = array
-            # query column interval
             contig_interval = query_coords.ContigInterval()
             contig_interval.contig = contig
             contig_interval.begin = start
