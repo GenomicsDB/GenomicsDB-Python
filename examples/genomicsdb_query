@@ -60,7 +60,7 @@ def generate_output_filename(output, interval, idx):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="query", description="GenomicsDB simple query", usage="%(prog)s [options]")
+    parser = argparse.ArgumentParser(prog="query", description="GenomicsDB simple query with samples/intervals/filter as inputs", formatter_class=argparse.RawTextHelpFormatter, usage="%(prog)s [options]")
     parser.add_argument("--version", action="store_true", help="print GenomicsDB native library version and exit")
     parser.add_argument(
         "-w",
@@ -76,14 +76,40 @@ def main():
         help="Optional - URL to vid mapping file. Defaults to vidmap.json in workspace",
     )
     parser.add_argument(
+        "-c",
+        "--callset",
+        required=False,
+        help="Optional - URL to callset mapping file. Defaults to callset.json in workspace",
+    )
+    parser.add_argument(
         "-l", "--loader", required=False, help="Optional - URL to loader file. Defaults to loader.json in workspace"
     )
     parser.add_argument(
-        "-L",
+        "-i",
         "--interval",
         action="append",
-        required=True,
-        help="One or more genomic intervals over which to operate. This argument may be specified 1 or more times e.g -L chr1:1-10000 -L chr2 -L chr3:1000",
+        required=False,
+        help="genomic intervals over which to operate. The intervals should be specified in the <CHROM>:<START>-<END> format with START and END optional. This argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+    )
+    parser.add_argument(
+        "-I",
+        "--interval-list",
+        action="append",
+        required=False,
+        help="genomic intervals listed in a file over which to operate. The intervals should be specified in the <CHROM>:<START>-<END> format, with START and END optional one interval per line. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+    )
+    parser.add_argument(
+        "-s",
+        "--sample",
+        action="append",
+        required=False,
+        help="sample names over which to operate. This argument may be specified 0 or more times e.g -s HG00097 -s HG00090. \nNote: \n\t1. -s/--sample and -S/--sample-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+    )
+    parser.add_argument(
+        "-S",
+        "--sample-list",
+        required=False,
+        help="sample file containing list of samples, one sample per line, to operate upon. \nNote: \n\t1. -s/--sample and -S/--sample-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
     )
     parser.add_argument(
         "-f",
@@ -92,10 +118,16 @@ def main():
         help="Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == \"G\" && resolve(GT, REF, ALT) &= \"T/T\" && ALT |= \"T\"'",
     )
     parser.add_argument(
+        "-t",
+        "--output-type",
+        required=False,
+        help="Optional - query output could be specified as either 'csv' or 'json'. Defaults to 'csv'",
+    )
+    parser.add_argument(
         "-o",
         "--output",
         required=True,
-        help="a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv",
+        help="a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv/.json",
     )
 
     args = parser.parse_args()
@@ -116,6 +148,7 @@ def main():
         raise RuntimeError(f"vidmap({vidmap_file}) or loader({loader_file}) not found")
     intervals = args.interval
     filter = args.filter
+    output_type = args.output_type
     output = args.output
 
     # parse vidmap.json
@@ -184,8 +217,13 @@ def main():
             contig_interval.begin = start
             contig_interval.end = end
             query_config.query_contig_intervals.extend([contig_interval])
-            df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
-            df.to_csv(generate_output_filename(output, interval, idx), index=False)
+            if output_type == "csv":
+                df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
+                df.to_csv(generate_output_filename(output, output_type, interval, idx), index=False)
+            elif output_type == "json":
+                json = gdb.query_variant_calls(query_protobuf=query_config, json_output=json_output_mode.ALL)
+                with open(generate_output_filename(output, output_type, interval, idx, "wb")) as f:
+                    f.write(json)
 
     print(f"DONE genomicsdb_query for workspace({workspace}) and intervals({intervals})")
 
