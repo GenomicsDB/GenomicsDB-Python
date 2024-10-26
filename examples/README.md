@@ -30,7 +30,6 @@ options:
                         	1. -i/--interval and -I/--interval-list are mutually exclusive 
                         	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
   -I INTERVAL_LIST, --interval-list INTERVAL_LIST
-                        NOT YET IMPLEMENTED
                         genomic intervals listed in a file over which to operate.
                         The intervals should be specified in the <CONTIG>:<START>-<END> format, with START and END optional one interval per line. 
                         Note: 
@@ -42,7 +41,6 @@ options:
                         	1. -s/--sample and -S/--sample-list are mutually exclusive 
                         	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
   -S SAMPLE_LIST, --sample-list SAMPLE_LIST
-                        NOT YET IMPLEMENTED
                         sample file containing list of samples, one sample per line, to operate upon. 
                         Note: 
                         	1. -s/--sample and -S/--sample-list are mutually exclusive 

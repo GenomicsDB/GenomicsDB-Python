@@ -24,14 +24,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Description : Python bindings to the native GenomicsDB Library
 #
 
 WORKSPACE=${WORKSPACE:-my_workspace}
 declare -a INTERVALS
 INTERVALS=("1:1-40000000" "2:3000" "3")
 #declare -a SAMPLES
-#SAMPLES={"HG00096", "HG00097", "HG00099"}
+#SAMPLES=("HG00096" "HG00097" "HG00099")
 #VIDMAP_FILE=my_vidmap_file.json
 #LOADER_FILE=my_loader_file.json
 #FILTER='resolve(GT, REF, ALT) &= "T/T"'
