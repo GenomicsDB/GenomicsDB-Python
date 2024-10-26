@@ -34,11 +34,12 @@
 #   ALL.all_fixed.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.HG00101.vcf.gz
 # To create a workspace for testing, do the following
 # ~/GenomicsDB/install/bin/vcf2genomicsdb_init -w ws -S ~/vcfs -n 1000
+# ~/GenomicsDB/install/bin/vcf2genomicsdb -r 0 ws/loader.json
 # ~/GenomicsDB/install/bin/vcf2genomicsdb -r 1 ws/loader.json
 # ~/GenomicsDB/install/bin/vcf2genomicsdb -r 2 ws/loader.json
 # ~/GenomicsDB/install/bin/vcf2genomicsdb -r 80 ws/loader.json
 
-WORKSPACE=${WORKSPACE:-my_workspace}
+WORKSPACE=${WORKSPACE:-ws}
 INTERVAL_ARGS="-i 1:1-40000000 -i 2:3000-40000 -i 2:40001 -i 3"
 SAMPLE_ARGS="-s HG00096 -s HG00097 -s HG00099"
 VIDMAP_FILE=vidmap_file.json
