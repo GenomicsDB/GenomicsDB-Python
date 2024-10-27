@@ -24,16 +24,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Description : Python bindings to the native GenomicsDB Library
 #
 
-WORKSPACE=my_workspace
+WORKSPACE=${WORKSPACE:-my_workspace}
 declare -a INTERVALS
 INTERVALS=("1:1-40000000" "2:3000" "3")
+#declare -a SAMPLES
+#SAMPLES=("HG00096" "HG00097" "HG00099")
 #VIDMAP_FILE=my_vidmap_file.json
 #LOADER_FILE=my_loader_file.json
 #FILTER='resolve(GT, REF, ALT) &= "T/T"'
-OUTPUT_FILE=query_output
+OUTPUT_FILE=my_output
 
 
 ###########################################
@@ -50,19 +51,26 @@ fi
 
 for INTERVAL in "${INTERVALS[@]}"
 do
-   INTERVAL_ARGS="$INTERVAL_ARGS -L $INTERVAL"
+   INTERVAL_ARGS="$INTERVAL_ARGS -i $INTERVAL"
 done
+
+if [[ ! -z ${SAMPLES} ]]; then
+  for SAMPLE in "${SAMPLES[@]}"
+  do
+    SAMPLE_ARGS="$SAMPLE_ARGS -s $SAMPLE"
+  done
+fi
 
 if [[ ! -z ${FILTER} ]]; then
   FILTER_EXPR="-f $FILTER"
 fi
 
 if [[ -z ${VIDMAP_FILE} && -z ${LOADER_FILE} ]]; then
-  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS $FILTER_EXPR -o $OUTPUT_FILE
+  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE
 elif  [[ -z ${VIDMAP_FILE} ]]; then
-  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -v $VIDMAP_FILE $FILTER_EXPR -o $OUTPUT_FILE
+  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS $SAMPLE_ARGS -v $VIDMAP_FILE $FILTER_EXPR -o $OUTPUT_FILE
 else
-  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -v $VIDMAP_FILE -l $LOADER_FILE $FILTER_EXPR -o $OUTPUT_FILE
+  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS $SAMPLE_ARGS-v $VIDMAP_FILE -l $LOADER_FILE $FILTER_EXPR -o $OUTPUT_FILE
 fi
 
 deactivate

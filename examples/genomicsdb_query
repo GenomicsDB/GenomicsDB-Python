@@ -28,12 +28,201 @@
 
 import argparse
 import json
+import os
 import re
 import sys
 
 import genomicsdb
+from genomicsdb import json_output_mode
 from genomicsdb.protobuf import genomicsdb_coordinates_pb2 as query_coords
 from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
+
+
+def parse_vidmap_json(vidmap_file, intervals=None):
+    if type(intervals) == str:
+        is_file = True
+    else:
+        is_file = False
+    contigs_map = {}
+    vidmap = json.loads(genomicsdb.read_entire_file(vidmap_file))
+    contigs = vidmap["contigs"]
+    if intervals and is_file:
+        with open(intervals) as file:
+            intervals = [line.rstrip() for line in file]
+    all_intervals = not intervals
+    if not intervals:
+        intervals = []
+    for contig in contigs:
+        contigs_map[contig["name"]] = contig
+        if all_intervals:
+            intervals.append(contig["name"])
+    return contigs_map, intervals
+
+
+def parse_callset_json(callset_file, samples=None):
+    if type(samples) == str:
+        is_file = True
+    else:
+        is_file = False
+    callset = json.loads(genomicsdb.read_entire_file(callset_file))
+    callsets = callset["callsets"]
+    if samples and is_file:
+        with open(samples) as file:
+            samples = [line.rstrip() for line in file]
+    if not samples:
+        samples = [callset for callset in callsets]
+    return samples
+
+
+def genomicsdb_connect(workspace, callset_file, vidmap_file, filter):
+    export_config = query_pb.ExportConfiguration()
+    export_config.workspace = workspace
+    export_config.attributes.extend(["REF", "ALT", "GT"])
+    export_config.vid_mapping_file = vidmap_file
+    export_config.callset_mapping_file = callset_file
+    export_config.bypass_intersecting_intervals_phase = False
+    export_config.enable_shared_posixfs_optimizations = True
+    if filter:
+        export_config.query_filter = filter
+    return genomicsdb.connect_with_protobuf(export_config)
+
+
+def setup_gdb():
+    parser = argparse.ArgumentParser(
+        prog="query",
+        description="GenomicsDB simple query with samples/intervals/filter as inputs",
+        formatter_class=argparse.RawTextHelpFormatter,
+        usage="%(prog)s [options]",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=genomicsdb.version(),
+        help="print GenomicsDB native library version and exit",
+    )
+    parser.add_argument(
+        "-w",
+        "--workspace",
+        required=True,
+        help="URL to GenomicsDB workspace \ne.g. -w my_workspace or -w az://my_container/my_workspace"
+        + " or -w s3://my_bucket/my_workspace or -w gs://my_bucket/my_workspace",
+    )
+    parser.add_argument(
+        "-v",
+        "--vidmap",
+        required=False,
+        help="Optional - URL to vid mapping file. Defaults to vidmap.json in workspace",
+    )
+    parser.add_argument(
+        "-c",
+        "--callset",
+        required=False,
+        help="Optional - URL to callset mapping file. Defaults to callset.json in workspace",
+    )
+    parser.add_argument(
+        "-l", "--loader", required=False, help="Optional - URL to loader file. Defaults to loader.json in workspace"
+    )
+    parser.add_argument("--list-samples", action="store_true", help="List samples ingested into the workspace and exit")
+    parser.add_argument(
+        "--list-contigs", action="store_true", help="List contigs for the ingested samples in the workspace and exit"
+    )
+    parser.add_argument(
+        "-i",
+        "--interval",
+        action="append",
+        required=False,
+        help="genomic intervals over which to operate. The intervals should be specified in the <CONTIG>:<START>-<END> format with START and END optional.\nThis argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+    )
+    parser.add_argument(
+        "-I",
+        "--interval-list",
+        required=False,
+        help="genomic intervals listed in a file over which to operate.\nThe intervals should be specified in the <CONTIG>:<START>-<END> format, with START and END optional one interval per line. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+    )
+    parser.add_argument(
+        "-s",
+        "--sample",
+        action="append",
+        required=False,
+        help="sample names over which to operate. This argument may be specified 0 or more times e.g -s HG00097 -s HG00090. \nNote: \n\t1. -s/--sample and -S/--sample-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+    )
+    parser.add_argument(
+        "-S",
+        "--sample-list",
+        required=False,
+        help="sample file containing list of samples, one sample per line, to operate upon. \nNote: \n\t1. -s/--sample and -S/--sample-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+    )
+    parser.add_argument(
+        "-f",
+        "--filter",
+        required=False,
+        help="Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == \"G\" && resolve(GT, REF, ALT) &= \"T/T\" && ALT |= \"T\"'",
+    )
+    parser.add_argument(
+        "-t",
+        "--output-type",
+        choices=["csv", "json"],
+        default="csv",
+        help="Optional - specify type of output for the query (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="query_output",
+        help="a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv/.json (default: %(default)s)",
+    )
+
+    args = parser.parse_args()
+
+    workspace = os.path.abspath(args.workspace)
+    if not genomicsdb.is_file(workspace + "/__tiledb_workspace.tdb"):
+        raise RuntimeError(f"workspace({workspace}) not found")
+    callset_file = args.callset
+    if not callset_file:
+        callset_file = workspace + "/callset.json"
+    vidmap_file = args.vidmap
+    if not vidmap_file:
+        vidmap_file = workspace + "/vidmap.json"
+    loader_file = args.loader
+    if not loader_file:
+        loader_file = workspace + "/loader.json"
+    if (
+        not genomicsdb.is_file(callset_file)
+        or not genomicsdb.is_file(vidmap_file)
+        or not genomicsdb.is_file(loader_file)
+    ):
+        raise RuntimeError(f"callset({callset_file}) vidmap({vidmap_file}) or loader({loader_file}) not found")
+
+    if args.list_contigs:
+        _, intervals = parse_vidmap_json(vidmap_file)
+        print(*intervals, sep="\n")
+        sys.exit(0)
+
+    if args.list_samples:
+        samples = parse_callset_json(callset_file)
+        print(*samples, sep="\n")
+        sys.exit(0)
+
+    intervals = args.interval
+    interval_list = args.interval_list
+    samples = args.sample
+    sample_list = args.sample_list
+    if not intervals and not samples and not interval_list and not sample_list:
+        raise RuntimeError(
+            "Specify at least one of either -i/-interval -I/--interval-list -s/--sample -S/--sample-list has to be specified"
+        )
+
+    contigs_map, intervals = parse_vidmap_json(vidmap_file, intervals or interval_list)
+    samples = parse_callset_json(callset_file, samples or sample_list)
+
+    # parse loader.json for partitions
+    loader = json.loads(genomicsdb.read_entire_file(loader_file))
+    partitions = loader["column_partitions"]
+
+    gdb = genomicsdb_connect(workspace, callset_file, vidmap_file, args.filter)
+
+    return gdb, workspace, partitions, contigs_map, intervals, samples, args.output_type, args.output
+
 
 interval_pattern = re.compile(r"(.*):(.*)-(.*)|(.*):(.*)|(.*)")
 
@@ -52,93 +241,15 @@ def parse_interval(interval: str):
     raise RuntimeError(f"Interval {interval} could not be parsed")
 
 
-def generate_output_filename(output, interval, idx):
+def generate_output_filename(output, output_type, interval, idx):
     output_filename = f"{output}_{interval.replace(':', '-')}"
     if idx > 0:
         output_filename = output_filename + f"_{idx}"
-    return output_filename + ".csv"
+    return output_filename + "." + output_type
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="query", description="GenomicsDB simple query", usage="%(prog)s [options]")
-    parser.add_argument("--version", action="store_true", help="print GenomicsDB native library version and exit")
-    parser.add_argument(
-        "-w",
-        "--workspace",
-        required=True,
-        help="URL to GenomicsDB workspace, e.g. -w my_workspace or -w az://my_container/my_workspace"
-        + " or -w s3://my_bucket/my_workspace or -w gs://my_bucket/my_workspace",
-    )
-    parser.add_argument(
-        "-v",
-        "--vidmap",
-        required=False,
-        help="Optional - URL to vid mapping file. Defaults to vidmap.json in workspace",
-    )
-    parser.add_argument(
-        "-l", "--loader", required=False, help="Optional - URL to loader file. Defaults to loader.json in workspace"
-    )
-    parser.add_argument(
-        "-L",
-        "--interval",
-        action="append",
-        required=True,
-        help="One or more genomic intervals over which to operate. This argument may be specified 1 or more times e.g -L chr1:1-10000 -L chr2 -L chr3:1000",
-    )
-    parser.add_argument(
-        "-f",
-        "--filter",
-        required=False,
-        help="Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == \"G\" && resolve(GT, REF, ALT) &= \"T/T\" && ALT |= \"T\"'",
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        required=True,
-        help="a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv",
-    )
-
-    args = parser.parse_args()
-    if args.version:
-        print(f"GenomicsDB native library version={genomicsdb.version()}")
-        sys.exit(0)
-
-    workspace = args.workspace
-    if not genomicsdb.is_file(workspace + "/__tiledb_workspace.tdb"):
-        raise RuntimeError(f"workspace({workspace}) not found")
-    vidmap_file = args.vidmap
-    if not vidmap_file:
-        vidmap_file = workspace + "/vidmap.json"
-    loader_file = args.loader
-    if not loader_file:
-        loader_file = workspace + "/loader.json"
-    if not genomicsdb.is_file(vidmap_file) or not genomicsdb.is_file(loader_file):
-        raise RuntimeError(f"vidmap({vidmap_file}) or loader({loader_file}) not found")
-    intervals = args.interval
-    filter = args.filter
-    output = args.output
-
-    # parse vidmap.json
-    contigs_map = {}
-    vidmap = json.loads(genomicsdb.read_entire_file(vidmap_file))
-    contigs = vidmap["contigs"]
-    for contig in contigs:
-        contigs_map[contig["name"]] = contig
-
-    # parse loader.json
-    loader = json.loads(genomicsdb.read_entire_file(loader_file))
-    partitions = loader["column_partitions"]
-
-    export_config = query_pb.ExportConfiguration()
-    export_config.workspace = workspace
-    export_config.attributes.extend(["REF", "ALT", "GT"])
-    export_config.callset_mapping_file = workspace + "/callset.json"
-    export_config.vid_mapping_file = workspace + "/vidmap.json"
-    export_config.bypass_intersecting_intervals_phase = False
-    export_config.enable_shared_posixfs_optimizations = True
-    if filter:
-        export_config.query_filter = filter
-    gdb = genomicsdb.connect_with_protobuf(export_config)
+    gdb, workspace, partitions, contigs_map, intervals, samples, output_type, output = setup_gdb()
 
     print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
     for interval in intervals:
@@ -163,7 +274,7 @@ def main():
                 continue
             if partition["workspace"] != workspace:
                 raise RuntimeError(
-                    f"Partiton workspaces({partition['workspace']} different from input workspace{workspace} not supported"
+                    f"Partiton workspaces({partition['workspace']} different from input workspace({workspace}) not supported"
                 )
             arrays.append(partition["array_name"])
 
@@ -183,11 +294,19 @@ def main():
             contig_interval.contig = contig
             contig_interval.begin = start
             contig_interval.end = end
+            if samples:
+                for sample in samples:
+                    query_config.query_sample_names.append(sample)
             query_config.query_contig_intervals.extend([contig_interval])
-            df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
-            df.to_csv(generate_output_filename(output, interval, idx), index=False)
+            if output_type == "csv":
+                df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
+                df.to_csv(generate_output_filename(output, output_type, interval, idx), index=False)
+            elif output_type == "json":
+                json_output = gdb.query_variant_calls(query_protobuf=query_config, json_output=json_output_mode.ALL)
+                with open(generate_output_filename(output, output_type, interval, idx), "wb") as f:
+                    f.write(json_output)
 
-    print(f"DONE genomicsdb_query for workspace({workspace}) and intervals({intervals})")
+    print(f"genomicsdb_query for workspace({workspace}) and intervals({intervals}) completed successfully")
 
 
 if __name__ == "__main__":
