@@ -70,9 +70,7 @@ def parse_callset_json(callset_file, samples=None):
         with open(samples) as file:
             samples = [line.rstrip() for line in file]
     if not samples:
-        samples = []
-        for callset in callsets:
-            samples.append(callset["sample_name"])
+        samples = [callset for callset in callsets]
     return samples
 
 
