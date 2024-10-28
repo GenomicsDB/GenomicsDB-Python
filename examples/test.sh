@@ -131,6 +131,9 @@ do
 done
 
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00097 -s HG00100 -s HG00096"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096 -s NON_EXISTENT_SAMPLE"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s NON_EXISTENT_SAMPLE"
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -S $TEMP_DIR/samples.list"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -f $FILTER"
