@@ -25,13 +25,13 @@
 # Description: setup script to build the GenomicsDB python package
 #
 
-from setuptools import setup, Extension, find_packages
-
+import glob
 import os
 import shutil
-import glob
 import sys
+
 import numpy
+from setuptools import Extension, find_packages, setup
 
 # Directory where a copy of the CPP compiled object is found.
 GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
@@ -73,10 +73,7 @@ link_args = []
 dst = os.path.join("genomicsdb/lib")
 if copy_genomicsdb_libs:
     os.makedirs(dst, exist_ok=True)
-    glob_paths = [
-        os.path.join(GENOMICSDB_LIB_DIR, e)
-        for e in ["lib*genomicsdb*.so*", "lib*genomicsdb*.dylib"]
-    ]
+    glob_paths = [os.path.join(GENOMICSDB_LIB_DIR, e) for e in ["lib*genomicsdb*.so*", "lib*genomicsdb*.dylib"]]
     lib_paths = []
     for paths in glob_paths:
         lib_paths.extend(glob.glob(paths))
@@ -100,9 +97,7 @@ if copy_protobuf_definitions:
             # Read in the file
             filename = os.path.join(dst, file)
             with open(filename, "r") as file:
-                replaced_contents = file.read().replace(
-                    "import genomicsdb_", "from . import genomicsdb_"
-                )
+                replaced_contents = file.read().replace("import genomicsdb_", "from . import genomicsdb_")
             # Write out the file
             with open(filename, "w") as file:
                 file.write(replaced_contents)
@@ -114,10 +109,11 @@ if "OSX_ARCH" in os.environ:
     os.environ["CFLAGS"] = "-arch " + os.environ["OSX_ARCH"]
     os.environ["CXXFLAGS"] = "-arch " + os.environ["OSX_ARCH"]
 
-EXTRA_COMPILE_ARGS=["-std=c++20"]
+EXTRA_COMPILE_ARGS = ["-std=c++20"]
 if "CXX" in os.environ and os.environ["CXX"].find("devtoolset-11") > 0:
-    EXTRA_COMPILE_ARGS=["-std=c++2a"]
-        
+    EXTRA_COMPILE_ARGS = ["-std=c++2a"]
+
+
 def run_cythonize(src):
     from Cython.Build.Dependencies import cythonize
 

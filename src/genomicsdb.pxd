@@ -29,14 +29,14 @@
 # distutils: language = c++
 # cython: language_level=3
 
+from cpython cimport PyList_New, PyObject
+from libc.stdint cimport INT64_MAX, int32_t, int64_t, uint32_t, uint64_t, uintptr_t
+from libc.stdlib cimport free, malloc
+from libcpp.functional cimport function
 from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.functional cimport function
-from libc.stdint cimport (int32_t, uint32_t, int64_t, uint64_t, uintptr_t, INT64_MAX)
-from libc.stdlib cimport malloc, free
 
-from cpython cimport (PyObject, PyList_New)
 
 cdef extern from "genomicsdb.h":
 

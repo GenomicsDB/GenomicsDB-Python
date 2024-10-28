@@ -39,7 +39,7 @@ from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
 
 
 def parse_vidmap_json(vidmap_file, intervals=None):
-    if type(intervals) == str:
+    if isinstance(intervals) == str:
         is_file = True
     else:
         is_file = False
@@ -71,7 +71,7 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
         return None
     callset = json.loads(genomicsdb.read_entire_file(callset_file))
     callsets = callset["callsets"]
-    if type(samples) == str:
+    if isinstance(samples) == str:
         with open(samples) as file:
             samples = [line.rstrip() for line in file]
     rows = [callset["row_idx"] for sample in samples for callset in callsets if sample == callset["sample_name"]]
@@ -152,32 +152,32 @@ def setup_gdb():
         "--interval",
         action="append",
         required=False,
-        help="genomic intervals over which to operate. The intervals should be specified in the <CONTIG>:<START>-<END> format with START and END optional.\nThis argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+        help="genomic intervals over which to operate. The intervals should be specified in the <CONTIG>:<START>-<END> format with START and END optional.\nThis argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",  # noqa
     )
     parser.add_argument(
         "-I",
         "--interval-list",
         required=False,
-        help="genomic intervals listed in a file over which to operate.\nThe intervals should be specified in the <CONTIG>:<START>-<END> format, with START and END optional one interval per line. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+        help="genomic intervals listed in a file over which to operate.\nThe intervals should be specified in the <CONTIG>:<START>-<END> format, with START and END optional one interval per line. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",  # noqa
     )
     parser.add_argument(
         "-s",
         "--sample",
         action="append",
         required=False,
-        help="sample names over which to operate. This argument may be specified 0 or more times e.g -s HG00097 -s HG00090. \nNote: \n\t1. -s/--sample and -S/--sample-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+        help="sample names over which to operate. This argument may be specified 0 or more times e.g -s HG00097 -s HG00090. \nNote: \n\t1. -s/--sample and -S/--sample-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",  # noqa
     )
     parser.add_argument(
         "-S",
         "--sample-list",
         required=False,
-        help="sample file containing list of samples, one sample per line, to operate upon. \nNote: \n\t1. -s/--sample and -S/--sample-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",
+        help="sample file containing list of samples, one sample per line, to operate upon. \nNote: \n\t1. -s/--sample and -S/--sample-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",  # noqa
     )
     parser.add_argument(
         "-f",
         "--filter",
         required=False,
-        help="Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == \"G\" && resolve(GT, REF, ALT) &= \"T/T\" && ALT |= \"T\"'",
+        help="Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == \"G\" && resolve(GT, REF, ALT) &= \"T/T\" && ALT |= \"T\"'",  # noqa
     )
     parser.add_argument(
         "-t",
@@ -190,7 +190,7 @@ def setup_gdb():
         "-o",
         "--output",
         default="query_output",
-        help="a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv/.json (default: %(default)s)",
+        help="a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv/.json (default: %(default)s)",  # noqa
     )
 
     args = parser.parse_args()
@@ -230,7 +230,7 @@ def setup_gdb():
     sample_list = args.sample_list
     if not intervals and not samples and not interval_list and not sample_list:
         raise RuntimeError(
-            "Specify at least one of either -i/-interval -I/--interval-list -s/--sample -S/--sample-list has to be specified"
+            "Specify at least one of either -i/-interval -I/--interval-list -s/--sample -S/--sample-list has to be specified"  # noqa
         )
 
     contigs_map, intervals = parse_vidmap_json(vidmap_file, intervals or interval_list)
@@ -308,7 +308,7 @@ def main():
                 continue
             if partition["workspace"] != workspace:
                 raise RuntimeError(
-                    f"Partiton workspaces({partition['workspace']} different from input workspace({workspace}) not supported"
+                    f"Partiton workspaces({partition['workspace']} different from input workspace({workspace}) not supported"  # noqa
                 )
             arrays.append(partition["array_name"])
 

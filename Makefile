@@ -54,20 +54,21 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-lint: ## check style with flake8
-	flake8 setup.py
+format: ## format files with black and isort
+	black --line-length 120 setup.py src test examples/genomicsdb_query
+	isort --profile black --line-length 120 setup.py src test examples/genomicsdb_query
 
-#test: ## run tests quickly with the default Python
-#	pytest
+lint: ## check style with flake8 and vulnerabilities with bandit
+	bandit -r setup.py src
+	flake8 --extend-ignore='E203, N803, N806, E402' --max-line-length=120 setup.py src test examples/genomicsdb_query
+	black --check --line-length 120 setup.py src test examples/genomicsdb_query
+	isort --profile black --line-length 120 -c setup.py src test examples/genomicsdb_query
+	cython-lint --max-line-length 120 src/*.pyx
 
-#test-all: ## run tests on every Python version with tox
-#	tox
+test: FORCE ## run tests quickly with the default Python
+	pytest test -s
 
-#coverage: ## check code coverage quickly with the default Python
-#	coverage run --source pathds -m pytest
-#	coverage report -m
-#	coverage html
-#	$(BROWSER) htmlcov/index.html
+FORCE:
 
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/genomicsdb_python.rst
@@ -79,9 +80,6 @@ docs: ## generate Sphinx HTML documentation, including API docs
 
 latexpdf: docs
 	$(MAKE) -C docs/_build/latex all
-
-#servedocs: docs ## compile the docs watching for changes
-#	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
 test-release: dist ## package and upload a test release
 	twine upload --repository testpypi dist/*
