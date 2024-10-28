@@ -60,14 +60,15 @@ def parse_vidmap_json(vidmap_file, intervals=None):
 
 
 def parse_callset_json(callset_file):
-  callset = json.loads(genomicsdb.read_entire_file(callset_file))
-  callsets = callset["callsets"]
-  samples = [callset["sample_name"] for callset in callsets]
-  return samples
+    callset = json.loads(genomicsdb.read_entire_file(callset_file))
+    callsets = callset["callsets"]
+    samples = [callset["sample_name"] for callset in callsets]
+    return samples
+
 
 def parse_callset_json_for_row_ranges(callset_file, samples=None):
     if not samples:
-      return None
+        return None
     callset = json.loads(genomicsdb.read_entire_file(callset_file))
     callsets = callset["callsets"]
     if type(samples) == str:
@@ -79,15 +80,15 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
     row = rows.pop()
     row_tuples = [(row, row)]
     while len(rows) > 0:
-      row = rows.pop()
-      tuple = row_tuples[-1]
-      if row > tuple[1] + 1:
-        # Append new range
-        row_tuples.append((row, row))
-      elif row == tuple[1] + 1:
-        # Expand range for tuple
-        row_tuples.pop()
-        row_tuples.append((tuple[0], row))
+        row = rows.pop()
+        tuple = row_tuples[-1]
+        if row > tuple[1] + 1:
+            # Append new range
+            row_tuples.append((row, row))
+        elif row == tuple[1] + 1:
+            # Expand range for tuple
+            row_tuples.pop()
+            row_tuples.append((tuple[0], row))
     return row_tuples
 
 
@@ -272,13 +273,13 @@ def main():
 
     row_range_list = None
     if row_tuples:
-      row_range_list = query_pb.RowRangeList()
-      for tuple in row_tuples:
-        range = query_pb.RowRange()
-        range.low = tuple[0]
-        range.high = tuple[1]
-        row_range_list.range_list.extend([range])
-              
+        row_range_list = query_pb.RowRangeList()
+        for tuple in row_tuples:
+            range = query_pb.RowRange()
+            range.low = tuple[0]
+            range.high = tuple[1]
+            row_range_list.range_list.extend([range])
+
     for interval in intervals:
         print(f"Processing interval({interval})...")
         # get tiledb offsets for interval
@@ -323,7 +324,7 @@ def main():
             contig_interval.end = end
             query_config.query_contig_intervals.extend([contig_interval])
             if row_range_list:
-              query_config.query_row_ranges.extend([row_range_list])
+                query_config.query_row_ranges.extend([row_range_list])
             if output_type == "csv":
                 df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
                 df.to_csv(generate_output_filename(output, output_type, interval, idx), index=False)
