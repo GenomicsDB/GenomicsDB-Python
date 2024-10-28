@@ -59,19 +59,36 @@ def parse_vidmap_json(vidmap_file, intervals=None):
     return contigs_map, intervals
 
 
-def parse_callset_json(callset_file, samples=None):
-    if type(samples) == str:
-        is_file = True
-    else:
-        is_file = False
+def parse_callset_json(callset_file):
+  callset = json.loads(genomicsdb.read_entire_file(callset_file))
+  callsets = callset["callsets"]
+  samples = [callset["sample_name"] for callset in callsets]
+  return samples
+
+def parse_callset_json_for_row_ranges(callset_file, samples=None):
+    if not samples:
+      return None
     callset = json.loads(genomicsdb.read_entire_file(callset_file))
     callsets = callset["callsets"]
-    if samples and is_file:
+    if type(samples) == str:
         with open(samples) as file:
             samples = [line.rstrip() for line in file]
-    if not samples:
-        samples = [callset for callset in callsets]
-    return samples
+    rows = [callset["row_idx"] for sample in samples for callset in callsets if sample == callset["sample_name"]]
+    rows.sort(reverse=True)
+    # make row_tuples
+    row = rows.pop()
+    row_tuples = [(row, row)]
+    while len(rows) > 0:
+      row = rows.pop()
+      tuple = row_tuples[-1]
+      if row > tuple[1] + 1:
+        # Append new range
+        row_tuples.append((row, row))
+      elif row == tuple[1] + 1:
+        # Expand range for tuple
+        row_tuples.pop()
+        row_tuples.append((tuple[0], row))
+    return row_tuples
 
 
 def genomicsdb_connect(workspace, callset_file, vidmap_file, filter):
@@ -213,7 +230,7 @@ def setup_gdb():
         )
 
     contigs_map, intervals = parse_vidmap_json(vidmap_file, intervals or interval_list)
-    samples = parse_callset_json(callset_file, samples or sample_list)
+    row_tuples = parse_callset_json_for_row_ranges(callset_file, samples or sample_list)
 
     # parse loader.json for partitions
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
@@ -221,7 +238,7 @@ def setup_gdb():
 
     gdb = genomicsdb_connect(workspace, callset_file, vidmap_file, args.filter)
 
-    return gdb, workspace, partitions, contigs_map, intervals, samples, args.output_type, args.output
+    return gdb, workspace, partitions, contigs_map, intervals, row_tuples, args.output_type, args.output
 
 
 interval_pattern = re.compile(r"(.*):(.*)-(.*)|(.*):(.*)|(.*)")
@@ -249,9 +266,19 @@ def generate_output_filename(output, output_type, interval, idx):
 
 
 def main():
-    gdb, workspace, partitions, contigs_map, intervals, samples, output_type, output = setup_gdb()
+    gdb, workspace, partitions, contigs_map, intervals, row_tuples, output_type, output = setup_gdb()
 
     print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
+
+    row_range_list = None
+    if row_tuples:
+      row_range_list = query_pb.RowRangeList()
+      for tuple in row_tuples:
+        range = query_pb.RowRange()
+        range.low = tuple[0]
+        range.high = tuple[1]
+        row_range_list.range_list.extend([range])
+              
     for interval in intervals:
         print(f"Processing interval({interval})...")
         # get tiledb offsets for interval
@@ -294,10 +321,9 @@ def main():
             contig_interval.contig = contig
             contig_interval.begin = start
             contig_interval.end = end
-            if samples:
-                for sample in samples:
-                    query_config.query_sample_names.append(sample)
             query_config.query_contig_intervals.extend([contig_interval])
+            if row_range_list:
+              query_config.query_row_ranges.extend([row_range_list])
             if output_type == "csv":
                 df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
                 df.to_csv(generate_output_filename(output, output_type, interval, idx), index=False)
