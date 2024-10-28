@@ -75,6 +75,9 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
         with open(samples) as file:
             samples = [line.rstrip() for line in file]
     rows = [callset["row_idx"] for sample in samples for callset in callsets if sample == callset["sample_name"]]
+    if len(rows) == 0:
+      print(f"None of the samples{samples} specified were found in the workspace")
+      return []
     rows.sort(reverse=True)
     # make row_tuples
     row = rows.pop()
@@ -268,6 +271,9 @@ def generate_output_filename(output, output_type, interval, idx):
 
 def main():
     gdb, workspace, partitions, contigs_map, intervals, row_tuples, output_type, output = setup_gdb()
+
+    if row_tuples and len(row_tuples) == 0:
+      return
 
     print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
 
