@@ -22,9 +22,7 @@ def run_test():
     list = gdb.query_variant_calls(row_ranges=[(0, 3)], array="t0_1_2")
     print(list)
 
-    list = gdb.query_variant_calls(
-        "t0_1_2", [(0, 13000), (13000, 1000000000)], [(0, 3)]
-    )
+    list = gdb.query_variant_calls("t0_1_2", [(0, 13000), (13000, 1000000000)], [(0, 3)])
     print(list)
     x, y, calls = zip(*list)
     print(pd.DataFrame(calls[0]))
@@ -49,8 +47,8 @@ def run_test():
             print("Index file to " + output + " NOT FOUND")
 
 
-from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
 from genomicsdb.protobuf import genomicsdb_coordinates_pb2 as query_coords
+from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
 
 
 def run_test_connect_with_protobuf():
@@ -91,6 +89,7 @@ def run_test_connect_with_protobuf():
     x, y, calls = zip(*list)
     print(pd.DataFrame(calls[0]))
 
+
 def run_test_connect_and_query_with_protobuf():
     print("*** run_test_connect_and_query_with_protobuf")
     export_config = query_pb.ExportConfiguration()
@@ -120,7 +119,7 @@ def run_test_connect_and_query_with_protobuf():
     list = gdb.query_variant_calls(query_protobuf=query_config)
     x, y, calls = zip(*list)
     print(pd.DataFrame(calls[0]))
-    
+
 
 def run_test_connect_with_json():
     print("*** run_test_connect_with_json")
