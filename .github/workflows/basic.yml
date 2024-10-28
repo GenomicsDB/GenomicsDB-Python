@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Cache Native GenomicsDB
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           GENOMICSDB_TARBALL: ${{env.GENOMICSDB_HOME}}_${{env.GENOMICSDB_BRANCH}}.tar
         with:
@@ -46,7 +46,7 @@ jobs:
           fi
 
       - name: Upload GenomicsDB Tarball
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: GenomicsDB-Tarball-${{runner.os}}
           path: ${{env.GENOMICSDB_TARBALL}}
@@ -64,10 +64,10 @@ jobs:
         python-version: ["3.9", "3.10", "3.11"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Download GenomicsDB Tarball
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: GenomicsDB-Tarball-${{runner.os}}
 
@@ -77,7 +77,7 @@ jobs:
       run: tar -xvf ${GENOMICSDB_TARBALL} -C $(dirname $GENOMICSDB_HOME)
       
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
