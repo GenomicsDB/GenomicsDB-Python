@@ -27,15 +27,29 @@
 #
 
 WORKSPACE=${WORKSPACE:-my_workspace}
+export CALLSET_FILE=${CALLSET_FILE:-$WORKSPACE/callset.json}
+export VIDMAP_FILE=${VIDMAP_FILE:-$WORKSPACE/vidmap.json}
+export LOADER_FILE=${LOADER_FILE:-$WORKSPACE/loader.json}
+
 declare -a INTERVALS
-INTERVALS=("1:1-40000000" "2:3000" "3")
+#INTERVALS=("1:1-1000000")
+#INTERVALS=("1:1-1000000" "1:1000001-2000000" "1:2000001-3137454")
+INTERVALS=("chr1:1-200000")
+#INTERVALS=("1:1-3137454")
+#INTERVALS=("1:1-40000000")
+#INTERVALS=("1:1-4000000" "1:8000001-16000000" "1:16000001-24000000" "1:24000001-32000000" "1:32000001-40000000" "2:3000" "3")
+#INTERVALS=("1:1-12549816")
+#INTERVALS=("1:1-3137454" "1:3137455-6274908" "1:6274909-9412362" "1:9412363-12549816")
+
 #declare -a SAMPLES
 #SAMPLES=("HG00096" "HG00097" "HG00099")
-#VIDMAP_FILE=my_vidmap_file.json
-#LOADER_FILE=my_loader_file.json
+
 #FILTER='resolve(GT, REF, ALT) &= "T/T"'
+
 OUTPUT_FILE=my_output
 
+export TILEDB_CACHE=1
+NTHREADS=${NTHREADS:=-8}
 
 ###########################################
 # Should not have to change anything below
@@ -49,11 +63,6 @@ else
   source env/bin/activate
 fi
 
-for INTERVAL in "${INTERVALS[@]}"
-do
-   INTERVAL_ARGS="$INTERVAL_ARGS -i $INTERVAL"
-done
-
 if [[ ! -z ${SAMPLES} ]]; then
   for SAMPLE in "${SAMPLES[@]}"
   do
@@ -65,12 +74,29 @@ if [[ ! -z ${FILTER} ]]; then
   FILTER_EXPR="-f $FILTER"
 fi
 
-if [[ -z ${VIDMAP_FILE} && -z ${LOADER_FILE} ]]; then
-  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE
-elif  [[ -z ${VIDMAP_FILE} ]]; then
-  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS $SAMPLE_ARGS -v $VIDMAP_FILE $FILTER_EXPR -o $OUTPUT_FILE
-else
-  ./genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS $SAMPLE_ARGS-v $VIDMAP_FILE -l $LOADER_FILE $FILTER_EXPR -o $OUTPUT_FILE
+echo  $LOADER_FILE  $CALLSET_FILE   $VIDMAP_FILE
+
+rm -f loader.json callset.json vidmap.json
+./genomicsdb_cache -w $WORKSPACE -l $LOADER_FILE  -c $CALLSET_FILE -v $VIDMAP_FILE
+
+if [[ -f loader.json ]]; then
+  export LOADER_FILE="loader.json"
 fi
+if [[ -f callset.json ]]; then
+  export CALLSET_FILE="callset.json"
+fi
+if [[ -f vidmap.json ]]; then
+  export VIDMAP_FILE="vidmap.json"
+fi
+
+run_query() {
+  INTERVAL=$1
+  OUTPUT_FILE=$2
+  echo ./genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE
+  /usr/bin/time -l ./genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t json
+}
+
+export -f run_query  
+parallel -j${NTHREADS} run_query {} $OUTPUT_FILE ::: ${INTERVALS[@]}
 
 deactivate

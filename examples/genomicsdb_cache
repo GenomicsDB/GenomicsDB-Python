@@ -1,0 +1,113 @@
+#!/usr/bin/env python
+
+#
+# genomicsdb_cache python script
+#
+# The MIT License
+#
+# Copyright (c) 2024 dātma, inc™
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+
+import genomicsdb
+import argparse
+import os
+
+def normalize_path(path):
+    if "://" in path:
+        return path
+    else:
+        return os.path.abspath(path)
+
+def is_cloud_path(path):
+    if "://" in path:
+      return True
+    else:
+        return False
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="cache",
+        description="Cache GenomicsDB generated json artifacts for workspace cloud URLs",
+        formatter_class=argparse.RawTextHelpFormatter,
+        usage="%(prog)s [options]",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=genomicsdb.version(),
+        help="print GenomicsDB native library version and exit",
+    )
+    parser.add_argument(
+        "-w",
+        "--workspace",
+        required=True,
+        help="URL to GenomicsDB workspace \ne.g. -w my_workspace or -w az://my_container/my_workspace"
+        + " or -w s3://my_bucket/my_workspace or -w gs://my_bucket/my_workspace",
+    )
+    parser.add_argument(
+        "-v",
+        "--vidmap",
+        required=False,
+        help="Optional - URL to vid mapping file. Defaults to vidmap.json in workspace",
+    )
+    parser.add_argument(
+        "-c",
+        "--callset",
+        required=False,
+        help="Optional - URL to callset mapping file. Defaults to callset.json in workspace",
+    )
+    parser.add_argument(
+        "-l", "--loader", required=False, help="Optional - URL to loader file. Defaults to loader.json in workspace"
+    )
+
+    args = parser.parse_args()
+
+    workspace = normalize_path(args.workspace)
+    if not genomicsdb.is_file(workspace + "/__tiledb_workspace.tdb"):
+       raise RuntimeError(f"workspace({workspace}) not found")
+
+    callset_file = args.callset
+    if not callset_file:
+        callset_file = workspace + "/callset.json"
+    vidmap_file = args.vidmap
+    if not vidmap_file:
+        vidmap_file = workspace + "/vidmap.json"
+    loader_file = args.loader
+    if not loader_file:
+        loader_file = workspace + "/loader.json"
+    if (not genomicsdb.is_file(callset_file)
+        or not genomicsdb.is_file(vidmap_file)
+        or not genomicsdb.is_file(loader_file)
+        ):
+        raise RuntimeError(f"callset({callset_file}) vidmap({vidmap_file}) or loader({loader_file}) not found")
+
+    if is_cloud_path(callset_file):
+        with open("callset.json", "wb") as f:
+            f.write(genomicsdb.read_entire_file(callset_file).encode())
+    if is_cloud_path(vidmap_file):
+        with open("vidmap.json", "wb") as f:
+            f.write(genomicsdb.read_entire_file(vidmap_file).encode())
+    if is_cloud_path(loader_file):
+        with open("loader.json", "wb") as f:
+            f.write(genomicsdb.read_entire_file(loader_file).encode())
+
+if __name__ == "__main__":
+    main()

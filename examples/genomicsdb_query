@@ -39,7 +39,7 @@ from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
 
 
 def parse_vidmap_json(vidmap_file, intervals=None):
-    if isinstance(intervals) == str:
+    if isinstance(intervals, str):
         is_file = True
     else:
         is_file = False
@@ -71,7 +71,7 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
         return None
     callset = json.loads(genomicsdb.read_entire_file(callset_file))
     callsets = callset["callsets"]
-    if isinstance(samples) == str:
+    if isinstance(samples, str):
         with open(samples) as file:
             samples = [line.rstrip() for line in file]
     rows = [callset["row_idx"] for sample in samples for callset in callsets if sample == callset["sample_name"]]
@@ -95,6 +95,13 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
     return row_tuples
 
 
+def parse_loader_json(loader_file):
+    loader = json.loads(genomicsdb.read_entire_file(loader_file))
+    partitions = loader["column_partitions"]
+    array_names = [partition["array_name"] for partition in partitions]
+    return [name.replace("$", ":", 1).replace("$", "-", 1) for name in array_names]
+
+
 def genomicsdb_connect(workspace, callset_file, vidmap_file, filter):
     export_config = query_pb.ExportConfiguration()
     export_config.workspace = workspace
@@ -106,6 +113,12 @@ def genomicsdb_connect(workspace, callset_file, vidmap_file, filter):
     if filter:
         export_config.query_filter = filter
     return genomicsdb.connect_with_protobuf(export_config)
+
+def normalize_path(path):
+    if "://" in path:
+        return path
+    else:
+        return os.path.abspath(path)
 
 
 def setup_gdb():
@@ -147,6 +160,8 @@ def setup_gdb():
     parser.add_argument(
         "--list-contigs", action="store_true", help="List contigs for the ingested samples in the workspace and exit"
     )
+    parser.add_argument(
+        "--list-partitions", action="store_true", help="List interval partitions for the ingested samples in the workspace and exit")
     parser.add_argument(
         "-i",
         "--interval",
@@ -195,7 +210,7 @@ def setup_gdb():
 
     args = parser.parse_args()
 
-    workspace = os.path.abspath(args.workspace)
+    workspace = normalize_path(args.workspace)
     if not genomicsdb.is_file(workspace + "/__tiledb_workspace.tdb"):
         raise RuntimeError(f"workspace({workspace}) not found")
     callset_file = args.callset
@@ -222,6 +237,12 @@ def setup_gdb():
     if args.list_samples:
         samples = parse_callset_json(callset_file)
         print(*samples, sep="\n")
+        sys.exit(0)
+
+    if args.list_partitions:
+        # parse loader.json for partitions
+        partitions = parse_loader_json(loader_file)
+        print(*partitions, sep="\n")
         sys.exit(0)
 
     intervals = args.interval
@@ -306,10 +327,6 @@ def main():
         for partition in partitions:
             if contig_end < partition["begin"]["tiledb_column"] or contig_offset > partition["end"]["tiledb_column"]:
                 continue
-            if partition["workspace"] != workspace:
-                raise RuntimeError(
-                    f"Partiton workspaces({partition['workspace']} different from input workspace({workspace}) not supported"  # noqa
-                )
             arrays.append(partition["array_name"])
 
         arrays_length = len(arrays)
@@ -335,7 +352,7 @@ def main():
                 df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
                 df.to_csv(generate_output_filename(output, output_type, interval, idx), index=False)
             elif output_type == "json":
-                json_output = gdb.query_variant_calls(query_protobuf=query_config, json_output=json_output_mode.ALL)
+                json_output = gdb.query_variant_calls(query_protobuf=query_config, json_output=json_output_mode.SAMPLES_WITH_NUM_CALLS)
                 with open(generate_output_filename(output, output_type, interval, idx), "wb") as f:
                     f.write(json_output)
 
