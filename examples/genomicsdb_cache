@@ -26,9 +26,11 @@
 # THE SOFTWARE.
 #
 
-import genomicsdb
 import argparse
 import os
+
+import genomicsdb
+
 
 def normalize_path(path):
     if "://" in path:
@@ -36,11 +38,13 @@ def normalize_path(path):
     else:
         return os.path.abspath(path)
 
+
 def is_cloud_path(path):
     if "://" in path:
-      return True
+        return True
     else:
         return False
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -82,7 +86,7 @@ def main():
 
     workspace = normalize_path(args.workspace)
     if not genomicsdb.is_file(workspace + "/__tiledb_workspace.tdb"):
-       raise RuntimeError(f"workspace({workspace}) not found")
+        raise RuntimeError(f"workspace({workspace}) not found")
 
     callset_file = args.callset
     if not callset_file:
@@ -93,10 +97,11 @@ def main():
     loader_file = args.loader
     if not loader_file:
         loader_file = workspace + "/loader.json"
-    if (not genomicsdb.is_file(callset_file)
+    if (
+        not genomicsdb.is_file(callset_file)
         or not genomicsdb.is_file(vidmap_file)
         or not genomicsdb.is_file(loader_file)
-        ):
+    ):
         raise RuntimeError(f"callset({callset_file}) vidmap({vidmap_file}) or loader({loader_file}) not found")
 
     if is_cloud_path(callset_file):
@@ -108,6 +113,7 @@ def main():
     if is_cloud_path(loader_file):
         with open("loader.json", "wb") as f:
             f.write(genomicsdb.read_entire_file(loader_file).encode())
+
 
 if __name__ == "__main__":
     main()

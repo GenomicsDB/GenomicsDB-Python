@@ -114,6 +114,7 @@ def genomicsdb_connect(workspace, callset_file, vidmap_file, filter):
         export_config.query_filter = filter
     return genomicsdb.connect_with_protobuf(export_config)
 
+
 def normalize_path(path):
     if "://" in path:
         return path
@@ -161,7 +162,10 @@ def setup_gdb():
         "--list-contigs", action="store_true", help="List contigs for the ingested samples in the workspace and exit"
     )
     parser.add_argument(
-        "--list-partitions", action="store_true", help="List interval partitions for the ingested samples in the workspace and exit")
+        "--list-partitions",
+        action="store_true",
+        help="List interval partitions for the ingested samples in the workspace and exit",
+    )
     parser.add_argument(
         "-i",
         "--interval",
@@ -352,7 +356,9 @@ def main():
                 df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
                 df.to_csv(generate_output_filename(output, output_type, interval, idx), index=False)
             elif output_type == "json":
-                json_output = gdb.query_variant_calls(query_protobuf=query_config, json_output=json_output_mode.SAMPLES_WITH_NUM_CALLS)
+                json_output = gdb.query_variant_calls(
+                    query_protobuf=query_config, json_output=json_output_mode.SAMPLES_WITH_NUM_CALLS
+                )
                 with open(generate_output_filename(output, output_type, interval, idx), "wb") as f:
                     f.write(json_output)
 
