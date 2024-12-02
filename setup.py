@@ -41,7 +41,7 @@ GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="genomicsdb")
 copy_genomicsdb_libs = False
 copy_protobuf_definitions = False
-with_version = "0.0.9.14"
+with_version = "0.0.9.17.dev5"
 
 args = sys.argv[:]
 for arg in args:
