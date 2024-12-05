@@ -1,5 +1,7 @@
 ## GenomicsDB simple query tool
 
+Note that there is `run.sh` bash script for ease of use and if you do not want to invoke the genomicsdb_query CLI directly.
+
 Simple GenomicsDB query tool `genomicsdb_query`, given a workspace and genomic intervals of the form `<CONTIG>:<START>-<END>`.  The intervals at a minimum need to have the contig specified, start and end are optional. e.g chr1:100-1000, chr1:100 and chr1 are all valid. Start defaults to 1 if not specified and end defaults to the length of the contig if not specified.
 
 Assumption : The workspace should have been created with the `vcf2genomicsdb` tool or with `gatk GenomicsDBImport` and should exist.
@@ -23,6 +25,7 @@ options:
                         Optional - URL to loader file. Defaults to loader.json in workspace
   --list-samples        List samples ingested into the workspace and exit
   --list-contigs        List contigs for the ingested samples in the workspace and exit
+  --list-partitions     List interval partitions for the ingested samples in the workspace and exit
   -i INTERVAL, --interval INTERVAL
                         genomic intervals over which to operate. The intervals should be specified in the <CONTIG>:<START>-<END> format with START and END optional.
                         This argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. 
