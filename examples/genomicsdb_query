@@ -219,7 +219,7 @@ def setup_gdb():
         "-z",
         "--max-arrow-byte-size",
         default="64MB",
-        help="Optional - used in conjunction with -t/--output-type arrow as hint for buffering parquet files(default: %(default)s)",
+        help="Optional - used in conjunction with -t/--output-type arrow as hint for buffering parquet files(default: %(default)s)",  # noqa
     )
     parser.add_argument(
         "-o",
@@ -328,7 +328,7 @@ def parse_args_for_json_type(json_output_type):
 
 
 def parse_args_for_max_bytes(max_arrow_byte_size):
-    size_str = max_arrow_byte_size.upper()
+    max_arrow_byte_size = max_arrow_byte_size.upper()
     units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3, "TB": 1024**4}
     if not re.match(r" ", max_arrow_byte_size):
         max_arrow_byte_size = re.sub(r"([KMGT]?B)", r" \1", max_arrow_byte_size)
