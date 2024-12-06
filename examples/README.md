@@ -7,7 +7,7 @@ Simple GenomicsDB query tool `genomicsdb_query`, given a workspace and genomic i
 Assumption : The workspace should have been created with the `vcf2genomicsdb` tool or with `gatk GenomicsDBImport` and should exist.
 
 ``` 
-~/GenomicsDB-Python/examples: ./genomicsdb_query --help
+~/GenomicsDB-Python.develop/examples: ./genomicsdb_query -h
 usage: query [options]
 
 GenomicsDB simple query with samples/intervals/filter as inputs
@@ -16,7 +16,8 @@ options:
   -h, --help            show this help message and exit
   --version             print GenomicsDB native library version and exit
   -w WORKSPACE, --workspace WORKSPACE
-                        URL to GenomicsDB workspace, e.g. -w my_workspace or -w az://my_container/my_workspace or -w s3://my_bucket/my_workspace or -w gs://my_bucket/my_workspace
+                        URL to GenomicsDB workspace 
+                        e.g. -w my_workspace or -w az://my_container/my_workspace or -w s3://my_bucket/my_workspace or -w gs://my_bucket/my_workspace
   -v VIDMAP, --vidmap VIDMAP
                         Optional - URL to vid mapping file. Defaults to vidmap.json in workspace
   -c CALLSET, --callset CALLSET
@@ -50,10 +51,14 @@ options:
                         	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
   -f FILTER, --filter FILTER
                         Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == "G" && resolve(GT, REF, ALT) &= "T/T" && ALT |= "T"'
-  -t {csv,json}, --output-type {csv,json}
-                        Optional - specify type of output for the query. (default: csv)
+  -t {csv,json,arrow}, --output-type {csv,json,arrow}
+                        Optional - specify type of output for the query (default: csv)
+  -j {all,all-by-calls,samples-with-num-calls,samples,num-calls}, --json-output-type {all,all-by-calls,samples-with-num-calls,samples,num-calls}
+                        Optional - used in conjunction with -t/--output-type json (default: samples-with-num-calls)
+  -z MAX_ARROW_BYTE_SIZE, --max-arrow-byte-size MAX_ARROW_BYTE_SIZE
+                        Optional - used in conjunction with -t/--output-type arrow as hint for buffering parquet files(default: 64MB)
   -o OUTPUT, --output OUTPUT
-                        a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv/.json
+                        a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv/.json (default: query_output)
 ```
 
 Run `genomicsdb_query` with the -w and --list-samples/--list-contigs to figure out legitimate samples and contigs over which the query can operate. These can be used with the --samples/--intervals options later to run the actual query.

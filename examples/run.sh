@@ -46,7 +46,8 @@ INTERVALS=("chr1:1-200000")
 
 #FILTER='resolve(GT, REF, ALT) &= "T/T"'
 
-OUTPUT_FILE=my_output
+OUTPUT_FILE=${OUTPUT_FILE=-my_output}
+OUTPUT_FILE_TYPE=${OUTPUT_FILE_TYPE=-json}
 
 export TILEDB_CACHE=1
 NTHREADS=${NTHREADS:=-8}
@@ -93,7 +94,7 @@ run_query() {
   INTERVAL=$1
   OUTPUT_FILE=$2
   echo ./genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE
-  /usr/bin/time -l ./genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t json
+  /usr/bin/time -l ./genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t $OUTPUT_FILE_TYPE
 }
 
 export -f run_query  

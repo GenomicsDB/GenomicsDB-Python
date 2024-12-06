@@ -129,6 +129,14 @@ do
     exit 1
   fi
 done
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $OUTPUT --output-type arrow"
+for FILE in "${INTERVALS[@]}"
+do
+  if [[ ! -f $OUTPUT/$FILE__0.parquet ]]; then
+    echo "Could not find parquet file=$OUTPUT/$FILE__0.parquet"
+    exit 1
+  fi
+done
 
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096"
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00097 -s HG00100 -s HG00096"
