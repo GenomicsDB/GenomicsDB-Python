@@ -7,7 +7,7 @@ Simple GenomicsDB query tool `genomicsdb_query`, given a workspace and genomic i
 Assumption : The workspace should have been created with the `vcf2genomicsdb` tool or with `gatk GenomicsDBImport` and should exist.
 
 ``` 
-~/GenomicsDB-Python.develop/examples: ./genomicsdb_query -h
+~/GenomicsDB-Python/examples: ./genomicsdb_query --help
 usage: query [options]
 
 GenomicsDB simple query with samples/intervals/filter as inputs
