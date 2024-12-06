@@ -112,28 +112,28 @@ genomicsdb_query -w $WORKSPACE --list-contigs > $TEMP_DIR/contigs.list
 genomicsdb_query -w $WORKSPACE --list-samples > $TEMP_DIR/samples.list
 
 declare -a FILES
-FILES=("1-1-40000000", "1-1-40000000_1", "2-3000-40000", "2-40001")
+FILES=("1-1-40000000" "1-1-40000000_1" "2-3000-40000" "2-40001")
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $OUTPUT"
-for FILE in "${INTERVALS[@]}"
+for FILE in "${FILES[@]}"
 do
-  if [[ ! -f $OUTPUT_$FILE.csv ]]; then
-    echo "Could not find file=$OUTPUT_$FILE.csv"
+  if [[ ! -f ${OUTPUT}_${FILE}.csv ]]; then
+    echo "Could not find file=${OUTPUT}_${FILE}.csv"
     exit 1
   fi
 done
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $OUTPUT --output-type json" 
-for FILE in "${INTERVALS[@]}"
+for FILE in "${FILES[@]}"
 do
-  if [[ ! -f $OUTPUT_$FILE.json ]]; then
-    echo "Could not find file=$OUTPUT_$FILE.json"
+  if [[ ! -f ${OUTPUT}_${FILE}.json ]]; then
+    echo "Could not find file=${OUTPUT}_${FILE}.json"
     exit 1
   fi
 done
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $OUTPUT --output-type arrow"
-for FILE in "${INTERVALS[@]}"
+for FILE in "${FILES[@]}"
 do
-  if [[ ! -f $OUTPUT/$FILE__0.parquet ]]; then
-    echo "Could not find parquet file=$OUTPUT/$FILE__0.parquet"
+  if [[ ! -f ${OUTPUT}/${FILE}__0.parquet ]]; then
+    echo "Could not find parquet file=${OUTPUT}/${FILE}__0.parquet"
     exit 1
   fi
 done
