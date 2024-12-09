@@ -32,6 +32,9 @@ import os
 import re
 import sys
 
+import pyarrow as pa
+import pyarrow.parquet as pq
+
 import genomicsdb
 from genomicsdb import json_output_mode
 from genomicsdb.protobuf import genomicsdb_coordinates_pb2 as query_coords
@@ -201,9 +204,22 @@ def setup_gdb():
     parser.add_argument(
         "-t",
         "--output-type",
-        choices=["csv", "json"],
+        choices=["csv", "json", "arrow"],
         default="csv",
         help="Optional - specify type of output for the query (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-j",
+        "--json-output-type",
+        choices=["all", "all-by-calls", "samples-with-num-calls", "samples", "num-calls"],
+        default="samples-with-num-calls",
+        help="Optional - used in conjunction with -t/--output-type json (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-z",
+        "--max-arrow-byte-size",
+        default="64MB",
+        help="Optional - used in conjunction with -t/--output-type arrow as hint for buffering parquet files(default: %(default)s)",  # noqa
     )
     parser.add_argument(
         "-o",
@@ -267,7 +283,7 @@ def setup_gdb():
 
     gdb = genomicsdb_connect(workspace, callset_file, vidmap_file, args.filter)
 
-    return gdb, workspace, partitions, contigs_map, intervals, row_tuples, args.output_type, args.output
+    return gdb, workspace, partitions, contigs_map, intervals, row_tuples, args
 
 
 interval_pattern = re.compile(r"(.*):(.*)-(.*)|(.*):(.*)|(.*)")
@@ -288,14 +304,40 @@ def parse_interval(interval: str):
 
 
 def generate_output_filename(output, output_type, interval, idx):
-    output_filename = f"{output}_{interval.replace(':', '-')}"
+    if output_type == "arrow":
+        output_filename = os.path.join(output, f"{interval.replace(':', '-')}")
+    else:
+        output_filename = f"{output}_{interval.replace(':', '-')}"
     if idx > 0:
         output_filename = output_filename + f"_{idx}"
-    return output_filename + "." + output_type
+    if output_type == "arrow":
+        return output_filename
+    else:
+        return output_filename + "." + output_type
+
+
+def parse_args_for_json_type(json_output_type):
+    json_types = {
+        "all": json_output_mode.ALL,
+        "all-by-calls": json_output_mode.ALL_BY_CALLS,
+        "samples-with-num-calls": json_output_mode.SAMPLES_WITH_NUM_CALLS,
+        "samples": json_output_mode.SAMPLES,
+        "num-calls": json_output_mode.NUM_CALLS,
+    }
+    return json_types[json_output_type]
+
+
+def parse_args_for_max_bytes(max_arrow_byte_size):
+    max_arrow_byte_size = max_arrow_byte_size.upper()
+    units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3, "TB": 1024**4}
+    if not re.match(r" ", max_arrow_byte_size):
+        max_arrow_byte_size = re.sub(r"([KMGT]?B)", r" \1", max_arrow_byte_size)
+    number, unit = max_arrow_byte_size.split()
+    return int(float(number) * units[unit])
 
 
 def main():
-    gdb, workspace, partitions, contigs_map, intervals, row_tuples, output_type, output = setup_gdb()
+    gdb, workspace, partitions, contigs_map, intervals, row_tuples, args = setup_gdb()
 
     if row_tuples and len(row_tuples) == 0:
         return
@@ -339,6 +381,14 @@ def main():
             continue
         print(f"\tArrays:{arrays} under consideration for interval({interval})")
 
+        output_type = args.output_type
+        output = args.output
+        if output_type == "json":
+            json_type = parse_args_for_json_type(args.json_output_type)
+        if output_type == "arrow":
+            max_arrow_bytes = parse_args_for_max_bytes(args.max_arrow_byte_size)
+            print(f"Using {args.max_arrow_byte_size} number of bytes as hint for writing out parquet files")
+
         for idx, array in enumerate(arrays):
             if not genomicsdb.is_file(workspace + "/" + array + "/__array_schema.tdb"):
                 print(f"\tArray({array}) not imported into workspace({workspace}) for interval({interval})")
@@ -352,15 +402,36 @@ def main():
             query_config.query_contig_intervals.extend([contig_interval])
             if row_range_list:
                 query_config.query_row_ranges.extend([row_range_list])
+            output_filename = generate_output_filename(output, output_type, interval, idx)
             if output_type == "csv":
                 df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
-                df.to_csv(generate_output_filename(output, output_type, interval, idx), index=False)
+                df.to_csv(output_filename, index=False)
             elif output_type == "json":
-                json_output = gdb.query_variant_calls(
-                    query_protobuf=query_config, json_output=json_output_mode.SAMPLES_WITH_NUM_CALLS
-                )
-                with open(generate_output_filename(output, output_type, interval, idx), "wb") as f:
+                json_output = gdb.query_variant_calls(query_protobuf=query_config, json_output=json_type)
+                with open(output_filename, "wb") as f:
                     f.write(json_output)
+            elif output_type == "arrow":
+                if not os.path.exists(output):
+                    os.mkdir(output)
+                nbytes = 0
+                writer = None
+                i = 0
+                for out in gdb.query_variant_calls(query_protobuf=query_config, arrow_output=True, batching=True):
+                    reader = pa.ipc.open_stream(out)
+                    for batch in reader:
+                        if nbytes > max_arrow_bytes:
+                            i += 1
+                            nbytes = 0
+                            if writer:
+                                writer.close()
+                                writer = None
+                        if not writer:
+                            print(f"Writing out batch {i}...")
+                            writer = pq.ParquetWriter(f"{output_filename}__{i}.parquet", batch.schema)
+                        nbytes += batch.nbytes
+                        writer.write_batch(batch)
+                if writer:
+                    writer.close()
 
     print(f"genomicsdb_query for workspace({workspace}) and intervals({intervals}) completed successfully")
 
