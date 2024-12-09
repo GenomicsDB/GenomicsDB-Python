@@ -81,10 +81,6 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
   PyObject* _intervals_list = NULL;
 };
 
-#define STRING_FIELD(NAME, TYPE) (TYPE.is_string() || TYPE.is_char() || TYPE.num_elements > 1 || (NAME.compare("GT") == 0))
-#define INT_FIELD(TYPE) (TYPE.is_int())
-#define FLOAT_FIELD(TYPE) (TYPE.is_float())
-
 class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
  public:
   ColumnarVariantCallProcessor() {

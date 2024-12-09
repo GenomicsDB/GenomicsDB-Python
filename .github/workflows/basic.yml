@@ -15,7 +15,8 @@ on:
 env:
   GENOMICSDB_BUILD_DIR: ${{github.workspace}}
   GENOMICSDB_HOME: ${{github.workspace}}/install
-  GENOMICSDB_BRANCH: develop
+  #GENOMICSDB_BRANCH: develop
+  GENOMICSDB_BRANCH: ng_cache_12092024
   
 jobs:
   native-build:
@@ -96,3 +97,9 @@ jobs:
       run: |
         PYTHONPATH=. pytest
         PYTHONPATH=. python test/test.py
+
+    - name: Cloud Test - Azurite
+      run: |
+        source .github/scripts/azurite.sh
+        PYTHONPATH=. WORKSPACE=az://test/ws test.sh
+        

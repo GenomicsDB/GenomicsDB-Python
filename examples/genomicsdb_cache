@@ -45,7 +45,6 @@ def is_cloud_path(path):
     else:
         return False
 
-
 def main():
     parser = argparse.ArgumentParser(
         prog="cache",
@@ -113,6 +112,9 @@ def main():
     if is_cloud_path(loader_file):
         with open("loader.json", "wb") as f:
             f.write(genomicsdb.read_entire_file(loader_file).encode())
+    if is_cloud_path(workspace):
+        genomicsdb.cache_metadata(workspace)
+        
 
 
 if __name__ == "__main__":
