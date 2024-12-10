@@ -102,5 +102,5 @@ jobs:
       run: |
         source .github/scripts/azurite.sh
         echo "Testing on Azurite..."
-        PYTHONPATH=. WORKSPACE=az://test/ws sh -x $GITHUB_WORKSPACE/examples/test.sh
+        PYTHONPATH=. WORKSPACE=az://test/ws bash -x $GITHUB_WORKSPACE/examples/test.sh
         echo "Testing on Azurite DONE"
