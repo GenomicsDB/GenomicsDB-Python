@@ -145,4 +145,12 @@ run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -S $TEMP_D
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -f $FILTER"
 
+run_command "genomicsdb_cache -w $WORKSPACE"
+export TILEDB_CACHE=1
+if [[ -f loader.json ]] && [[ -f callset.json ]] && [[ -f vidmap.json ]]; then
+  echo "Running from cached metadata for workspace=$WORKSPACE..."
+  run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -s HG00097 -l loader.json -c callset.json -v vidmap.json"
+   echo "Running from cached metadata for workspace=$WORKSPACE DONE"
+fi
+
 cleanup
