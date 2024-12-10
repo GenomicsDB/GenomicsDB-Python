@@ -100,7 +100,7 @@ jobs:
 
     - name: Cloud Test - Azurite
       run: |
-        source .github/scripts/azurite.sh
+        source .github/scripts/setup_azurite.sh
         echo "Testing on Azurite..."
         PYTHONPATH=. WORKSPACE=az://test/ws ./examples/test.sh
         echo "Testing on Azurite DONE"

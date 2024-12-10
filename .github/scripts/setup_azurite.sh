@@ -27,20 +27,8 @@ set -e
 sudo apt-get update
 sudo apt-get -y install azure-cli
 
-node_version="$(node --version)"
-echo "node version = ${node_version}"
-
 # Install Azurite
-case "${node_version}" in
-  v12*)
-    # Pin azurite to 3.29.0 as there are syntax issues with the latest on v12*
-    azurite_version=v3.29.0
-    ;;
-  *)
-    azurite_version=latest
-    ;;
-esac
-sudo npm install -g azurite@${azurite_version}
+sudo npm install -g azurite
 which azurite
 echo "azurite version = $(azurite --version)"
 
@@ -68,7 +56,7 @@ export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 AZURE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=https://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=https://127.0.0.1:10001/devstoreaccount1;"
 az storage container create -n test --connection-string $AZURE_CONNECTION_STRING
 
-# Examples workspace
+# Setup examples workspace on azurite
 cd $GITHUB_WORKSPACE/examples
 tar xzvf examples_ws.tgz
 echo "Azure Storage Blob upload-batch..."
