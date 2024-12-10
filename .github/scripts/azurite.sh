@@ -71,4 +71,4 @@ az storage container create -n test --connection-string $AZURE_CONNECTION_STRING
 # Examples workspace
 cd $GITHUB_WORKSPACE/examples
 tar xzvf examples_ws.tgz
-az storage blob upload-batch -d test/ws -s examples_ws --connection-string $AZURE_CONNECTION_STRING
+az storage blob upload-batch -d test/ws -s ws --connection-string $AZURE_CONNECTION_STRING
