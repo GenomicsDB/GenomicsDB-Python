@@ -90,11 +90,12 @@ if [[ -f vidmap.json ]]; then
   export VIDMAP_FILE="vidmap.json"
 fi
 
+PATH=$(dirname $0):$PATH
 run_query() {
   INTERVAL=$1
   OUTPUT_FILE=$2
-  echo ./genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE
-  /usr/bin/time -l ./genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t $OUTPUT_FILE_TYPE
+  echo genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE
+  /usr/bin/time -l genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t $OUTPUT_FILE_TYPE
 }
 
 export -f run_query  
