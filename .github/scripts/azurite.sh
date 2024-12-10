@@ -54,7 +54,7 @@ sudo cp $AZURITE_DIR/cert.pem /usr/local/share/ca-certificates/ca-certificates.c
 sudo update-ca-certificates
 
 # Start azurite
-azurite --location $AZURITE_DIR --cert cert.pem --key key.pem &
+azurite --skipApiVersionCheck --loose --location $AZURITE_DIR --cert cert.pem --key key.pem &
 
 # Env to run tests
 export AZURE_STORAGE_ACCOUNT=devstoreaccount1
@@ -71,4 +71,6 @@ az storage container create -n test --connection-string $AZURE_CONNECTION_STRING
 # Examples workspace
 cd $GITHUB_WORKSPACE/examples
 tar xzvf examples_ws.tgz
+echo "Azure Storage Blob upload-batch..."
 az storage blob upload-batch -d test/ws -s ws --connection-string $AZURE_CONNECTION_STRING
+echo "Azure Storage Blob upload-batch DONE"
