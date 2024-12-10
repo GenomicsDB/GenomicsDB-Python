@@ -147,7 +147,10 @@ run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.
 
 run_command "genomicsdb_cache -w $WORKSPACE"
 export TILEDB_CACHE=1
-if [[ -f loader.json ]] && [[ -f callset.json ]] && [[ -f vidmap.json ]]; then
+if [[ $WORKSPACE == *://* ]]; then
+  if [[ ! -f loader.json ]] || [[ ! -f callset.json ]] || [[ ! -f vidmap.json ]]; then
+    die "Could not cache workspace metadata for cloud URL=$WORKSPACE"
+  fi
   echo "Running from cached metadata for workspace=$WORKSPACE..."
   run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -s HG00097 -l loader.json -c callset.json -v vidmap.json"
    echo "Running from cached metadata for workspace=$WORKSPACE DONE"
