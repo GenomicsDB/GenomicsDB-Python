@@ -54,7 +54,7 @@ sudo cp $AZURITE_DIR/cert.pem /usr/local/share/ca-certificates/ca-certificates.c
 sudo update-ca-certificates
 
 # Start azurite
-azurite --skipApiVersionCheck --loose --location $AZURITE_DIR --cert cert.pem --key key.pem &
+azurite --silent --skipApiVersionCheck --loose --location $AZURITE_DIR --cert cert.pem --key key.pem &
 
 # Env to run tests
 export AZURE_STORAGE_ACCOUNT=devstoreaccount1
