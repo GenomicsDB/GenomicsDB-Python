@@ -49,7 +49,7 @@ export AZURE_STORAGE_ACCOUNT=devstoreaccount1
 export AZURE_STORAGE_KEY=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
 export AZURE_STORAGE_SERVICE_ENDPOINT="https://127.0.0.1:10000/devstoreaccount1"
 # TODO: Ignoring "SSL SecurityWarning: Certificate has no subjectAltName", see https://docs.oracle.com/cd/E52668_01/E66514/html/ceph-issues-24424028.html for a fix
-export AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=anycontent
+# export AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=anycontent
 export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 # Create container called test as TileDB expects the container to be already created
