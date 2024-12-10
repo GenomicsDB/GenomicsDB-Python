@@ -102,7 +102,7 @@ run_command "genomicsdb_query --list-contigs" 2
 run_command "genomicsdb_query -w $WORKSPACE" 1
 run_command "genomicsdb_query -w $WORKSPACE -i xx -S XX" 1
 
-if [[ ! -d $WORKSPACE ]]; then
+if [[ -z $WORKSPACE ]]; then
   echo "Specify an existing workspace in env WORKSPACE"
   exit 1
 fi
