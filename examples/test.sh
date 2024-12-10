@@ -46,7 +46,6 @@ VIDMAP_FILE=vidmap_file.json
 LOADER_FILE=loader_file.json
 FILTER='ISHOMREF'
 
-
 if [[ $(uname) == "Darwin" ]]; then
   TEMP_DIR=$(mktemp -d -t test-examples)
 else
@@ -94,7 +93,7 @@ run_command() {
   fi
 }
 
-PATH=.:$PATH
+PATH=$(dirname $0):$PATH
 run_command "genomicsdb_query" 2
 run_command "genomicsdb_query -h"
 run_command "genomicsdb_query --version"
