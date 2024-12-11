@@ -32,6 +32,7 @@ import os
 import re
 import sys
 
+import genomicsdb_common
 import pyarrow as pa
 import pyarrow.parquet as pq
 
@@ -39,27 +40,6 @@ import genomicsdb
 from genomicsdb import json_output_mode
 from genomicsdb.protobuf import genomicsdb_coordinates_pb2 as query_coords
 from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
-
-
-def parse_vidmap_json(vidmap_file, intervals=None):
-    if isinstance(intervals, str):
-        is_file = True
-    else:
-        is_file = False
-    contigs_map = {}
-    vidmap = json.loads(genomicsdb.read_entire_file(vidmap_file))
-    contigs = vidmap["contigs"]
-    if intervals and is_file:
-        with open(intervals) as file:
-            intervals = [line.rstrip() for line in file]
-    all_intervals = not intervals
-    if not intervals:
-        intervals = []
-    for contig in contigs:
-        contigs_map[contig["name"]] = contig
-        if all_intervals:
-            intervals.append(contig["name"])
-    return contigs_map, intervals
 
 
 def parse_callset_json(callset_file):
@@ -116,13 +96,6 @@ def genomicsdb_connect(workspace, callset_file, vidmap_file, filter):
     if filter:
         export_config.query_filter = filter
     return genomicsdb.connect_with_protobuf(export_config)
-
-
-def normalize_path(path):
-    if "://" in path:
-        return path
-    else:
-        return os.path.abspath(path)
 
 
 def setup_gdb():
@@ -230,7 +203,7 @@ def setup_gdb():
 
     args = parser.parse_args()
 
-    workspace = normalize_path(args.workspace)
+    workspace = genomicsdb_common.normalize_path(args.workspace)
     if not genomicsdb.is_file(workspace + "/__tiledb_workspace.tdb"):
         raise RuntimeError(f"workspace({workspace}) not found")
     callset_file = args.callset
@@ -250,7 +223,7 @@ def setup_gdb():
         raise RuntimeError(f"callset({callset_file}) vidmap({vidmap_file}) or loader({loader_file}) not found")
 
     if args.list_contigs:
-        _, intervals = parse_vidmap_json(vidmap_file)
+        _, intervals = genomicsdb_common.parse_vidmap_json(vidmap_file)
         print(*intervals, sep="\n")
         sys.exit(0)
 
@@ -274,7 +247,7 @@ def setup_gdb():
             "Specify at least one of either -i/-interval -I/--interval-list -s/--sample -S/--sample-list has to be specified"  # noqa
         )
 
-    contigs_map, intervals = parse_vidmap_json(vidmap_file, intervals or interval_list)
+    contigs_map, intervals = genomicsdb_common.parse_vidmap_json(vidmap_file, intervals or interval_list)
     row_tuples = parse_callset_json_for_row_ranges(callset_file, samples or sample_list)
 
     # parse loader.json for partitions
@@ -284,23 +257,6 @@ def setup_gdb():
     gdb = genomicsdb_connect(workspace, callset_file, vidmap_file, args.filter)
 
     return gdb, workspace, partitions, contigs_map, intervals, row_tuples, args
-
-
-interval_pattern = re.compile(r"(.*):(.*)-(.*)|(.*):(.*)|(.*)")
-
-
-def parse_interval(interval: str):
-    result = re.match(interval_pattern, interval)
-    if result:
-        length = len(result.groups())
-        if length == 6:
-            if result.group(1) and result.group(2) and result.group(3):
-                return result.group(1), int(result.group(2)), int(result.group(3))
-            elif result.group(4) and result.group(5):
-                return result.group(4), int(result.group(5)), None
-            elif result.group(6):
-                return result.group(6), 1, None
-    raise RuntimeError(f"Interval {interval} could not be parsed")
 
 
 def generate_output_filename(output, output_type, interval, idx):
@@ -356,7 +312,7 @@ def main():
     for interval in intervals:
         print(f"Processing interval({interval})...")
         # get tiledb offsets for interval
-        contig, start, end = parse_interval(interval)
+        contig, start, end = genomicsdb_common.parse_interval(interval)
         if contig in contigs_map:
             contig_offset = contigs_map[contig]["tiledb_column_offset"] + start - 1
             length = contigs_map[contig]["length"]
