@@ -82,7 +82,7 @@ echo  $LOADER_FILE  $CALLSET_FILE   $VIDMAP_FILE
 rm -f loader.json callset.json vidmap.json
 for INTERVAL in "${INTERVALS[@]}"
 do
-  INTERVAL_LIST = "$INTERVAL_LIST -i  $INTERVAL"
+  INTERVAL_LIST="$INTERVAL_LIST -i  $INTERVAL"
 done
 
 genomicsdb_cache -w $WORKSPACE -l $LOADER_FILE  -c $CALLSET_FILE -v $VIDMAP_FILE $INTERVAL_LIST

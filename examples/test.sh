@@ -145,7 +145,7 @@ run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -S $TEMP_D
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -f $FILTER"
 
-run_command "genomicsdb_cache -w $WORKSPACE"
+run_command "genomicsdb_cache -w $WORKSPACE $INTERVAL_ARGS"
 export TILEDB_CACHE=1
 if [[ $WORKSPACE == *://* ]]; then
   if [[ ! -f loader.json ]] || [[ ! -f callset.json ]] || [[ ! -f vidmap.json ]]; then

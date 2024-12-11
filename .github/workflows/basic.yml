@@ -104,6 +104,7 @@ jobs:
         source .github/scripts/setup_azurite.sh
         echo "Testing on Azurite..."
         PYTHONPATH=. WORKSPACE=az://test/ws ./examples/test.sh
+        ls -l /tmp/tiledb_bookkeeping
         echo "Testing on Azurite DONE"
 
         
