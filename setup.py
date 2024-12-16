@@ -41,7 +41,7 @@ GENOMICSDB_LOCAL_DATA_DIR = "genomicsdb"
 GENOMICSDB_INSTALL_PATH = os.getenv("GENOMICSDB_HOME", default="genomicsdb")
 copy_genomicsdb_libs = False
 copy_protobuf_definitions = False
-with_version = "0.0.9.14"
+with_version = "0.0.9.17"
 
 args = sys.argv[:]
 for arg in args:
@@ -58,7 +58,6 @@ for arg in args:
         with_version = arg.split("=")[1]
         sys.argv.remove(arg)
 
-print("GenomicsDB-Python Version={}".format(with_version))
 print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
 
 GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
