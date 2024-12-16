@@ -27,16 +27,11 @@
 #
 
 import argparse
-import os
+import json
+
+import genomicsdb_common
 
 import genomicsdb
-
-
-def normalize_path(path):
-    if "://" in path:
-        return path
-    else:
-        return os.path.abspath(path)
 
 
 def is_cloud_path(path):
@@ -81,10 +76,23 @@ def main():
     parser.add_argument(
         "-l", "--loader", required=False, help="Optional - URL to loader file. Defaults to loader.json in workspace"
     )
+    parser.add_argument(
+        "-i",
+        "--interval",
+        action="append",
+        required=False,
+        help="genomic intervals over which to operate. The intervals should be specified in the <CONTIG>:<START>-<END> format with START and END optional.\nThis argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",  # noqa
+    )
+    parser.add_argument(
+        "-I",
+        "--interval-list",
+        required=False,
+        help="genomic intervals listed in a file over which to operate.\nThe intervals should be specified in the <CONTIG>:<START>-<END> format, with START and END optional one interval per line. \nNote: \n\t1. -i/--interval and -I/--interval-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",  # noqa
+    )
 
     args = parser.parse_args()
 
-    workspace = normalize_path(args.workspace)
+    workspace = genomicsdb_common.normalize_path(args.workspace)
     if not genomicsdb.is_file(workspace + "/__tiledb_workspace.tdb"):
         raise RuntimeError(f"workspace({workspace}) not found")
 
@@ -113,6 +121,14 @@ def main():
     if is_cloud_path(loader_file):
         with open("loader.json", "wb") as f:
             f.write(genomicsdb.read_entire_file(loader_file).encode())
+    if is_cloud_path(workspace) and (args.interval or args.interval_list):
+        contigs_map, intervals = genomicsdb_common.parse_vidmap_json(vidmap_file, args.interval or args.interval_list)
+        loader = json.loads(genomicsdb.read_entire_file("loader.json"))
+        partitions = loader["column_partitions"]
+
+        for array in genomicsdb_common.get_arrays(contigs_map, intervals, partitions):
+            print(f"Caching fragments for array {array}")
+            genomicsdb.cache_array_metadata(workspace, array)
 
 
 if __name__ == "__main__":

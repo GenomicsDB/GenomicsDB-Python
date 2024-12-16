@@ -46,7 +46,6 @@ VIDMAP_FILE=vidmap_file.json
 LOADER_FILE=loader_file.json
 FILTER='ISHOMREF'
 
-
 if [[ $(uname) == "Darwin" ]]; then
   TEMP_DIR=$(mktemp -d -t test-examples)
 else
@@ -94,7 +93,7 @@ run_command() {
   fi
 }
 
-PATH=.:$PATH
+PATH=$(dirname $0):$PATH
 run_command "genomicsdb_query" 2
 run_command "genomicsdb_query -h"
 run_command "genomicsdb_query --version"
@@ -103,7 +102,7 @@ run_command "genomicsdb_query --list-contigs" 2
 run_command "genomicsdb_query -w $WORKSPACE" 1
 run_command "genomicsdb_query -w $WORKSPACE -i xx -S XX" 1
 
-if [[ ! -d $WORKSPACE ]]; then
+if [[ -z $WORKSPACE ]]; then
   echo "Specify an existing workspace in env WORKSPACE"
   exit 1
 fi
@@ -145,5 +144,16 @@ run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s NON_EXI
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -S $TEMP_DIR/samples.list"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -f $FILTER"
+
+run_command "genomicsdb_cache -w $WORKSPACE $INTERVAL_ARGS"
+export TILEDB_CACHE=1
+if [[ $WORKSPACE == *://* ]]; then
+  if [[ ! -f loader.json ]] || [[ ! -f callset.json ]] || [[ ! -f vidmap.json ]]; then
+    die "Could not cache workspace metadata for cloud URL=$WORKSPACE"
+  fi
+  echo "Running from cached metadata for workspace=$WORKSPACE..."
+  run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -s HG00097 -l loader.json -c callset.json -v vidmap.json"
+   echo "Running from cached metadata for workspace=$WORKSPACE DONE"
+fi
 
 cleanup

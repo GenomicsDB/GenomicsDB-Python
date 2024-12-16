@@ -57,12 +57,14 @@ NTHREADS=${NTHREADS:=-8}
 ###########################################
 
 if [[ ! -d env ]]; then
-  python3.11 -m venv env
+  python3 -m venv env
   source env/bin/activate
   pip install genomicsdb
 else
   source env/bin/activate
 fi
+
+PATH=$(dirname $0):$PATH
 
 if [[ ! -z ${SAMPLES} ]]; then
   for SAMPLE in "${SAMPLES[@]}"
@@ -78,7 +80,12 @@ fi
 echo  $LOADER_FILE  $CALLSET_FILE   $VIDMAP_FILE
 
 rm -f loader.json callset.json vidmap.json
-./genomicsdb_cache -w $WORKSPACE -l $LOADER_FILE  -c $CALLSET_FILE -v $VIDMAP_FILE
+for INTERVAL in "${INTERVALS[@]}"
+do
+  INTERVAL_LIST="$INTERVAL_LIST -i  $INTERVAL"
+done
+
+genomicsdb_cache -w $WORKSPACE -l $LOADER_FILE  -c $CALLSET_FILE -v $VIDMAP_FILE $INTERVAL_LIST
 
 if [[ -f loader.json ]]; then
   export LOADER_FILE="loader.json"
@@ -93,8 +100,8 @@ fi
 run_query() {
   INTERVAL=$1
   OUTPUT_FILE=$2
-  echo ./genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE
-  /usr/bin/time -l ./genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t $OUTPUT_FILE_TYPE
+  echo genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE
+  /usr/bin/time -l genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t $OUTPUT_FILE_TYPE
 }
 
 export -f run_query  

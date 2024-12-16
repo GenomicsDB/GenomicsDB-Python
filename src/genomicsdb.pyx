@@ -495,3 +495,8 @@ def read_entire_file(filename):
         contents_string = contents.decode("utf-8")
         free(contents)
         return contents_string
+
+
+def cache_array_metadata(workspace, array):
+    if c_cache_fragment_metadata(as_string(workspace), as_string(array)) != 0:
+        print(f"Could not cache fragment metadata for array={array} in {workspace}")
