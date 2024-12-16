@@ -58,6 +58,7 @@ for arg in args:
         with_version = arg.split("=")[1]
         sys.argv.remove(arg)
 
+print("GenomicsDB-Python Version={}".format(with_version))
 print("Compiled GenomicsDB Install Path: {}".format(GENOMICSDB_INSTALL_PATH))
 
 GENOMICSDB_INCLUDE_DIR = os.path.join(GENOMICSDB_INSTALL_PATH, "include")
