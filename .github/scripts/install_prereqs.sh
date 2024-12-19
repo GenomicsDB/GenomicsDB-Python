@@ -206,7 +206,8 @@ if [[ $1 == "release" ]]; then
   echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}"
   echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
   # For Debugging
-  git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop $NATIVE_BUILD_DIR
+  #git clone https://github.com/GenomicsDB/GenomicsDB.git -b develop $NATIVE_BUILD_DIR
+  it clone https://github.com/GenomicsDB/GenomicsDB.git -b ng_errmsg $NATIVE_BUILD_DIR
   pushd $NATIVE_BUILD_DIR
   mkdir build &&
     pushd build &&

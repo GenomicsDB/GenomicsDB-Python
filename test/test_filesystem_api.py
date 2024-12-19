@@ -19,3 +19,11 @@ def test_filesystem_api(tmpdir):
 
     read_text = genomicsdb.read_entire_file(hello_file)
     assert read_text == text
+
+    assert not genomicsdb.workspace_exists("non-existent-ws")
+    assert not genomicsdb.workspace_exists("az://non-existent-container/ws")
+    assert not genomicsdb.workspace_exists("az://non-existent-container@non-existent-account.blob/ws")
+
+    assert not genomicsdb.array_exists("non-existent-ws", "non-existent-array")
+    assert not genomicsdb.array_exists("az://non-existent-container/ws", "non-existent-array")
+    assert not genomicsdb.array_exists("az://non-existent-container@non-existent-account.blob/ws", "non-existent-array")

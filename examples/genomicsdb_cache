@@ -93,7 +93,7 @@ def main():
     args = parser.parse_args()
 
     workspace = genomicsdb_common.normalize_path(args.workspace)
-    if not genomicsdb.is_file(workspace + "/__tiledb_workspace.tdb"):
+    if not genomicsdb.workspace_exists(workspace):
         raise RuntimeError(f"workspace({workspace}) not found")
 
     callset_file = args.callset
@@ -128,7 +128,8 @@ def main():
 
         for array in genomicsdb_common.get_arrays(contigs_map, intervals, partitions):
             print(f"Caching fragments for array {array}")
-            genomicsdb.cache_array_metadata(workspace, array)
+            if genomicsdb.array_exists(workspace, array):
+                genomicsdb.cache_array_metadata(workspace, array)
 
 
 if __name__ == "__main__":

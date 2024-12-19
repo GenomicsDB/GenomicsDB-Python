@@ -204,7 +204,7 @@ def setup_gdb():
     args = parser.parse_args()
 
     workspace = genomicsdb_common.normalize_path(args.workspace)
-    if not genomicsdb.is_file(workspace + "/__tiledb_workspace.tdb"):
+    if not genomicsdb.workspace_exists(workspace):
         raise RuntimeError(f"workspace({workspace}) not found")
     callset_file = args.callset
     if not callset_file:
@@ -346,7 +346,7 @@ def main():
             print(f"Using {args.max_arrow_byte_size} number of bytes as hint for writing out parquet files")
 
         for idx, array in enumerate(arrays):
-            if not genomicsdb.is_file(workspace + "/" + array + "/__array_schema.tdb"):
+            if not genomicsdb.array_exists(workspace, array):
                 print(f"\tArray({array}) not imported into workspace({workspace}) for interval({interval})")
                 continue
             query_config = query_pb.QueryConfiguration()
