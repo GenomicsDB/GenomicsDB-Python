@@ -45,7 +45,7 @@ jobs:
           CIBW_BEFORE_BUILD: "pip install -r {package}/requirements_dev.txt && cd {package}"
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_SKIP: "*musllinux*"
-          CIBW_CONFIG_SETTINGS: "--build-option=--with-version=${{ needs.version_number.outputs.version }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
+          CIBW_CONFIG_SETTINGS: "--global-option=--with-version=${{ needs.version_number.outputs.version }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
           CIBW_ENVIRONMENT: CMAKE_PREFIX_PATH=${{ env.INSTALL_PREFIX }}
           CIBW_ENVIRONMENT_MACOS: DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
           CIBW_ENVIRONMENT_LINUX: >
@@ -66,7 +66,7 @@ jobs:
   build_macos_arm64_wheels:
     name: Build wheels for macOS arm64
     needs: version_number
-    runs-on: macos-12
+    runs-on: macos-13
     env:
       INSTALL_PREFIX: ${{ github.workspace }}/prereqs_arm64
       MACOSX_DEPLOYMENT_TARGET: 12.1
@@ -81,7 +81,7 @@ jobs:
           CIBW_BEFORE_ALL: "OSX_ARCH='arm64' INSTALL_PREFIX=${{ env.INSTALL_PREFIX }} .github/scripts/install_prereqs.sh release"
           CIBW_BEFORE_BUILD: "pip install -r {package}/requirements_dev.txt && cd {package}"
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
-          CIBW_CONFIG_SETTINGS: "--build-option=--with-version=${{ needs.version_number.outputs.version }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
+          CIBW_CONFIG_SETTINGS: "--global-option=--with-version=${{ needs.version_number.outputs.version }} --build-option=--with-genomicsdb=${{ env.INSTALL_PREFIX }}"
           CIBW_ENVIRONMENT: DYLD_LIBRARY_PATH=${{ env.INSTALL_PREFIX }}/lib
 
       - uses: actions/upload-artifact@v4
