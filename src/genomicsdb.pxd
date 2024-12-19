@@ -252,6 +252,8 @@ cdef extern from "genomicsdb_utils.h":
     cdef bint c_is_file "genomicsdb::is_file"(string)
     cdef ssize_t c_file_size "genomicsdb::file_size"(string)
     cdef int c_read_entire_file "genomicsdb::read_entire_file"(string, void**, size_t*)
+    cdef bint c_workspace_exists "genomicsdb::workspace_exists"(string)
+    cdef bint c_array_exists "genomicsdb::array_exists"(string, string)
     cdef vector[string] c_get_array_names "genomicsdb::get_array_names"(string)
     cdef int c_cache_fragment_metadata "genomicsdb::cache_fragment_metadata"(string, string)
     pass
