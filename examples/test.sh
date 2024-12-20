@@ -39,7 +39,6 @@
 # ~/GenomicsDB/install/bin/vcf2genomicsdb -r 2 ws/loader.json
 # ~/GenomicsDB/install/bin/vcf2genomicsdb -r 80 ws/loader.json
 
-WORKSPACE=${WORKSPACE:-ws}
 INTERVAL_ARGS="-i 1:1-40000000 -i 2:3000-40000 -i 2:40001 -i 3"
 SAMPLE_ARGS="-s HG00096 -s HG00097 -s HG00099"
 VIDMAP_FILE=vidmap_file.json
@@ -93,7 +92,13 @@ run_command() {
   fi
 }
 
+if [[ -z $WORKSPACE ]]; then
+  tar xzf $(dirname $0)/examples_ws.tgz -C $TEMP_DIR
+  WORKSPACE=$TEMP_DIR/ws
+fi
+
 PATH=$(dirname $0):$PATH
+
 run_command "genomicsdb_query" 2
 run_command "genomicsdb_query -h"
 run_command "genomicsdb_query --version"
@@ -101,11 +106,6 @@ run_command "genomicsdb_query --list-samples" 2
 run_command "genomicsdb_query --list-contigs" 2
 run_command "genomicsdb_query -w $WORKSPACE" 1
 run_command "genomicsdb_query -w $WORKSPACE -i xx -S XX" 1
-
-if [[ -z $WORKSPACE ]]; then
-  echo "Specify an existing workspace in env WORKSPACE"
-  exit 1
-fi
 
 genomicsdb_query -w $WORKSPACE --list-contigs > $TEMP_DIR/contigs.list
 genomicsdb_query -w $WORKSPACE --list-samples > $TEMP_DIR/samples.list
@@ -137,14 +137,15 @@ do
   fi
 done
 
-run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096"
-run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00097 -s HG00100 -s HG00096"
-run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096 -s NON_EXISTENT_SAMPLE"
-run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s NON_EXISTENT_SAMPLE"
-run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -S $TEMP_DIR/samples.list"
-run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list"
-run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -f $FILTER"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096 -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096 -s NON_EXISTENT_SAMPLE -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s NON_EXISTENT_SAMPLE -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -S $TEMP_DIR/samples.list -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -f $FILTER -o $OUTPUT"
 
+rm -f loader.json callset.json vidmap.json
 run_command "genomicsdb_cache -w $WORKSPACE $INTERVAL_ARGS"
 export TILEDB_CACHE=1
 if [[ $WORKSPACE == *://* ]]; then
@@ -152,8 +153,38 @@ if [[ $WORKSPACE == *://* ]]; then
     die "Could not cache workspace metadata for cloud URL=$WORKSPACE"
   fi
   echo "Running from cached metadata for workspace=$WORKSPACE..."
-  run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -s HG00097 -l loader.json -c callset.json -v vidmap.json"
+  run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -s HG00097 -l loader.json -c callset.json -v vidmap.json -o $OUTPUT"
    echo "Running from cached metadata for workspace=$WORKSPACE DONE"
 fi
+rm -f loader.json callset.json vidmap.json
+
+if [[ $WORKSPACE == *://* ]]; then
+  cleanup
+  exit 0
+fi
+
+####################################################################
+#
+# Check old style workspaces with genomicsdb_query/genomicsdb_cache
+#
+####################################################################
+
+OLDSTYLE_DIR=$TEMP_DIR/old_style
+mkdir -p $OLDSTYLE_DIR
+tar xzf $(dirname $0)/../test/inputs/sanity.test.tgz -C $OLDSTYLE_DIR
+WORKSPACE=$OLDSTYLE_DIR/ws
+
+run_command "genomicsdb_query -w $WORKSPACE --list-samples"
+run_command "genomicsdb_query -w $WORKSPACE --list-contigs"
+run_command "genomicsdb_query -w $WORKSPACE --list-partitions"
+run_command "genomicsdb_query -w $WORKSPACE -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
+
+OLDSTYLE_JSONS="-l $OLDSTYLE_DIR/loader.json -c $OLDSTYLE_DIR/callset_t0_1_2.json -v $OLDSTYLE_DIR/vid.json"
+run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-samples"
+run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-contigs"
+run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-partitions"
+run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
 
 cleanup

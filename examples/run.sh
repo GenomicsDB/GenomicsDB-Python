@@ -26,7 +26,9 @@
 #
 #
 
-WORKSPACE=${WORKSPACE:-my_workspace}
+set -e
+
+export WORKSPACE=${WORKSPACE:-my_workspace}
 export CALLSET_FILE=${CALLSET_FILE:-$WORKSPACE/callset.json}
 export VIDMAP_FILE=${VIDMAP_FILE:-$WORKSPACE/vidmap.json}
 export LOADER_FILE=${LOADER_FILE:-$WORKSPACE/loader.json}
@@ -97,11 +99,17 @@ if [[ -f vidmap.json ]]; then
   export VIDMAP_FILE="vidmap.json"
 fi
 
+if [[ $(uname) == "Darwin" ]]; then
+  export MEASURE_PERFORMANCE="/usr/bin/time -l"
+else
+  export MEASURE_PERFORMANCE="/usr/bin/time -v"
+fi
+
 run_query() {
   INTERVAL=$1
   OUTPUT_FILE=$2
   echo genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t $OUTPUT_FILE_TYPE
-  /usr/bin/time -l genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t $OUTPUT_FILE_TYPE
+  $MEASURE_PERFORMANCE genomicsdb_query -w $WORKSPACE -l $LOADER_FILE -c $CALLSET_FILE -v $VIDMAP_FILE -i $INTERVAL $SAMPLE_ARGS $FILTER_EXPR -o $OUTPUT_FILE -t $OUTPUT_FILE_TYPE
 }
 
 export -f run_query  
