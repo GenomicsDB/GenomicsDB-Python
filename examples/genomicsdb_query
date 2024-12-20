@@ -47,7 +47,7 @@ def parse_callset_json(callset_file):
     callsets = callset["callsets"]
     samples = []
     for callset in callsets:
-        if isinstance(callset) == str:  # Old style vidmap json
+        if isinstance(callset, str):  # Old style vidmap json
             samples.append(callset)
         else:  # Generated with vcf2genomicsdb_init
             samples.append(callset["sample_name"])
@@ -69,8 +69,8 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
         callset["row_idx"]
         for sample in samples
         for callset in callsets
-        if (isinstance(callset) != str and sample == callset["sample_name"])
-        or (isinstance(callset) == str and sample == callset)
+        if (not isinstance(callset, str) and sample == callset["sample_name"])
+        or (isinstance(callset, str) and sample == callset)
     ]
     if len(rows) == 0:
         print(f"None of the samples{samples} specified were found in the workspace")
@@ -342,7 +342,7 @@ def main():
 
         arrays = []
         for idx, partition in enumerate(partitions):
-            if isinstance(partition["begin"]) == int:  # Old style vidmap json
+            if isinstance(partition["begin"], int):  # Old style vidmap json
                 column_begin = partition["begin"]
                 if "end" in partition.keys():
                     column_end = partition["end"]

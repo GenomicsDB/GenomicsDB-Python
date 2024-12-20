@@ -53,7 +53,7 @@ def parse_vidmap_json(vidmap_file, intervals=None):
     if not intervals:
         intervals = []
     for contig in contigs:
-        if isinstance(contig) == str:  # Old style vidmap json
+        if isinstance(contig, str):  # Old style vidmap json
             contig_name = contig
             contigs_map[contig] = {
                 "length": contigs[contig]["length"],
