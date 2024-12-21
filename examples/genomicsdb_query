@@ -92,7 +92,7 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
     return row_tuples
 
 
-def parse_loader_json(workspace, loader_file, contigs_map):
+def parse_loader_json(loader_file):
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
     partitions = loader["column_partitions"]
     array_names = [partition["array_name"] for partition in partitions]
@@ -249,7 +249,7 @@ def setup_gdb():
     if args.list_partitions:
         contigs_map, _ = genomicsdb_common.parse_vidmap_json(vidmap_file)
         # parse loader.json for partitions
-        partitions = parse_loader_json(workspace, loader_file, contigs_map)
+        partitions = parse_loader_json(loader_file)
         print(*partitions, sep="\n")
         sys.exit(0)
 
