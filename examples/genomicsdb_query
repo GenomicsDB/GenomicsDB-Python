@@ -45,12 +45,7 @@ from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
 def parse_callset_json(callset_file):
     callset = json.loads(genomicsdb.read_entire_file(callset_file))
     callsets = callset["callsets"]
-    samples = []
-    for callset in callsets:
-        if isinstance(callset, str):  # Old style vidmap json
-            samples.append(callset)
-        else:  # Generated with vcf2genomicsdb_init
-            samples.append(callset["sample_name"])
+    samples = [callset if isinstance(callset, str) else callset["sample_name"] for callset in callsets]
     return samples
 
 
@@ -95,7 +90,7 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
 def parse_loader_json(loader_file):
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
     partitions = loader["column_partitions"]
-    array_names = [partition["array_name"] for partition in partitions]
+    array_names = [partition["array_name"] if "array_name" in partition else partition["array"] for partition in partitions]
     return [name.replace("$", ":", 1).replace("$", "-", 1) for name in array_names]
 
 
