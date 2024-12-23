@@ -45,7 +45,7 @@ from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
 def parse_callset_json(callset_file):
     callset = json.loads(genomicsdb.read_entire_file(callset_file))
     callsets = callset["callsets"]
-    samples = [callset["sample_name"] for callset in callsets]
+    samples = [callset if isinstance(callset, str) else callset["sample_name"] for callset in callsets]
     return samples
 
 
@@ -57,7 +57,16 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
     if isinstance(samples, str):
         with open(samples) as file:
             samples = [line.rstrip() for line in file]
-    rows = [callset["row_idx"] for sample in samples for callset in callsets if sample == callset["sample_name"]]
+    if not samples:
+        return None
+    # Old style json has type(callset) == str whereas the one generated with vcf2genomicsdb_init is a list
+    rows = [
+        callsets[callset]["row_idx"] if isinstance(callset, str) else callset["row_idx"]
+        for sample in samples
+        for callset in callsets
+        if (not isinstance(callset, str) and sample == callset["sample_name"])
+        or (isinstance(callset, str) and sample == callset)
+    ]
     if len(rows) == 0:
         print(f"None of the samples{samples} specified were found in the workspace")
         return []
@@ -81,7 +90,9 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
 def parse_loader_json(loader_file):
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
     partitions = loader["column_partitions"]
-    array_names = [partition["array_name"] for partition in partitions]
+    array_names = [
+        partition["array_name"] if "array_name" in partition else partition["array"] for partition in partitions
+    ]
     return [name.replace("$", ":", 1).replace("$", "-", 1) for name in array_names]
 
 
@@ -140,7 +151,7 @@ def setup_gdb():
     parser.add_argument(
         "--list-partitions",
         action="store_true",
-        help="List interval partitions for the ingested samples in the workspace and exit",
+        help="List interval partitions(genomicsdb arrays in the workspace) for the ingested samples in the workspace and exit",  # noqa
     )
     parser.add_argument(
         "-i",
@@ -233,6 +244,7 @@ def setup_gdb():
         sys.exit(0)
 
     if args.list_partitions:
+        contigs_map, _ = genomicsdb_common.parse_vidmap_json(vidmap_file)
         # parse loader.json for partitions
         partitions = parse_loader_json(loader_file)
         print(*partitions, sep="\n")
@@ -326,10 +338,24 @@ def main():
             continue
 
         arrays = []
-        for partition in partitions:
-            if contig_end < partition["begin"]["tiledb_column"] or contig_offset > partition["end"]["tiledb_column"]:
+        for idx, partition in enumerate(partitions):
+            if isinstance(partition["begin"], int):  # Old style vidmap json
+                column_begin = partition["begin"]
+                if "end" in partition.keys():
+                    column_end = partition["end"]
+                elif idx + 1 < len(partitions):
+                    column_end = partitions[idx + 1]["begin"] - 1
+                else:
+                    column_end = sys.maxsize
+            else:  # Generated with vcf2genomicsdb_init
+                column_begin = partition["begin"]["tiledb_column"]
+                column_end = partition["end"]["tiledb_column"]
+            if contig_end < column_begin or contig_offset > column_end:
                 continue
-            arrays.append(partition["array_name"])
+            if "array_name" in partition.keys():
+                arrays.append(partition["array_name"])
+            elif "array" in partition.keys():
+                arrays.append(partition["array"])
 
         arrays_length = len(arrays)
         if arrays_length == 0:

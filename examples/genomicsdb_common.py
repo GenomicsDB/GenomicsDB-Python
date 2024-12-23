@@ -53,9 +53,17 @@ def parse_vidmap_json(vidmap_file, intervals=None):
     if not intervals:
         intervals = []
     for contig in contigs:
-        contigs_map[contig["name"]] = contig
+        if isinstance(contig, str):  # Old style vidmap json
+            contig_name = contig
+            contigs_map[contig] = {
+                "length": contigs[contig]["length"],
+                "tiledb_column_offset": contigs[contig]["tiledb_column_offset"],
+            }
+        else:  # Generated with vcf2genomicsdb_init
+            contig_name = contig["name"]
+            contigs_map[contig["name"]] = contig
         if all_intervals:
-            intervals.append(contig["name"])
+            intervals.append(contig_name)
     return contigs_map, intervals
 
 
