@@ -90,7 +90,9 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
 def parse_loader_json(loader_file):
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
     partitions = loader["column_partitions"]
-    array_names = [partition["array_name"] if "array_name" in partition else partition["array"] for partition in partitions]
+    array_names = [
+        partition["array_name"] if "array_name" in partition else partition["array"] for partition in partitions
+    ]
     return [name.replace("$", ":", 1).replace("$", "-", 1) for name in array_names]
 
 
