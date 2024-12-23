@@ -61,12 +61,13 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
         return None
     # Old style json has type(callset) == str whereas the one generated with vcf2genomicsdb_init is a list
     rows = [
-        callset["row_idx"]
+        callsets[callset]["row_idx"] if isinstance(callset, str) else callset["row_idx"]
         for sample in samples
         for callset in callsets
         if (not isinstance(callset, str) and sample == callset["sample_name"])
         or (isinstance(callset, str) and sample == callset)
     ]
+    breakpoint()
     if len(rows) == 0:
         print(f"None of the samples{samples} specified were found in the workspace")
         return []
