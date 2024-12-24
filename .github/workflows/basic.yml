@@ -102,7 +102,7 @@ jobs:
       run: |
         source .github/scripts/setup_azurite.sh
         echo "Testing on Azurite..."
-        echo "WORKSPACE=$WORKSPACE OLDSTYLE_DIR=$OLDSTYLE_DIR
+        echo "WORKSPACE=$WORKSPACE OLDSTYLE_DIR=$OLDSTYLE_DIR"
         PYTHONPATH=. ./examples/test.sh
         ls -l /tmp/tiledb_bookkeeping
         echo "Testing on Azurite DONE"
