@@ -55,6 +55,7 @@ AZURE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=devstoreacco
 az storage container create -n test --connection-string $AZURE_CONNECTION_STRING
 
 # Setup examples workspace on azurite
+mkdir  oldstyle_dir
 tar xzvf $GITHUB_WORKSPACE/test/inputs/sanity.test.tgz -C oldstyle_dir
 cd $GITHUB_WORKSPACE/examples
 tar xzvf examples_ws.tgz
