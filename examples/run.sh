@@ -45,8 +45,10 @@ INTERVALS=("1:1-1000000")
 
 #declare -a SAMPLES
 #SAMPLES=("HG00096" "HG00097" "HG00099")
+#SAMPLES_LIST=samples.list
 
 #FILTER='resolve(GT, REF, ALT) &= "T/T"'
+FILTER='!ISHOMREF'
 
 export OUTPUT_FILE=${OUTPUT_FILE:-my_output}
 export OUTPUT_FILE_TYPE=${OUTPUT_FILE_TYPE:-json}
@@ -54,16 +56,18 @@ export OUTPUT_FILE_TYPE=${OUTPUT_FILE_TYPE:-json}
 export TILEDB_CACHE=1
 NTHREADS=${NTHREADS:-8}
 
+VENV=${VENV:-env}
+
 ###########################################
 # Should not have to change anything below
 ###########################################
 
-if [[ ! -d env ]]; then
-  python3 -m venv env
+if [[ ! -d $VENV ]]; then
+  python3 -m venv $VENV
   source env/bin/activate
   pip install genomicsdb
 else
-  source env/bin/activate
+  source $VENV/bin/activate
 fi
 
 PATH=$(dirname $0):$PATH
@@ -75,8 +79,12 @@ if [[ ! -z ${SAMPLES} ]]; then
   done
 fi
 
+if [[ ! -z $SAMPLES_LIST ]]; then
+  export SAMPLE_ARGS="-S $SAMPLE_LIST"
+fi
+
 if [[ ! -z ${FILTER} ]]; then
-  FILTER_EXPR="-f $FILTER"
+  export FILTER_EXPR="-f $FILTER"
 fi
 
 echo  $LOADER_FILE  $CALLSET_FILE   $VIDMAP_FILE

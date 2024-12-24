@@ -158,20 +158,17 @@ if [[ $WORKSPACE == *://* ]]; then
 fi
 rm -f loader.json callset.json vidmap.json
 
-if [[ $WORKSPACE == *://* ]]; then
-  cleanup
-  exit 0
-fi
-
 ####################################################################
 #
 # Check old style workspaces with genomicsdb_query/genomicsdb_cache
 #
 ####################################################################
 
-OLDSTYLE_DIR=$TEMP_DIR/old_style
-mkdir -p $OLDSTYLE_DIR
-tar xzf $(dirname $0)/../test/inputs/sanity.test.tgz -C $OLDSTYLE_DIR
+if [[ -z $OLDSTYLE_DIR ]]; then
+  OLDSTYLE_DIR=$TEMP_DIR/old_style
+  mkdir -p $OLDSTYLE_DIR
+  tar xzf $(dirname $0)/../test/inputs/sanity.test.tgz -C $OLDSTYLE_DIR
+fi
 WORKSPACE=$OLDSTYLE_DIR/ws
 
 run_command "genomicsdb_query -w $WORKSPACE --list-samples"
@@ -181,6 +178,7 @@ run_command "genomicsdb_query -w $WORKSPACE -s HG00097 -s HG00100 -s HG00096 -o 
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
 
 OLDSTYLE_JSONS="-l $OLDSTYLE_DIR/loader.json -c $OLDSTYLE_DIR/callset_t0_1_2.json -v $OLDSTYLE_DIR/vid.json"
+run_command "genomicsdb_cache -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-samples"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-contigs"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-partitions"
