@@ -121,4 +121,4 @@ def get_arrays(interval, contigs_map, partitions):
         elif "array" in partition.keys():
             arrays.append(partition["array"])
 
-    return arrays
+    return contig, start, end, arrays
