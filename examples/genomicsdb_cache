@@ -41,6 +41,11 @@ def is_cloud_path(path):
         return False
 
 
+def get_arrays(interval, contigs_map, partitions):
+    _, _, _, arrays = genomicsdb_common.get_arrays(interval, contigs_map, partitions)
+    return arrays
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="cache",
@@ -126,9 +131,9 @@ def main():
         loader = json.loads(genomicsdb.read_entire_file("loader.json"))
         partitions = loader["column_partitions"]
         arrays = {
-            array
+            arrays_for_interval
             for interval in intervals
-            for _, _, _, array in genomicsdb_common.get_arrays(interval, contigs_map, partitions)
+            for arrays_for_interval in get_arrays(interval, contigs_map, partitions)
         }
         for array in arrays:
             print(f"Caching fragments for array {array}")
