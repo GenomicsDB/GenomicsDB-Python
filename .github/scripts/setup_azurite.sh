@@ -54,16 +54,15 @@ export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 AZURE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=https://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=https://127.0.0.1:10001/devstoreaccount1;"
 az storage container create -n test --connection-string $AZURE_CONNECTION_STRING
 
-# Setup examples workspace on azurite
+# Setup test workspaces on azurite
 mkdir  oldstyle_dir
 tar xzvf $GITHUB_WORKSPACE/test/inputs/sanity.test.tgz -C oldstyle_dir
-cd $GITHUB_WORKSPACE/examples
-tar xzvf examples_ws.tgz
-echo "Azure Storage Blob upload-batch..."
-az storage blob upload-batch -d test/ws -s ws --connection-string $AZURE_CONNECTION_STRING
-export WORKSPACE=az://test/ws
 az storage blob upload-batch -d oldstyle-dir -s oldstyle_dir --connection-string $AZURE_CONNECTION_STRING
 export  OLDSTYLE_DIR=az://oldstyle-dir
-echo "Azure Storage Blob upload-batch DONE"
+
+cd $GITHUB_WORKSPACE/examples
+tar xzvf examples_ws.tgz
+az storage blob upload-batch -d test/ws -s ws --connection-string $AZURE_CONNECTION_STRING
+export WORKSPACE=az://test/ws
 
 popd
