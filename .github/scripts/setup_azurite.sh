@@ -62,8 +62,8 @@ tar xzvf examples_ws.tgz
 echo "Azure Storage Blob upload-batch..."
 az storage blob upload-batch -d test/ws -s ws --connection-string $AZURE_CONNECTION_STRING
 export WORKSPACE=az://test/ws
-az storage blob upload-batch -d oldstyle_dir -s oldstyle_dir oldstyle-dir --connection-string $AZURE_CONNECTION_STRING
-export  OLDSTYLE_DIR=az://oldstyle
+az storage blob upload-batch -d oldstyle-dir -s oldstyle_dir --connection-string $AZURE_CONNECTION_STRING
+export  OLDSTYLE_DIR=az://oldstyle-dir
 echo "Azure Storage Blob upload-batch DONE"
 
 popd
