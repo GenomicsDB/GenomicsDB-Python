@@ -55,10 +55,14 @@ AZURE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=devstoreacco
 az storage container create -n test --connection-string $AZURE_CONNECTION_STRING
 
 # Setup examples workspace on azurite
+tar xzvf $GITHUB_WORKSPACE/test/inputs/sanity.test.tgz -C oldstyle_dir
 cd $GITHUB_WORKSPACE/examples
 tar xzvf examples_ws.tgz
 echo "Azure Storage Blob upload-batch..."
 az storage blob upload-batch -d test/ws -s ws --connection-string $AZURE_CONNECTION_STRING
+export WORKSPACE=az://test/ws
+az storage blob upload-batch -d oldstyle_dir -s oldstyle_dir oldstyle-dir --connection-string $AZURE_CONNECTION_STRING
+export  OLDSTYLE_DIR=az://oldstyle
 echo "Azure Storage Blob upload-batch DONE"
 
 popd

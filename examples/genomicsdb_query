@@ -337,30 +337,11 @@ def main():
             print(f"Contig({contig}) not found in vidmap.json")
             continue
 
-        arrays = []
-        for idx, partition in enumerate(partitions):
-            if isinstance(partition["begin"], int):  # Old style vidmap json
-                column_begin = partition["begin"]
-                if "end" in partition.keys():
-                    column_end = partition["end"]
-                elif idx + 1 < len(partitions):
-                    column_end = partitions[idx + 1]["begin"] - 1
-                else:
-                    column_end = sys.maxsize
-            else:  # Generated with vcf2genomicsdb_init
-                column_begin = partition["begin"]["tiledb_column"]
-                column_end = partition["end"]["tiledb_column"]
-            if contig_end < column_begin or contig_offset > column_end:
-                continue
-            if "array_name" in partition.keys():
-                arrays.append(partition["array_name"])
-            elif "array" in partition.keys():
-                arrays.append(partition["array"])
-
-        arrays_length = len(arrays)
-        if arrays_length == 0:
+        arrays = genomicsdb_common.get_arrays(interval, contigs_map, partitions)
+        if len(arrays) == 0:
             print(f"No arrays in the workspace matched input interval({interval})")
             continue
+
         print(f"\tArrays:{arrays} under consideration for interval({interval})")
 
         output_type = args.output_type

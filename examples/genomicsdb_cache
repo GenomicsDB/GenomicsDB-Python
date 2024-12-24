@@ -125,8 +125,10 @@ def main():
         contigs_map, intervals = genomicsdb_common.parse_vidmap_json(vidmap_file, args.interval or args.interval_list)
         loader = json.loads(genomicsdb.read_entire_file("loader.json"))
         partitions = loader["column_partitions"]
-
-        for array in genomicsdb_common.get_arrays(contigs_map, intervals, partitions):
+        arrays = {
+            array for interval in intervals for array in genomicsdb_common.get_arrays(interval, contigs_map, partitions)
+        }
+        for array in arrays:
             print(f"Caching fragments for array {array}")
             if genomicsdb.array_exists(workspace, array):
                 genomicsdb.cache_array_metadata(workspace, array)
