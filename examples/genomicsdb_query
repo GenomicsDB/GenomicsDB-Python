@@ -321,6 +321,14 @@ def main():
             range.high = tuple[1]
             row_range_list.range_list.extend([range])
 
+    output_type = args.output_type
+    output = args.output
+    if output_type == "json":
+        json_type = parse_args_for_json_type(args.json_output_type)
+    if output_type == "arrow":
+        max_arrow_bytes = parse_args_for_max_bytes(args.max_arrow_byte_size)
+        print(f"Using {args.max_arrow_byte_size} number of bytes as hint for writing out parquet files")
+
     for interval in intervals:
         print(f"Processing interval({interval})...")
 
@@ -330,14 +338,6 @@ def main():
             continue
 
         print(f"\tArrays:{arrays} under consideration for interval({interval})")
-
-        output_type = args.output_type
-        output = args.output
-        if output_type == "json":
-            json_type = parse_args_for_json_type(args.json_output_type)
-        if output_type == "arrow":
-            max_arrow_bytes = parse_args_for_max_bytes(args.max_arrow_byte_size)
-            print(f"Using {args.max_arrow_byte_size} number of bytes as hint for writing out parquet files")
 
         for idx, array in enumerate(arrays):
             if not genomicsdb.array_exists(workspace, array):
