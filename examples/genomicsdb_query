@@ -307,7 +307,7 @@ def parse_args_for_max_bytes(max_arrow_byte_size):
 def main():
     gdb, workspace, partitions, contigs_map, intervals, row_tuples, args = setup_gdb()
 
-    if row_tuples and len(row_tuples) == 0:
+    if row_tuples is not None and len(row_tuples) == 0:
         return
 
     print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
