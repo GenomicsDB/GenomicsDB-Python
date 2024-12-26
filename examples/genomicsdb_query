@@ -32,6 +32,11 @@ import os
 import re
 import sys
 
+import multiprocessing
+from typing import NamedTuple
+import logging
+import threading
+
 import genomicsdb_common
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -40,6 +45,11 @@ import genomicsdb
 from genomicsdb import json_output_mode
 from genomicsdb.protobuf import genomicsdb_coordinates_pb2 as query_coords
 from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
+
+logging.basicConfig(
+    format='%(asctime)s.%(msecs)03d %(levelname)-5s GenomicsDB Python - pid=%(process)d tid=%(thread)d %(message)s',
+    level=logging.INFO,
+    datefmt='%H:%M:%S')
 
 
 def parse_callset_json(callset_file):
@@ -95,21 +105,15 @@ def parse_loader_json(loader_file):
     ]
     return [name.replace("$", ":", 1).replace("$", "-", 1) for name in array_names]
 
+def check_nproc(value):
+    ivalue = int(value)
+    if ivalue < 1:
+        raise argparse.ArgumentTypeError("%s specified nproc arg cannot be less than 1" % value)
+    elif ivalue > multiprocessing.cpu_count():
+        raise argparse.ArgumentTypeError("%s specified nproc arg cannot exceed max number of available processing units" % value)
+    return ivalue
 
-def genomicsdb_connect(workspace, callset_file, vidmap_file, filter):
-    export_config = query_pb.ExportConfiguration()
-    export_config.workspace = workspace
-    export_config.attributes.extend(["REF", "ALT", "GT"])
-    export_config.vid_mapping_file = vidmap_file
-    export_config.callset_mapping_file = callset_file
-    export_config.bypass_intersecting_intervals_phase = False
-    export_config.enable_shared_posixfs_optimizations = True
-    if filter:
-        export_config.query_filter = filter
-    return genomicsdb.connect_with_protobuf(export_config)
-
-
-def setup_gdb():
+def setup():
     parser = argparse.ArgumentParser(
         prog="query",
         description="GenomicsDB simple query with samples/intervals/filter as inputs",
@@ -184,6 +188,13 @@ def setup_gdb():
         "--filter",
         required=False,
         help="Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == \"G\" && resolve(GT, REF, ALT) &= \"T/T\" && ALT |= \"T\"'",  # noqa
+    )
+    parser.add_argument(
+        "-n",
+        "--nproc",
+        type=check_nproc,
+        default=8,
+        help="Optional - number of processing units for multiprocessing(default: %(default)s). Run nproc from command line to print the number of processing units available to a process for the user"
     )
     parser.add_argument(
         "-t",
@@ -266,9 +277,7 @@ def setup_gdb():
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
     partitions = loader["column_partitions"]
 
-    gdb = genomicsdb_connect(workspace, callset_file, vidmap_file, args.filter)
-
-    return gdb, workspace, partitions, contigs_map, intervals, row_tuples, args
+    return workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, args
 
 
 def generate_output_filename(output, output_type, interval, idx):
@@ -304,84 +313,143 @@ def parse_args_for_max_bytes(max_arrow_byte_size):
     return int(float(number) * units[unit])
 
 
-def main():
-    gdb, workspace, partitions, contigs_map, intervals, row_tuples, args = setup_gdb()
+class GenomicsDBExportConfig(NamedTuple):
+    workspace: str
+    vidmap_file: str
+    callset_file: str
 
-    if row_tuples and len(row_tuples) == 0:
-        return
 
-    print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
+class GenomicsDBQueryConfig(NamedTuple):
+    interval: str
+    contig: str
+    start: int
+    end: int
+    array_name: str
+    row_tuples: tuple|None
+    filter: str|None
 
+class OutputConfig(NamedTuple):
+    filename: str
+    type: str
+    json_type: str|None
+    max_arrow_bytes: int
+
+def configure_export(config: GenomicsDBExportConfig):
+    export_config = query_pb.ExportConfiguration()
+    export_config.workspace = config.workspace
+    export_config.attributes.extend(["REF", "ALT", "GT"])
+    export_config.vid_mapping_file = config.vidmap_file
+    export_config.callset_mapping_file = config.callset_file
+    export_config.bypass_intersecting_intervals_phase = False
+    export_config.enable_shared_posixfs_optimizations = True
+    return export_config
+
+
+def configure_query(config: GenomicsDBQueryConfig):
+    query_config = query_pb.QueryConfiguration()
+    query_config.array_name = config.array_name
+    contig_interval = query_coords.ContigInterval()
+    contig_interval.contig = config.contig
+    contig_interval.begin = config.start
+    contig_interval.end = config.end
+    query_config.query_contig_intervals.extend([contig_interval])
     row_range_list = None
-    if row_tuples:
+    if config.row_tuples:
         row_range_list = query_pb.RowRangeList()
-        for tuple in row_tuples:
+        for tuple in config.row_tuples:
             range = query_pb.RowRange()
             range.low = tuple[0]
             range.high = tuple[1]
             row_range_list.range_list.extend([range])
+    if row_range_list:
+        query_config.query_row_ranges.extend([row_range_list])
+    return query_config
+
+def process(export_config, query_config, output_config):
+    if not genomicsdb.array_exists(export_config.workspace, query_config.array_name):
+        logging.error(f"\tArray({query_config.array_name}) not imported into workspace({export_config.workspace}) for interval({query_config.interval})")
+        return 1
+    global gdb
+    try:
+        if gdb:
+            logging.info(f"Found gdb to process array({query_config.array_name}) for interval({query_config.interval})")
+    except NameError:
+        logging.info(f"Instantiating genomicsdb to process array({query_config.array_name}) for interval({query_config.interval})")
+        gdb = genomicsdb.connect_with_protobuf(configure_export(export_config))
+        logging.info(f"Instantiating genomicsdb to process array({query_config.array_name}) for interval({query_config.interval}) DONE")
+    query_protobuf = configure_query(query_config)
+    if output_config.type == "csv":
+        df = gdb.query_variant_calls(query_protobuf=query_protobuf, flatten_intervals=True)
+        df.to_csv(output_config.filename, index=False)
+    elif output_config.type == "json":
+        json_output = gdb.query_variant_calls(query_protobuf=query_protobuf, json_output=output_config.json_type)
+        with open(output_config.filename, "wb") as f:
+            f.write(json_output)
+    elif output_config.type == "arrow":
+        parent_dir = os.path.dirname(output_config.filename)
+        if not os.path.exists(parent_dir):
+            os.mkdir(parent_dir)
+        nbytes = 0
+        writer = None
+        i = 0
+        for out in gdb.query_variant_calls(query_protobuf=query_protobuf, arrow_output=True, batching=True):
+            reader = pa.ipc.open_stream(out)
+            for batch in reader:
+                if nbytes > output_config.max_arrow_bytes:
+                    i += 1
+                    nbytes = 0
+                    if writer:
+                        writer.close()
+                        writer = None
+                if not writer:
+                    writer = pq.ParquetWriter(f"{output_config.filename}__{i}.parquet", batch.schema)
+                nbytes += batch.nbytes
+                writer.write_batch(batch)
+            if writer:
+                writer.close()
+                writer = None
+
+    logging.info(f"Processed array {query_config.array_name} for interval {query_config.interval}")
+    return 0
+
+
+def main():
+    workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, args = setup()
+
+    if row_tuples is not None and len(row_tuples) == 0:
+        return
+
+    print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
 
     output_type = args.output_type
     output = args.output
+    json_type = None
     if output_type == "json":
         json_type = parse_args_for_json_type(args.json_output_type)
+    max_arrow_bytes = -1
     if output_type == "arrow":
         max_arrow_bytes = parse_args_for_max_bytes(args.max_arrow_byte_size)
         print(f"Using {args.max_arrow_byte_size} number of bytes as hint for writing out parquet files")
 
-    for interval in intervals:
-        print(f"Processing interval({interval})...")
+    export_config = GenomicsDBExportConfig(workspace, vidmap_file, callset_file)
+    with multiprocessing.Pool(processes=args.nproc) as pool:
+        for interval in intervals:
+            print(f"Processing interval({interval})...")
 
-        contig, start, end, arrays = genomicsdb_common.get_arrays(interval, contigs_map, partitions)
-        if len(arrays) == 0:
-            print(f"No arrays in the workspace matched input interval({interval})")
-            continue
-
-        print(f"\tArrays:{arrays} under consideration for interval({interval})")
-
-        for idx, array in enumerate(arrays):
-            if not genomicsdb.array_exists(workspace, array):
-                print(f"\tArray({array}) not imported into workspace({workspace}) for interval({interval})")
+            contig, start, end, arrays = genomicsdb_common.get_arrays(interval, contigs_map, partitions)
+            if len(arrays) == 0:
+                print(f"No arrays in the workspace matched input interval({interval})")
                 continue
-            query_config = query_pb.QueryConfiguration()
-            query_config.array_name = array
-            contig_interval = query_coords.ContigInterval()
-            contig_interval.contig = contig
-            contig_interval.begin = start
-            contig_interval.end = end
-            query_config.query_contig_intervals.extend([contig_interval])
-            if row_range_list:
-                query_config.query_row_ranges.extend([row_range_list])
-            output_filename = generate_output_filename(output, output_type, interval, idx)
-            if output_type == "csv":
-                df = gdb.query_variant_calls(query_protobuf=query_config, flatten_intervals=True)
-                df.to_csv(output_filename, index=False)
-            elif output_type == "json":
-                json_output = gdb.query_variant_calls(query_protobuf=query_config, json_output=json_type)
-                with open(output_filename, "wb") as f:
-                    f.write(json_output)
-            elif output_type == "arrow":
-                if not os.path.exists(output):
-                    os.mkdir(output)
-                nbytes = 0
-                writer = None
-                i = 0
-                for out in gdb.query_variant_calls(query_protobuf=query_config, arrow_output=True, batching=True):
-                    reader = pa.ipc.open_stream(out)
-                    for batch in reader:
-                        if nbytes > max_arrow_bytes:
-                            i += 1
-                            nbytes = 0
-                            if writer:
-                                writer.close()
-                                writer = None
-                        if not writer:
-                            print(f"Writing out batch {i}...")
-                            writer = pq.ParquetWriter(f"{output_filename}__{i}.parquet", batch.schema)
-                        nbytes += batch.nbytes
-                        writer.write_batch(batch)
-                if writer:
-                    writer.close()
+
+            print(f"\tArrays:{arrays} under consideration for interval({interval})")
+
+            for idx, array in enumerate(arrays):
+                query_config = GenomicsDBQueryConfig(interval, contig, start, end, array, row_tuples, filter)
+                output_config = OutputConfig(generate_output_filename(output, output_type, interval, idx),
+                                             output_type, json_type, max_arrow_bytes)
+                res = pool.apply_async(process, args=(export_config, query_config, output_config))
+                print(res.get())
+                
 
     print(f"genomicsdb_query for workspace({workspace}) and intervals({intervals}) completed successfully")
 
