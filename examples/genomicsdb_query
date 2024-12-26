@@ -33,7 +33,7 @@ import multiprocessing
 import os
 import re
 import sys
-from typing import NamedTuple
+from typing import NamedTuple, List
 
 import genomicsdb_common
 import pyarrow as pa
@@ -328,7 +328,7 @@ class GenomicsDBQueryConfig(NamedTuple):
     start: int
     end: int
     array_name: str
-    row_tuples: tuple | None
+    row_tuples: List[tuple] | None
     filter: str | None
 
 
