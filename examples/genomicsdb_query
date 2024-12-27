@@ -328,14 +328,14 @@ class GenomicsDBQueryConfig(NamedTuple):
     start: int
     end: int
     array_name: str
-    row_tuples: List[tuple] | None
-    filter: str | None
+    row_tuples:List[tuple]
+    filter:str
 
 
 class OutputConfig(NamedTuple):
     filename: str
     type: str
-    json_type: str | None
+    json_type: str
     max_arrow_bytes: int
 
 
