@@ -328,8 +328,8 @@ class GenomicsDBQueryConfig(NamedTuple):
     start: int
     end: int
     array_name: str
-    row_tuples:List[tuple]
-    filter:str
+    row_tuples: List[tuple]
+    filter: str
 
 
 class OutputConfig(NamedTuple):
