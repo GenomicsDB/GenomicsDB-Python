@@ -27,6 +27,7 @@
 import json
 import os
 import re
+import sys
 
 import genomicsdb
 
@@ -85,25 +86,39 @@ def parse_interval(interval: str):
     raise RuntimeError(f"Interval {interval} could not be parsed")
 
 
-def get_arrays(contigs_map, intervals, partitions):
-    arrays = set()
-    for interval in intervals:
-        contig, start, end = parse_interval(interval)
-        if contig in contigs_map:
-            contig_offset = contigs_map[contig]["tiledb_column_offset"] + start - 1
-            length = contigs_map[contig]["length"]
-            if end and end < length + 1:
-                contig_end = contigs_map[contig]["tiledb_column_offset"] + end - 1
-            else:
-                end = length
-                contig_end = contigs_map[contig]["tiledb_column_offset"] + length - 1
+def get_arrays(interval, contigs_map, partitions):
+    contig, start, end = parse_interval(interval)
+    if contig in contigs_map:
+        contig_offset = contigs_map[contig]["tiledb_column_offset"] + start - 1
+        length = contigs_map[contig]["length"]
+        if end and end < length + 1:
+            contig_end = contigs_map[contig]["tiledb_column_offset"] + end - 1
         else:
-            print(f"Contig({contig}) not found in vidmap.json")
+            end = length
+            contig_end = contigs_map[contig]["tiledb_column_offset"] + length - 1
+    else:
+        print(f"Contig({contig}) not found in vidmap.json")
+
+    arrays = []
+    for idx, partition in enumerate(partitions):
+        if isinstance(partition["begin"], int):  # Old style vidmap json
+            column_begin = partition["begin"]
+            if "end" in partition.keys():
+                column_end = partition["end"]
+            elif idx + 1 < len(partitions):
+                column_end = partitions[idx + 1]["begin"] - 1
+            else:
+                column_end = sys.maxsize
+        else:  # Generated with vcf2genomicsdb_init
+            column_begin = partition["begin"]["tiledb_column"]
+            column_end = partition["end"]["tiledb_column"]
+
+        if contig_end < column_begin or contig_offset > column_end:
             continue
 
-        for partition in partitions:
-            if contig_end < partition["begin"]["tiledb_column"] or contig_offset > partition["end"]["tiledb_column"]:
-                continue
-            arrays.add(partition["array_name"])
+        if "array_name" in partition.keys():
+            arrays.append(partition["array_name"])
+        elif "array" in partition.keys():
+            arrays.append(partition["array"])
 
-    return arrays
+    return contig, start, end, arrays
