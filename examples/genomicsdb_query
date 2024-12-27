@@ -402,9 +402,6 @@ def process(config):
         with open(output_config.filename, "wb") as f:
             f.write(json_output)
     elif output_config.type == "arrow":
-        parent_dir = os.path.dirname(output_config.filename)
-        if not os.path.exists(parent_dir):
-            os.mkdir(parent_dir)
         nbytes = 0
         writer = None
         i = 0
@@ -443,6 +440,8 @@ def main():
         json_type = parse_args_for_json_type(args.json_output_type)
     max_arrow_bytes = -1
     if output_type == "arrow":
+        if not os.path.exists(output):
+            os.mkdir(output)
         max_arrow_bytes = parse_args_for_max_bytes(args.max_arrow_byte_size)
         print(f"Using {args.max_arrow_byte_size} number of bytes as hint for writing out parquet files")
 
