@@ -33,7 +33,7 @@ import multiprocessing
 import os
 import re
 import sys
-from typing import NamedTuple, List
+from typing import List, NamedTuple
 
 import genomicsdb_common
 import pyarrow as pa
@@ -55,7 +55,7 @@ def parse_callset_json(callset_file):
     callset = json.loads(genomicsdb.read_entire_file(callset_file))
     callsets = callset["callsets"]
     samples = [callset if isinstance(callset, str) else callset["sample_name"] for callset in callsets]
-<    return samples
+    return samples
 
 
 def parse_callset_json_for_row_ranges(callset_file, samples=None):
@@ -338,10 +338,11 @@ class OutputConfig(NamedTuple):
     json_type: str | None
     max_arrow_bytes: int
 
+
 class Config(NamedTuple):
     export_config: GenomicsDBExportConfig
     query_config: GenomicsDBQueryConfig
-    output_config:OutputConfig 
+    output_config: OutputConfig
 
 
 def configure_export(config: GenomicsDBExportConfig):
@@ -469,10 +470,8 @@ def main():
     if len(configs) == 1:
         process(configs[0])
     else:
-        nprocs = min(len(configs), args.nproc)
-        with multiprocessing.Pool(processes=args.nproc) as pool:
+        with multiprocessing.Pool(processes=min(len(configs), args.nproc)) as pool:
             pool.map(process, configs)
-
 
     print(f"genomicsdb_query for workspace({workspace}) and intervals({intervals}) completed successfully")
 
