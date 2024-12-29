@@ -489,7 +489,7 @@ def main():
             msg = "unsuccessfully. Check output for errors"
             break
 
-    print(f"genomicsdb_query for workspace({workspace}) and intervals({intervals}) completed {msg}" )
+    print(f"genomicsdb_query for workspace({workspace}) and intervals({intervals}) completed {msg}")
 
 
 if __name__ == "__main__":
