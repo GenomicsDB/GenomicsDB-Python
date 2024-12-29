@@ -158,7 +158,7 @@ def setup():
     parser.add_argument(
         "--list-partitions",
         action="store_true",
-        help="List interval partitions(genomicsdb arrays in the workspace) for the ingested samples in the workspace and exit",  # noqa
+        help="List interval partitions(genomicsdb arrays in the workspace) for the given intervals(-i/--interval or -I/--interval-list) or all the intervals for the workspace and exit",  # noqa
     )
     parser.add_argument(
         "-i",
@@ -257,7 +257,7 @@ def setup():
         print(*samples, sep="\n")
         sys.exit(0)
 
-    if args.list_partitions:
+    if args.list_partitions and not args.interval and not args.interval_list:
         contigs_map, _ = genomicsdb_common.parse_vidmap_json(vidmap_file)
         # parse loader.json for partitions
         partitions = parse_loader_json(loader_file)
@@ -274,11 +274,17 @@ def setup():
         )
 
     contigs_map, intervals = genomicsdb_common.parse_vidmap_json(vidmap_file, intervals or interval_list)
-    row_tuples = parse_callset_json_for_row_ranges(callset_file, samples or sample_list)
 
     # parse loader.json for partitions
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
     partitions = loader["column_partitions"]
+
+    if args.list_partitions:
+        partitions = genomicsdb_common.get_partitions(intervals, contigs_map, partitions)
+        print(*partitions, sep="\n")
+        sys.exit(0)
+
+    row_tuples = parse_callset_json_for_row_ranges(callset_file, samples or sample_list)
 
     return workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, args
 

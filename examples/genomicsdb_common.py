@@ -86,6 +86,14 @@ def parse_interval(interval: str):
     raise RuntimeError(f"Interval {interval} could not be parsed")
 
 
+def get_partitions(intervals, contigs_map, partitions):
+    arrays = []
+    for interval in intervals:
+        _, _, _, array_names = get_arrays(interval, contigs_map, partitions)
+        arrays.extend([name.replace("$", ":", 1).replace("$", "-", 1) for name in array_names])
+    return arrays
+
+
 def get_arrays(interval, contigs_map, partitions):
     contig, start, end = parse_interval(interval)
     if contig in contigs_map:
