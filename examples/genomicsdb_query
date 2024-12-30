@@ -96,13 +96,13 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
     return row_tuples
 
 
-def parse_loader_json(loader_file):
+def parse_loader_json(loader_file, interval_form=True):
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
     partitions = loader["column_partitions"]
     array_names = [
         partition["array_name"] if "array_name" in partition else partition["array"] for partition in partitions
     ]
-    return [name.replace("$", ":", 1).replace("$", "-", 1) for name in array_names]
+    return [name.replace("$", ":", 1).replace("$", "-", 1) if interval_form else name for name in array_names]
 
 
 def check_nproc(value):
@@ -159,6 +159,11 @@ def setup():
         "--list-partitions",
         action="store_true",
         help="List interval partitions(genomicsdb arrays in the workspace) for the given intervals(-i/--interval or -I/--interval-list) or all the intervals for the workspace and exit",  # noqa
+    )
+    parser.add_argument(
+        "--list-arrays",
+        action="store_true",
+        help="Sanity check against partitions found in loader and vid mapping files and list genomicsdb arrays physically found in the workspace and exit",  # noqa
     )
     parser.add_argument(
         "-i",
@@ -258,11 +263,33 @@ def setup():
         sys.exit(0)
 
     if args.list_partitions and not args.interval and not args.interval_list:
-        contigs_map, _ = genomicsdb_common.parse_vidmap_json(vidmap_file)
         # parse loader.json for partitions
         partitions = parse_loader_json(loader_file)
         print(*partitions, sep="\n")
         sys.exit(0)
+
+    if args.list_arrays:
+        # parse loader.json for partitions
+        partitions = parse_loader_json(loader_file, False)
+        errors_found = False
+        found_partitions = []
+        for partition in partitions:
+            if genomicsdb.array_exists(workspace, partition):
+                found_partitions.append(partition)
+            else:
+                logging.error(f"Array({partition}) does not seem to exist in workspace({workspace})")
+                errors_found = True
+        if errors_found:
+            print(
+                f"Check vid mapping({vidmap_file}) and loader({loader_file}) files for inconsistencies w.r.t workspace({workspace})"
+            )  # noqa
+            if len(found_partitions) > 0:
+                print("Following arrays found in workspace -")
+                print(*found_partitions, sep="\n")
+            sys.exit(1)
+        else:
+            print(*partitions, sep="\n")
+            sys.exit(0)
 
     intervals = args.interval
     interval_list = args.interval_list

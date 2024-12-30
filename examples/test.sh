@@ -178,9 +178,10 @@ run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS --list-partitions"
 cmd="genomicsdb_query -w $WORKSPACE -i 1:1-10 --list-partitions"
 PARTITION=$($cmd)
 if [[ $PARTITION != "t0_1_2" ]]; then
-  echo "Expected output for $cmd shoule be t0_1_2, but got $PARTITION"
+  echo "Expected output for $cmd should be t0_1_2, but got $PARTITION"
   exit 1
 fi
+run_command "genomicsdb_query -w $WORKSPACE --list-arrays" 1
 run_command "genomicsdb_query -w $WORKSPACE -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
 
@@ -189,6 +190,7 @@ run_command "genomicsdb_cache -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-samples"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-contigs"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-partitions"
+run_command "genomicsdb_query -w $WORKSPACE  $OLDSTYLE_JSON --list-arrays" 1
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS --list-partitions"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
