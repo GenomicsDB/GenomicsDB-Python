@@ -161,11 +161,6 @@ def setup():
         help="List interval partitions(genomicsdb arrays in the workspace) for the given intervals(-i/--interval or -I/--interval-list) or all the intervals for the workspace and exit",  # noqa
     )
     parser.add_argument(
-        "--list-arrays",
-        action="store_true",
-        help="Sanity check against partitions found in loader and vid mapping files and list genomicsdb arrays physically found in the workspace and exit",  # noqa
-    )
-    parser.add_argument(
         "-i",
         "--interval",
         action="append",
@@ -252,63 +247,45 @@ def setup():
     ):
         raise RuntimeError(f"callset({callset_file}) vidmap({vidmap_file}) or loader({loader_file}) not found")
 
-    if args.list_contigs:
-        _, intervals = genomicsdb_common.parse_vidmap_json(vidmap_file)
-        print(*intervals, sep="\n")
-        sys.exit(0)
-
+    # List samples
     if args.list_samples:
         samples = parse_callset_json(callset_file)
         print(*samples, sep="\n")
         sys.exit(0)
 
-    if args.list_partitions and not args.interval and not args.interval_list:
-        # parse loader.json for partitions
-        partitions = parse_loader_json(loader_file)
-        print(*partitions, sep="\n")
-        sys.exit(0)
-
-    if args.list_arrays:
-        # parse loader.json for partitions
-        partitions = parse_loader_json(loader_file, False)
-        errors_found = False
-        found_partitions = []
-        for partition in partitions:
-            if genomicsdb.array_exists(workspace, partition):
-                found_partitions.append(partition)
-            else:
-                logging.error(f"Array({partition}) does not seem to exist in workspace({workspace})")
-                errors_found = True
-        if errors_found:
-            print(
-                f"Check vid mapping({vidmap_file}) and loader({loader_file}) files for inconsistencies w.r.t workspace({workspace})"
-            )  # noqa
-            if len(found_partitions) > 0:
-                print("Following arrays found in workspace -")
-                print(*found_partitions, sep="\n")
-            sys.exit(1)
-        else:
-            print(*partitions, sep="\n")
-            sys.exit(0)
-
     intervals = args.interval
     interval_list = args.interval_list
     samples = args.sample
     sample_list = args.sample_list
-    if not intervals and not samples and not interval_list and not sample_list:
-        raise RuntimeError(
-            "Specify at least one of either -i/-interval -I/--interval-list -s/--sample -S/--sample-list has to be specified"  # noqa
-        )
+    if not args.list_partitions and not args.list_contigs:
+        if not intervals and not samples and not interval_list and not sample_list:
+            raise RuntimeError(
+                "Specify at least one of either -i/-interval -I/--interval-list -s/--sample -S/--sample-list has to be specified"  # noqa
+            )
 
     contigs_map, intervals = genomicsdb_common.parse_vidmap_json(vidmap_file, intervals or interval_list)
 
-    # parse loader.json for partitions
+    # List contigs
+    if args.list_contigs:
+        if intervals:
+            for interval in intervals:
+                if interval.split(":")[0] in contigs_map.keys():
+                    print(interval)
+        else:
+            print(*contigs_map.keys(), sep="\n")
+        sys.exit(0)
+
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
     partitions = loader["column_partitions"]
 
+    # List partitions
     if args.list_partitions:
-        partitions = genomicsdb_common.get_partitions(intervals, contigs_map, partitions)
-        print(*partitions, sep="\n")
+        if args.interval or args.interval_list:
+            partition_names = genomicsdb_common.get_partitions(intervals, contigs_map, partitions)
+        else:
+            # just parse loader.json for partitions
+            partition_names = parse_loader_json(loader_file)
+        print(*partition_names, sep="\n")
         sys.exit(0)
 
     row_tuples = parse_callset_json_for_row_ranges(callset_file, samples or sample_list)
@@ -496,7 +473,7 @@ def main():
 
         contig, start, end, arrays = genomicsdb_common.get_arrays(interval, contigs_map, partitions)
         if len(arrays) == 0:
-            print(f"No arrays in the workspace matched input interval({interval})")
+            logging.error(f"No arrays in the workspace matched input interval({interval})")
             continue
 
         print(f"\tArrays:{arrays} under consideration for interval({interval})")
@@ -510,6 +487,9 @@ def main():
             )
             configs.append(Config(export_config, query_config, output_config))
 
+    if len(configs) == 0:
+        print("Nothing to process!!. Check output for possible errors")
+        sys.exit(1)
     if min(len(configs), args.nproc) == 1:
         results = list(map(process, configs))
     else:
@@ -519,11 +499,15 @@ def main():
     msg = "successfully"
     for result in results:
         if result != 0:
-            msg = "unsuccessfully. Check output for errors"
+            msg = "unsuccessfully. Check output for possible errors"
             break
 
     print(f"genomicsdb_query for workspace({workspace}) and intervals({intervals}) completed {msg}")
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except RuntimeError as e:
+        logging.error(e)
+        sys.exit(1)

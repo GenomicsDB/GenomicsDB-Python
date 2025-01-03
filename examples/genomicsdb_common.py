@@ -25,8 +25,8 @@
 #
 
 import json
+import logging
 import os
-import re
 import sys
 
 import genomicsdb
@@ -53,37 +53,41 @@ def parse_vidmap_json(vidmap_file, intervals=None):
     all_intervals = not intervals
     if not intervals:
         intervals = []
+    column_offset = 0
     for contig in contigs:
         if isinstance(contig, str):  # Old style vidmap json
             contig_name = contig
-            contigs_map[contig] = {
+            contig_elem = {
                 "length": contigs[contig]["length"],
                 "tiledb_column_offset": contigs[contig]["tiledb_column_offset"],
             }
         else:  # Generated with vcf2genomicsdb_init
             contig_name = contig["name"]
-            contigs_map[contig["name"]] = contig
+            contig_elem = contig
+        # Sanity check of column offsets
+        if column_offset != contig_elem["tiledb_column_offset"]:
+            logging.critical(
+                f"vidmap file({vidmap_file}) has wrong column offset for {contig_name}. Cannot process vidmap file from contigs({contig_name})" # noqa
+            )
+            break
+        contigs_map[contig_name] = contig_elem
+        column_offset += contig_elem["length"]
         if all_intervals:
             intervals.append(contig_name)
     return contigs_map, intervals
 
 
-interval_pattern = re.compile(r"(.*):(.*)-(.*)|(.*):(.*)|(.*)")
-
-
-# get tiledb offsets for interval
 def parse_interval(interval: str):
-    result = re.match(interval_pattern, interval)
-    if result:
-        length = len(result.groups())
-        if length == 6:
-            if result.group(1) and result.group(2) and result.group(3):
-                return result.group(1), int(result.group(2)), int(result.group(3))
-            elif result.group(4) and result.group(5):
-                return result.group(4), int(result.group(5)), None
-            elif result.group(6):
-                return result.group(6), 1, None
-    raise RuntimeError(f"Interval {interval} could not be parsed")
+    results = interval.split(":")
+    contig = results[0]
+    if len(results) > 1:
+        results = results[1].split("-")
+        if len(results) > 1:
+            return contig, int(results[0]), int(results[1])
+        else:
+            return contig, int(results[0]), None
+    else:
+        return contig, 1, None
 
 
 def get_partitions(intervals, contigs_map, partitions):
@@ -105,11 +109,12 @@ def get_arrays(interval, contigs_map, partitions):
             end = length
             contig_end = contigs_map[contig]["tiledb_column_offset"] + length - 1
     else:
-        print(f"Contig({contig}) not found in vidmap.json")
+        logging.error(f"Contig({contig}) not found in vidmap.json")
+        return 0, 0, 0, []
 
     arrays = []
     for idx, partition in enumerate(partitions):
-        if isinstance(partition["begin"], int):  # Old style vidmap json
+        if isinstance(partition["begin"], int):  # Old style loader json
             column_begin = partition["begin"]
             if "end" in partition.keys():
                 column_end = partition["end"]
