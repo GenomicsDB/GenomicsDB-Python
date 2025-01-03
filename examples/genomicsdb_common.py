@@ -67,7 +67,7 @@ def parse_vidmap_json(vidmap_file, intervals=None):
         # Sanity check of column offsets
         if column_offset != contig_elem["tiledb_column_offset"]:
             logging.critical(
-                f"vidmap file({vidmap_file}) has wrong column offset for {contig_name}. Cannot process vidmap file from contigs({contig_name})" # noqa
+                f"vidmap file({vidmap_file}) has wrong column offset for {contig_name}. Cannot process vidmap file from contigs({contig_name})"  # noqa
             )
             break
         contigs_map[contig_name] = contig_elem
