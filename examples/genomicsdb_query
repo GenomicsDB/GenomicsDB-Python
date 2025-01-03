@@ -96,6 +96,25 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
     return row_tuples
 
 
+def parse_vidmap_json_for_attributes(vidmap_file, attributes=None):
+    if attributes is None:
+        return ["GT"]
+    else:
+        vidmap = json.loads(genomicsdb.read_entire_file(vidmap_file))
+        fields = vidmap["fields"]
+        if isinstance(fields, list):
+            fields = [field["name"] for field in fields]
+        else:  # Old style vidmap json
+            fields = fields.keys()
+        if len(attributes) == 0:
+            return fields
+        attributes = attributes.replace(" ", "").split(",")
+        not_found = [attribute for attribute in attributes if attribute not in fields]
+        if len(not_found) > 0:
+            raise RuntimeError(f"Attributes({not_found}) not found in vid mapping({vidmap_file})")
+        return attributes
+
+
 def parse_loader_json(loader_file, interval_form=True):
     loader = json.loads(genomicsdb.read_entire_file(loader_file))
     partitions = loader["column_partitions"]
@@ -119,7 +138,7 @@ def check_nproc(value):
 def setup():
     parser = argparse.ArgumentParser(
         prog="query",
-        description="GenomicsDB simple query with samples/intervals/filter as inputs",
+        description="GenomicsDB simple query with samples/intervals/attributes/filter as inputs",
         formatter_class=argparse.RawTextHelpFormatter,
         usage="%(prog)s [options]",
     )
@@ -153,7 +172,12 @@ def setup():
     )
     parser.add_argument("--list-samples", action="store_true", help="List samples ingested into the workspace and exit")
     parser.add_argument(
-        "--list-contigs", action="store_true", help="List contigs for the ingested samples in the workspace and exit"
+        "--list-contigs", action="store_true", help="List contigs configured in vid mapping for the workspace and exit"
+    )
+    parser.add_argument(
+        "--list-fields",
+        action="store_true",
+        help="List genomic fields configured in vid mapping for the workspace and exit",
     )
     parser.add_argument(
         "--list-partitions",
@@ -185,6 +209,12 @@ def setup():
         "--sample-list",
         required=False,
         help="sample file containing list of samples, one sample per line, to operate upon. \nNote: \n\t1. -s/--sample and -S/--sample-list are mutually exclusive \n\t2. either samples and/or intervals using -i/-I/-s/-S options has to be specified",  # noqa
+    )
+    parser.add_argument(
+        "-a",
+        "--attributes",
+        required=False,
+        help="Optional - comma separated list of genomic attributes or fields described in the vid mapping for the query, eg. GT,AC,PL,DP... Defaults to GT",  # noqa
     )
     parser.add_argument(
         "-f",
@@ -253,6 +283,12 @@ def setup():
         print(*samples, sep="\n")
         sys.exit(0)
 
+    # List fields
+    if args.list_fields:
+        fields = parse_vidmap_json_for_attributes(vidmap_file, attributes="")
+        print(*fields, sep="\n")
+        sys.exit(0)
+
     intervals = args.interval
     interval_list = args.interval_list
     samples = args.sample
@@ -260,7 +296,7 @@ def setup():
     if not args.list_partitions and not args.list_contigs:
         if not intervals and not samples and not interval_list and not sample_list:
             raise RuntimeError(
-                "Specify at least one of either -i/-interval -I/--interval-list -s/--sample -S/--sample-list has to be specified"  # noqa
+                "one of either -i/-interval -I/--interval-list -s/--sample -S/--sample-list has to be specified"  # noqa
             )
 
     contigs_map, intervals = genomicsdb_common.parse_vidmap_json(vidmap_file, intervals or interval_list)
@@ -289,8 +325,9 @@ def setup():
         sys.exit(0)
 
     row_tuples = parse_callset_json_for_row_ranges(callset_file, samples or sample_list)
+    attributes = parse_vidmap_json_for_attributes(vidmap_file, args.attributes)
 
-    return workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, args
+    return workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, attributes, args
 
 
 def generate_output_filename(output, output_type, interval, idx):
@@ -330,6 +367,7 @@ class GenomicsDBExportConfig(NamedTuple):
     workspace: str
     vidmap_file: str
     callset_file: str
+    attributes: str
     filter: str
 
 
@@ -358,11 +396,12 @@ class Config(NamedTuple):
 def configure_export(config: GenomicsDBExportConfig):
     export_config = query_pb.ExportConfiguration()
     export_config.workspace = config.workspace
-    export_config.attributes.extend(["REF", "ALT", "GT"])
     export_config.vid_mapping_file = config.vidmap_file
     export_config.callset_mapping_file = config.callset_file
     export_config.bypass_intersecting_intervals_phase = False
     export_config.enable_shared_posixfs_optimizations = True
+    if config.attributes:
+        export_config.attributes.extend(config.attributes)
     if config.filter:
         export_config.query_filter = config.filter
     return export_config
@@ -447,7 +486,7 @@ def process(config):
 
 
 def main():
-    workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, args = setup()
+    workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, attributes, args = setup()
 
     if row_tuples is not None and len(row_tuples) == 0:
         return
@@ -466,7 +505,7 @@ def main():
         max_arrow_bytes = parse_args_for_max_bytes(args.max_arrow_byte_size)
         print(f"Using {args.max_arrow_byte_size} number of bytes as hint for writing out parquet files")
 
-    export_config = GenomicsDBExportConfig(workspace, vidmap_file, callset_file, args.filter)
+    export_config = GenomicsDBExportConfig(workspace, vidmap_file, callset_file, attributes, args.filter)
     configs = []
     for interval in intervals:
         print(f"Processing interval({interval})...")
