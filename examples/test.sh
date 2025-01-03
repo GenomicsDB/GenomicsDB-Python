@@ -44,6 +44,7 @@ SAMPLE_ARGS="-s HG00096 -s HG00097 -s HG00099"
 VIDMAP_FILE=vidmap_file.json
 LOADER_FILE=loader_file.json
 FILTER='ISHOMREF'
+FIELDS="DP,GT"
 
 if [[ $(uname) == "Darwin" ]]; then
   TEMP_DIR=$(mktemp -d -t test-examples)
@@ -141,9 +142,12 @@ run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096 -s NON_EXISTENT_SAMPLE -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s NON_EXISTENT_SAMPLE -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096 -s NON_EXISTENT_SAMPLE -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -S $TEMP_DIR/samples.list -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -f $FILTER -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -a $FIELDS  -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -a NON_EXISTENT_FIELD,$FIELDS  -o $OUTPUT" 1
 
 rm -f loader.json callset.json vidmap.json
 run_command "genomicsdb_cache -w $WORKSPACE $INTERVAL_ARGS"
@@ -173,16 +177,28 @@ WORKSPACE=$OLDSTYLE_DIR/ws
 
 run_command "genomicsdb_query -w $WORKSPACE --list-samples"
 run_command "genomicsdb_query -w $WORKSPACE --list-contigs"
+run_command "genomicsdb_query -w $WORKSPACE --list-fields"
 run_command "genomicsdb_query -w $WORKSPACE --list-partitions"
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS --list-partitions"
+cmd="genomicsdb_query -w $WORKSPACE -i 1:1-10 --list-partitions"
+PARTITION=$($cmd)
+if [[ $PARTITION != "t0_1_2" ]]; then
+  echo "Expected output for $cmd should be t0_1_2, but got $PARTITION"
+  exit 1
+fi
 run_command "genomicsdb_query -w $WORKSPACE -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -a GT -o $OUTPUT"
 
 OLDSTYLE_JSONS="-l $OLDSTYLE_DIR/loader.json -c $OLDSTYLE_DIR/callset_t0_1_2.json -v $OLDSTYLE_DIR/vid.json"
 run_command "genomicsdb_cache -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-samples"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-contigs"
+run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-fields"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-partitions"
+run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS --list-partitions"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS -S $TEMP_DIR/samples.list -a GT -o $OUTPUT"
 
 cleanup
