@@ -538,7 +538,7 @@ def main():
     msg = "successfully"
     for result in results:
         if result != 0:
-            msg = "unsuccessfully. Check output for possible errors"
+            msg = "unsuccessfully for some arrays. Check output for errors"
             break
 
     print(f"genomicsdb_query for workspace({workspace}) and intervals({intervals}) completed {msg}")
