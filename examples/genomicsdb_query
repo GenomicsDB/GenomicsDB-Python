@@ -96,23 +96,23 @@ def parse_callset_json_for_row_ranges(callset_file, samples=None):
     return row_tuples
 
 
-def parse_callset_json_for_split_row_ranges(callset_file, chunk_length):
+def parse_callset_json_for_split_row_ranges(callset_file, chunk_size):
     callset = json.loads(genomicsdb.read_entire_file(callset_file))
     callsets = callset["callsets"]
-    chunks = int(len(callsets) / chunk_length + 1)
-    last_chunk_length = len(callsets) - (chunks - 1) * chunk_length
+    chunks = int(len(callsets) / chunk_size + 1)
+    last_chunk_size = len(callsets) - (chunks - 1) * chunk_size
     # Collapse small last chunk into the last but one chunk
-    if last_chunk_length < chunk_length / 2:
+    if last_chunk_size < chunk_size / 2:
         chunks -= 1
-        last_chunk_length += chunk_length
+        last_chunk_size += chunk_size
     if chunks == 1:
         return None
     split_row_ranges = []
     for i in range(0, chunks):
         if i == chunks - 1:
-            split_row_ranges.append((chunk_length * i, chunk_length * i + last_chunk_length - 1))
+            split_row_ranges.append((chunk_size * i, chunk_size * i + last_chunk_size - 1))
         else:
-            split_row_ranges.append((chunk_length * i, chunk_length * (i + 1) - 1))
+            split_row_ranges.append((chunk_size * i, chunk_size * (i + 1) - 1))
     return split_row_ranges
 
 
@@ -582,8 +582,8 @@ def main():
         sys.exit(1)
 
     # Check if there is room for row_tuples to be parallelized
-    if len(configs) < args.nproc:
-        chunk_size = args.chunk_size
+    chunk_size = int(args.chunk_size)
+    if len(configs) < args.nproc and chunk_size > 1:
         if row_tuples is None:
             row_tuples = parse_callset_json_for_split_row_ranges(callset_file, chunk_size)
         new_configs = []
