@@ -583,9 +583,8 @@ def main():
 
     # Check if there is room for row_tuples to be parallelized
     chunk_size = int(args.chunk_size)
-    if len(configs) < args.nproc and chunk_size > 1:
-        if row_tuples is None:
-            row_tuples = parse_callset_json_for_split_row_ranges(callset_file, chunk_size)
+    if len(configs) < args.nproc and chunk_size > 1 and row_tuples is None:
+        row_tuples = parse_callset_json_for_split_row_ranges(callset_file, chunk_size)
         new_configs = []
         for idx_row, row_tuple in enumerate(row_tuples):
             for idx, config in enumerate(configs):
