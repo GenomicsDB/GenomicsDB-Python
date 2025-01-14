@@ -604,7 +604,9 @@ def main():
                     )
                     output_config = config.output_config
                     split_output_config = OutputConfig(
-                        generate_output_filename(output, output_type, query_config.interval, len(configs) * idx + idx_row),
+                        generate_output_filename(
+                            output, output_type, query_config.interval, len(configs) * idx + idx_row
+                        ),
                         output_type,
                         json_type,
                         max_arrow_bytes,
