@@ -426,7 +426,11 @@ class GenomicsDBQueryConfig(NamedTuple):
     row_tuples: List[tuple]
 
     def __str__(self):
-        return f"\tinterval={self.interval} array={self.array_name} callset rows={self.row_tuples}"
+        if self.row_tuples:
+            row_tuples_str = f"{self.row_tuples}"
+        else:
+            row_tuples_str = "ALL"
+        return f"\tinterval={self.interval} array={self.array_name} callset rows={row_tuples_str}"
 
 
 class OutputConfig(NamedTuple):
@@ -583,29 +587,30 @@ def main():
 
     # Check if there is room for row_tuples to be parallelized
     chunk_size = int(args.chunk_size)
-    if len(configs) < args.nproc and chunk_size > 1 and row_tuples is None:
+    if row_tuples is None and len(configs) < args.nproc and chunk_size > 1:
         row_tuples = parse_callset_json_for_split_row_ranges(callset_file, chunk_size)
-        new_configs = []
-        for idx_row, row_tuple in enumerate(row_tuples):
-            for idx, config in enumerate(configs):
-                query_config = config.query_config
-                split_query_config = GenomicsDBQueryConfig(
-                    query_config.interval,
-                    query_config.contig,
-                    query_config.start,
-                    query_config.end,
-                    query_config.array_name,
-                    [row_tuple],
-                )
-                output_config = config.output_config
-                split_output_config = OutputConfig(
-                    generate_output_filename(output, output_type, query_config.interval, len(configs) * idx + idx_row),
-                    output_type,
-                    json_type,
-                    max_arrow_bytes,
-                )
-                new_configs.append(Config(export_config, split_query_config, split_output_config))
-        configs = new_configs
+        if row_tuples:
+            new_configs = []
+            for idx_row, row_tuple in enumerate(row_tuples):
+                for idx, config in enumerate(configs):
+                    query_config = config.query_config
+                    split_query_config = GenomicsDBQueryConfig(
+                        query_config.interval,
+                        query_config.contig,
+                        query_config.start,
+                        query_config.end,
+                        query_config.array_name,
+                        [row_tuple],
+                    )
+                    output_config = config.output_config
+                    split_output_config = OutputConfig(
+                        generate_output_filename(output, output_type, query_config.interval, len(configs) * idx + idx_row),
+                        output_type,
+                        json_type,
+                        max_arrow_bytes,
+                    )
+                    new_configs.append(Config(export_config, split_query_config, split_output_config))
+            configs = new_configs
 
     if args.dryrun:
         print(f"Query configurations for {export_config}:")
