@@ -187,8 +187,14 @@ if [[ $PARTITION != "t0_1_2" ]]; then
   exit 1
 fi
 run_command "genomicsdb_query -w $WORKSPACE -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT -d"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.list -a GT -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -i 1 -o $OUTPUT -d"
+run_command "genomicsdb_query -w $WORKSPACE -i 1 --chunk-size=2 -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -i 1 --chunk-size=2 -b -o $OUTPUT -d"
+run_command "genomicsdb_query -w $WORKSPACE -i 1 --chunk-size=2 -b -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -i 4 --chunk-size=4 -b -o $OUTPUT -d"
 
 OLDSTYLE_JSONS="-l $OLDSTYLE_DIR/loader.json -c $OLDSTYLE_DIR/callset_t0_1_2.json -v $OLDSTYLE_DIR/vid.json"
 run_command "genomicsdb_cache -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS"
