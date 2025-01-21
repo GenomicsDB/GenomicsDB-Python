@@ -107,7 +107,7 @@ query_output_1-100-100000.csv  query_output_1-100001.csv      query_output_2.csv
 
 ### Caching for enhanced performance
 
-Locally caching artifacts from cloud URLs is optional for GenomicsDB metadata and helps with performance for metadata/artifacts which can be accessed multiple times. There is a separate caching tool `genomicsdb_cache` which takes as inputs the workspace, optionally callset/vidmap/loader.json and also optionally the intervals or intervals with the -i/--interval/-I/--interval-list option. This is envisioned to be done once before the first start of the queries for the interval. Set the env variable `TILEDB_CACHE` to `1` and explicitly use `-c callset.json -v vidmap.json -l loader.json` with the `genomicsdb_query` command to access locally cached GenomicsDB metadata.
+Locally caching artifacts from cloud URLs is optional for GenomicsDB metadata and helps with performance for metadata/artifacts which can be accessed multiple times. There is a separate caching tool `genomicsdb_cache` which takes as inputs the workspace, optionally callset/vidmap/loader.json and also optionally the intervals or intervals with the -i/--interval/-I/--interval-list option. Note that the json files are downloaded to the current working directory whereas other metadata are persisted in `$TMPDIR` or in `/tmp`. This is envisioned to be done once before the first start of the queries for the interval. Set the env variable `TILEDB_CACHE` to `1` and explicitly use `-c callset.json -v vidmap.json -l loader.json` with the `genomicsdb_query` command to access locally cached GenomicsDB metadata and json artifacts.
 
 ```
 ~/GenomicsDB-Python/examples: ./genomicsdb_cache -h
