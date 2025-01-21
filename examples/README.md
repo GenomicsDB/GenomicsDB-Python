@@ -1,7 +1,5 @@
 ## GenomicsDB simple query tool
 
-Note that there is `run.sh` bash script for ease of use and if you do not want to invoke the genomicsdb_query CLI directly.
-
 Simple GenomicsDB query tool `genomicsdb_query`, given a workspace and genomic intervals of the form `<CONTIG>:<START>-<END>`.  The intervals at a minimum need to have the contig specified, start and end are optional. e.g chr1:100-1000, chr1:100 and chr1 are all valid. Start defaults to 1 if not specified and end defaults to the length of the contig if not specified.
 
 Assumption : The workspace should have been created with the `vcf2genomicsdb` tool or with `gatk GenomicsDBImport` and should exist.
@@ -10,7 +8,7 @@ Assumption : The workspace should have been created with the `vcf2genomicsdb` to
 ~/GenomicsDB-Python/examples: ./genomicsdb_query --help
 usage: query [options]
 
-GenomicsDB simple query with samples/intervals/filter as inputs
+GenomicsDB simple query with samples/intervals/attributes/filter as inputs
 
 options:
   -h, --help            show this help message and exit
@@ -25,8 +23,9 @@ options:
   -l LOADER, --loader LOADER
                         Optional - URL to loader file. Defaults to loader.json in workspace
   --list-samples        List samples ingested into the workspace and exit
-  --list-contigs        List contigs for the ingested samples in the workspace and exit
-  --list-partitions     List interval partitions for the ingested samples in the workspace and exit
+  --list-contigs        List contigs configured in vid mapping for the workspace and exit
+  --list-fields         List genomic fields configured in vid mapping for the workspace and exit
+  --list-partitions     List interval partitions(genomicsdb arrays in the workspace) for the given intervals(-i/--interval or -I/--interval-list) or all the intervals for the workspace and exit
   -i INTERVAL, --interval INTERVAL
                         genomic intervals over which to operate. The intervals should be specified in the <CONTIG>:<START>-<END> format with START and END optional.
                         This argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. 
@@ -49,8 +48,14 @@ options:
                         Note: 
                         	1. -s/--sample and -S/--sample-list are mutually exclusive 
                         	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
+  -a ATTRIBUTES, --attributes ATTRIBUTES
+                        Optional - comma separated list of genomic attributes or fields described in the vid mapping for the query, eg. GT,AC,PL,DP... Defaults to GT
   -f FILTER, --filter FILTER
                         Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == "G" && resolve(GT, REF, ALT) &= "T/T" && ALT |= "T"'
+  -n NPROC, --nproc NPROC
+                        Optional - number of processing units for multiprocessing(default: 8). Run nproc from command line to print the number of processing units available to a process for the user
+  --chunk-size CHUNK_SIZE
+                        Optional - hint to split number of samples for  multiprocessing used in conjunction with -n/--nproc and when -s/-S/--sample/--sample-list is not specified (default: 10240)
   -t {csv,json,arrow}, --output-type {csv,json,arrow}
                         Optional - specify type of output for the query (default: csv)
   -j {all,all-by-calls,samples-with-num-calls,samples,num-calls}, --json-output-type {all,all-by-calls,samples-with-num-calls,samples,num-calls}
@@ -58,7 +63,10 @@ options:
   -z MAX_ARROW_BYTE_SIZE, --max-arrow-byte-size MAX_ARROW_BYTE_SIZE
                         Optional - used in conjunction with -t/--output-type arrow as hint for buffering parquet files(default: 64MB)
   -o OUTPUT, --output OUTPUT
-                        a prefix filename to csv outputs from the tool. The filenames will be suffixed with the interval and .csv/.json (default: query_output)
+                        a prefix filename to outputs from the tool. The filenames will be suffixed with the interval and .csv/.json/... (default: query_output)
+  -d, --dryrun          displays the query that  will be run without actually executing the query (default: False)
+  -b, --bypass-intersecting-intervals-phase
+                        iterate only once bypassing the intersecting intervals phase (default: False)
 ```
 
 Run `genomicsdb_query` with the -w and --list-samples/--list-contigs to figure out legitimate samples and contigs over which the query can operate. These can be used with the --samples/--intervals options later to run the actual query.
@@ -97,5 +105,40 @@ query_output_1-100-100000.csv  query_output_1-100001.csv      query_output_2.csv
 
 ```
 
+### Caching for enhanced performance
 
-For ease of use, open run.sh and change the `WORKSPACE`, `INTERVALS` and other commented out variables to what is desired before invoking it. Variables `VIDMAP_FILE` and `LOADER_FILE` need to be set only if they are not in the workspace. run.sh calls genomicsdb_query, the tool does the querying of the workspace for the intervals specified and outputs one csv file per input interval.
+Locally caching artifacts from cloud URLs is optional for GenomicsDB metadata and helps with performance for metadata/artifacts which can be accessed multiple times. There is a separate caching tool `genomicsdb_cache` which takes as inputs the workspace, optionally callset/vidmap/loader.json and also optionally the intervals or intervals with the -i/--interval/-I/--interval-list option. This is envisioned to be done once before the first start of the queries for the interval. Set the env variable `TILEDB_CACHE` to `1` and explicitly use `-c callset.json -v vidmap.json -l loader.json` with the `genomicsdb_query` command to access locally cached GenomicsDB metadata.
+
+```
+~/GenomicsDB-Python/examples: ./genomicsdb_cache -h
+usage: cache [options]
+
+Cache GenomicsDB metadata and generated callset/vidmap/loader json artifacts for workspace cloud URLs
+
+options:
+  -h, --help            show this help message and exit
+  --version             print GenomicsDB native library version and exit
+  -w WORKSPACE, --workspace WORKSPACE
+                        URL to GenomicsDB workspace 
+                        e.g. -w my_workspace or -w az://my_container/my_workspace or -w s3://my_bucket/my_workspace or -w gs://my_bucket/my_workspace
+  -v VIDMAP, --vidmap VIDMAP
+                        Optional - URL to vid mapping file. Defaults to vidmap.json in workspace
+  -c CALLSET, --callset CALLSET
+                        Optional - URL to callset mapping file. Defaults to callset.json in workspace
+  -l LOADER, --loader LOADER
+                        Optional - URL to loader file. Defaults to loader.json in workspace
+  -i INTERVAL, --interval INTERVAL
+                        Optional - genomic intervals over which to operate. The intervals should be specified in the <CONTIG>:<START>-<END> format with START and END optional.
+                        This argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. 
+                        Note: 
+                        	1. -i/--interval and -I/--interval-list are mutually exclusive 
+                        	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
+  -I INTERVAL_LIST, --interval-list INTERVAL_LIST
+                        Optional - genomic intervals listed in a file over which to operate.
+                        The intervals should be specified in the <CONTIG>:<START>-<END> format, with START and END optional one interval per line. 
+                        Note: 
+                        	1. -i/--interval and -I/--interval-list are mutually exclusive 
+                        	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
+```
+
+
