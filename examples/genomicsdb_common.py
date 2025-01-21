@@ -74,7 +74,7 @@ def parse_vidmap_json(vidmap_file, intervals=None):
         column_offset += contig_elem["length"]
         if all_intervals:
             intervals.append(contig_name)
-    return contigs_map, intervals
+    return contigs_map, set(intervals)
 
 
 def parse_interval(interval: str):

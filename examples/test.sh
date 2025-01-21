@@ -72,6 +72,7 @@ die() {
 #                    any other value if the command should return a failure
 run_command() {
   echo $EMPTY > $TEMP_DIR/output
+  rm -fr ${OUTPUT}*
   declare -i EXPECT_NZ
   declare -i GOT_NZ
   EXPECT_NZ=0
@@ -91,6 +92,39 @@ run_command() {
     cat $TEMP_DIR/output
     die "command '`echo $1`' returned $retval unexpectedly"
   fi
+}
+
+check_command_with_duplicates() {
+  # First argument should be the command
+  run_command "$1"
+  nFiles=$(ls -l ${OUTPUT}*.csv | wc -l)
+  # Second argument should be the number of files
+  if [[ nFiles -ne $2 ]]; then
+    die "Could not find the required number of files for '$cmd'"
+  fi
+  IFS=' ' read -r -a FILES <<< $3
+  for FILE in "${FILES[@]}"
+  do
+    if [[ ! -f ${OUTPUT}_${FILE}.csv ]]; then
+      echo "Could not find file=${OUTPUT}_${FILE}.csv"
+      exit 1
+    fi
+    nlines=$(wc -l < ${OUTPUT}_${FILE}.csv)
+    errmg="'${cmd}' does not return with the required number of lines for ${OUTPUT}_${FILE}.csv"
+    if [[ $FILE == "1" ]]; then
+      if [[ $1 == *"-s HG00141"* ]]; then
+        if [[ $nlines -ne 3 ]]; then
+          die $errmsg
+        fi
+      elif [[ $nlines -ne 5 ]]; then
+        die $errmsg
+      fi
+    else
+      if [[ $nlines -ne 2 ]]; then
+        die $errmsg
+      fi
+    fi
+  done
 }
 
 if [[ -z $WORKSPACE ]]; then
@@ -195,6 +229,10 @@ run_command "genomicsdb_query -w $WORKSPACE -i 1 --chunk-size=2 -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE -i 1 --chunk-size=2 -b -o $OUTPUT -d"
 run_command "genomicsdb_query -w $WORKSPACE -i 1 --chunk-size=2 -b -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE -i 4 --chunk-size=4 -b -o $OUTPUT -d"
+# Duplicates
+check_command_with_duplicates "genomicsdb_query -w $WORKSPACE -i 1 -i 1 --chunk-size=2 -o $OUTPUT" 2 "1 1_1"
+check_command_with_duplicates "genomicsdb_query -w $WORKSPACE -i 1 -i 1 --chunk-size=2 -s HG00141 -s HG00141 -o $OUTPUT" 1 "1"
+
 
 OLDSTYLE_JSONS="-l $OLDSTYLE_DIR/loader.json -c $OLDSTYLE_DIR/callset_t0_1_2.json -v $OLDSTYLE_DIR/vid.json"
 run_command "genomicsdb_cache -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS"
