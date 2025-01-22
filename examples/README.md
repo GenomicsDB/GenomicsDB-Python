@@ -88,7 +88,7 @@ HG00099
 Example actual query :
 
 ```
-~/GenomicsDB-Python/examples: ./genomicsdb_query -w my_workspace  -L 1:100-100000 -L 1:100001 -L 2 -L 3 -f ISHOMREF -o query_output
+~/GenomicsDB-Python/examples: ./genomicsdb_query -w my_workspace -i 1:100-100000 -i 1:100001 -i 2 -i 3 -f ISHOMREF -o query_output
 Starting genomicsdb_query for workspace(my_workspace) and intervals(['1:100-100000', '1:100001', '2', '3'])
 Processing interval(1:100-100000)...
 	Arrays:['1$1$249250621'] under consideration for interval(1:100-100000)
