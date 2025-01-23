@@ -162,6 +162,8 @@ def parse_vidmap_json_and_print_fields(vidmap_file):
         for key, val in fields.items():
             # breakpoint()
             print_fields(key, val)
+    # See https://github.com/GenomicsDB/GenomicsDB/wiki/Importing-VCF-data-into-GenomicsDB
+    # for description of lengths in vid mapping files
     abbreviations = {
         "A": "Number of alternate alleles",
         "R": "Number of alleles (including reference allele)",
