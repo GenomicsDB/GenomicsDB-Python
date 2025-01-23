@@ -122,7 +122,7 @@ def print_fields(key, val):
     if "length" not in val:
         val["length"] = "1"
     for idx in range(len(val["vcf_field_class"])):
-        field_val = val["vcf_field_class"][idx]
+        field_class = val["vcf_field_class"][idx]
         if isinstance(val["type"], list):
             if idx < len(val["type"]):
                 field_type = val["type"][idx]
@@ -148,7 +148,7 @@ def print_fields(key, val):
                 field_type = "String"
             else:
                 field_type = "Char"
-        print(f"{key:<20} {field_val:10} {field_type:10} {field_length}")
+        print(f"{key:<20} {field_class:10} {field_type:10} {field_length}")
 
 
 def parse_vidmap_json_and_print_fields(vidmap_file):
@@ -171,7 +171,7 @@ def parse_vidmap_json_and_print_fields(vidmap_file):
     }
     print("--")
     print("Abbreviations : ")
-    {print(f"  {k}: {v}") for k, v in abbreviations.items()}
+    {print(f"  {key}: {val}") for key, val in abbreviations.items()}
 
 
 def parse_vidmap_json_for_attributes(vidmap_file, attributes=None):
