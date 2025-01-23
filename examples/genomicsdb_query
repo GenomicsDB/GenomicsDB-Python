@@ -116,8 +116,67 @@ def parse_callset_json_for_split_row_ranges(callset_file, chunk_size):
     return split_row_ranges
 
 
+def print_fields(key, val):
+    if "vcf_field_class" not in val:
+        val["vcf_field_class"] = ["FILTER"]
+    if "length" not in val:
+        val["length"] = "1"
+    for idx in range(len(val["vcf_field_class"])):
+        field_class = val["vcf_field_class"][idx]
+        if isinstance(val["type"], list):
+            if idx < len(val["type"]):
+                field_type = val["type"][idx]
+            else:
+                field_type = val["type"][0]
+        else:
+            field_type = val["type"]
+        if isinstance(val["length"], list):
+            if idx < len(val["length"]):
+                field_length = val["length"][idx]
+            else:
+                field_length = val["length"][0]
+            if "variable_length_descriptor" in field_length:
+                field_length = field_length["variable_length_descriptor"]
+        else:
+            field_length = val["length"]
+        if field_type == "int":
+            field_type = "Integer"
+        elif field_type == "float":
+            field_type = "Float"
+        elif field_type == "char":
+            if field_length.lower() == "var":
+                field_type = "String"
+            else:
+                field_type = "Char"
+        print(f"{key:<20} {field_class:10} {field_type:10} {field_length}")
+
+
+def parse_vidmap_json_and_print_fields(vidmap_file):
+    vidmap = json.loads(genomicsdb.read_entire_file(vidmap_file))
+    fields = vidmap["fields"]
+    print(f"{'Field':20} {'Class':10} {'Type':10} {'Length'}")
+    print(f"{'-----':20} {'-----':10} {'----':10} {'------'}")
+    if isinstance(fields, list):
+        {print_fields(field["name"], field) for field in fields}
+    else:  # Old style vidmap json
+        for key, val in fields.items():
+            print_fields(key, val)
+    # See https://github.com/GenomicsDB/GenomicsDB/wiki/Importing-VCF-data-into-GenomicsDB
+    # for description of lengths in vid mapping files
+    abbreviations = {
+        "A": "Number of alternate alleles",
+        "R": "Number of alleles (including reference allele)",
+        "G": "Number of possible genotypes",
+        "PP or P": "Ploidy",
+        "VAR or var": "variable length",
+    }
+    print("--")
+    print("Abbreviations : ")
+    {print(f"  {key}: {val}") for key, val in abbreviations.items()}
+
+
 def parse_vidmap_json_for_attributes(vidmap_file, attributes=None):
-    if attributes is None:
+    if attributes is None or len(attributes) == 0:
         return ["GT"]
     else:
         vidmap = json.loads(genomicsdb.read_entire_file(vidmap_file))
@@ -126,8 +185,6 @@ def parse_vidmap_json_for_attributes(vidmap_file, attributes=None):
             fields = [field["name"] for field in fields]
         else:  # Old style vidmap json
             fields = fields.keys()
-        if len(attributes) == 0:
-            return fields
         attributes = attributes.replace(" ", "").split(",")
         not_found = [attribute for attribute in attributes if attribute not in fields]
         if len(not_found) > 0:
@@ -322,8 +379,7 @@ def setup():
 
     # List fields
     if args.list_fields:
-        fields = parse_vidmap_json_for_attributes(vidmap_file, attributes="")
-        print(*fields, sep="\n")
+        parse_vidmap_json_and_print_fields(vidmap_file)
         sys.exit(0)
 
     intervals = args.interval
