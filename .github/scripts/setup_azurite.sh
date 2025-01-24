@@ -60,7 +60,7 @@ tar xzvf $GITHUB_WORKSPACE/test/inputs/sanity.test.tgz -C oldstyle_dir
 az storage blob upload-batch -d test/oldstyle-dir -s oldstyle_dir --connection-string $AZURE_CONNECTION_STRING
 export  OLDSTYLE_DIR=az://test/oldstyle-dir
 
-cd $GITHUB_WORKSPACE/examples
+cd $GITHUB_WORKSPACE/test/scripts
 tar xzvf examples_ws.tgz
 az storage blob upload-batch -d test/ws -s ws --connection-string $AZURE_CONNECTION_STRING
 export WORKSPACE=az://test/ws
