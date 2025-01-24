@@ -19,5 +19,8 @@ cd genomicsdb-<version>
 python setup.py install
 ```
 
+## GenomicsDB console scripts
+See [GenomicsDB query tool](https://github.com/GenomicsDB/GenomicsDB-Python/blob/master/genomicsdb/scripts/README.md) for the available console scripts. As of now the supported output options are as csv, json and parquet files.
+
 ## Development
 See [instructions](https://github.com/GenomicsDB/GenomicsDB-Python/blob/master/INSTALL.md) for local builds and running tests.

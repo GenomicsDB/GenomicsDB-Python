@@ -5,7 +5,7 @@
 #
 # The MIT License
 #
-# Copyright (c) 2024 dātma, inc™
+# Copyright (c) 2024-2025 dātma, inc™
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,6 @@ import re
 import sys
 from typing import List, NamedTuple
 
-import genomicsdb_common
 import pyarrow as pa
 import pyarrow.parquet as pq
 
@@ -43,6 +42,7 @@ import genomicsdb
 from genomicsdb import json_output_mode
 from genomicsdb.protobuf import genomicsdb_coordinates_pb2 as query_coords
 from genomicsdb.protobuf import genomicsdb_export_config_pb2 as query_pb
+from genomicsdb.scripts import genomicsdb_common
 
 logging.basicConfig(
     format="%(asctime)s.%(msecs)03d %(levelname)-5s GenomicsDB Python - pid=%(process)d tid=%(thread)d %(message)s",

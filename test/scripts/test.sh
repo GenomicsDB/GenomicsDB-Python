@@ -205,7 +205,7 @@ rm -f loader.json callset.json vidmap.json
 if [[ -z $OLDSTYLE_DIR ]]; then
   OLDSTYLE_DIR=$TEMP_DIR/old_style
   mkdir -p $OLDSTYLE_DIR
-  tar xzf $(dirname $0)/../test/inputs/sanity.test.tgz -C $OLDSTYLE_DIR
+  tar xzf $(dirname $0)/../inputs/sanity.test.tgz -C $OLDSTYLE_DIR
 fi
 WORKSPACE=$OLDSTYLE_DIR/ws
 

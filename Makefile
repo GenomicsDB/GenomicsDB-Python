@@ -55,14 +55,14 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 format: ## format files with black and isort
-	black --line-length 120 setup.py src test examples/genomicsdb_*
-	isort --profile black --line-length 120 setup.py src test examples/genomicsdb_*
+	black --line-length 120 setup.py src test genomicsdb/scripts
+	isort --profile black --line-length 120 setup.py src test genomicsdb/scripts
 
 lint: ## check style with flake8 and vulnerabilities with bandit
 	bandit -r setup.py src
-	flake8 --extend-ignore='E203, N803, N806, E402' --max-line-length=120 setup.py src test examples/genomicsdb_*
-	black --check --line-length 120 setup.py src test examples/genomicsdb_*
-	isort --profile black --line-length 120 -c setup.py src test examples/genomicsdb_*
+	flake8 --extend-ignore='E203, N803, N806, E402' --max-line-length=120 setup.py src test genomicsdb/scripts
+	black --check --line-length 120 setup.py src test genomicsdb/scripts
+	isort --profile black --line-length 120 -c setup.py src test genomicsdb/scripts
 	cython-lint --max-line-length 120 src/*.pyx
 
 test: FORCE ## run tests quickly with the default Python

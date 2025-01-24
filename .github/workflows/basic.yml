@@ -96,14 +96,14 @@ jobs:
       run: |
         PYTHONPATH=. pytest
         PYTHONPATH=. python test/test.py
-        PYTHONPATH=. examples/test.sh
+        PYTHONPATH=. test/scripts/test.sh
         
     - name: Cloud Test - Azurite
       run: |
         source .github/scripts/setup_azurite.sh
         echo "Testing on Azurite..."
         echo "WORKSPACE=$WORKSPACE OLDSTYLE_DIR=$OLDSTYLE_DIR"
-        PYTHONPATH=. ./examples/test.sh
+        PYTHONPATH=. test/scripts/test.sh
         ls -l /tmp/tiledb_bookkeeping
         echo "Testing on Azurite DONE"
 

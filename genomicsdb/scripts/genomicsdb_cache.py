@@ -5,7 +5,7 @@
 #
 # The MIT License
 #
-# Copyright (c) 2024 dātma, inc™
+# Copyright (c) 2024-2025 dātma, inc™
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
 import argparse
 import json
 
-import genomicsdb_common
-
 import genomicsdb
+from genomicsdb.scripts import genomicsdb_common
 
 
 def is_cloud_path(path):
