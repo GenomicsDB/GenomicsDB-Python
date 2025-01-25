@@ -3,7 +3,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2023 dātma, inc™
+# Copyright (c) 2023-2025 dātma, inc™
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -146,7 +146,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="genomicsdb",
-    description="Experimental Python Bindings for querying GenomicsDB",
+    description="Python Bindings for querying GenomicsDB",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="GenomicsDB.org",
@@ -159,12 +159,18 @@ setup(
     setup_requires=["cython>=0.27"],
     install_requires=install_requirements,
     python_requires=">=3.9",
-    packages=find_packages(exclude=["package", "test"]),
+    packages=find_packages(include=["genomicsdb", "genomicsdb.*"], exclude=["package", "test"]),
     keywords=["genomics", "genomicsdb", "variant", "vcf", "variant calls"],
     include_package_data=True,
     version=with_version,
+    entry_points={
+        "console_scripts": [
+            "genomicsdb_query=genomicsdb.scripts.genomicsdb_query:main",
+            "genomicsdb_cache=genomicsdb.scripts.genomicsdb_cache:main",
+        ],
+    },
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Intended Audience :: Information Technology",
         "Intended Audience :: Science/Research",
