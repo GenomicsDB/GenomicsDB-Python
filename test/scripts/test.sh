@@ -244,5 +244,7 @@ run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS --lis
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS -S $TEMP_DIR/samples.list -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS -S $TEMP_DIR/samples.list -a GT -o $OUTPUT"
+rm $WORKSPACE/vcfheader.vcf
+run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-fields"
 
 cleanup
