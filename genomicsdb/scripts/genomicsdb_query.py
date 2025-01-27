@@ -172,17 +172,17 @@ def parse_template_header_file(template_header_file):
                 field_start = line.find("=<")
                 field_end = line.find(">")
                 field_type = line[0:field_start]
-                fields=line[field_start+2:field_end].split(",")
+                fields = line[field_start + 2 : field_end].split(",")
                 field_id = None
                 field_description = None
                 for field in fields:
                     val = field.find("ID=")
                     if val == 0:
-                        field_id = field[val+len("ID="):]
+                        field_id = field[val + len("ID=") :]
                     else:
                         val = field.find("Description=")
                         if val == 0:
-                            field_description = field[val+len("Description="):]
+                            field_description = field[val + len("Description=") :]
                 if field_id and field_description:
                     template_header_fields[(field_id, field_type)] = field_description
             except Exception as e:
