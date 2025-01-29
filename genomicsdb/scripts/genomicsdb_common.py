@@ -35,16 +35,16 @@ import genomicsdb
 def normalize_path(path):
     if "://" in path:
         if path.endswith("/"):
-            return path[0:len(path)-2]
+            return path[0 : len(path) - 2]
         else:
             return path
     else:
         # os.path.abspath removes trailing slash
         return os.path.abspath(path)
 
-def join_paths(path1, path2):
-    return path1+"/"+path2
 
+def join_paths(path1, path2):
+    return path1 + "/" + path2
 
 
 def parse_vidmap_json(vidmap_file, intervals=None):

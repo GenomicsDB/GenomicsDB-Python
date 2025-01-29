@@ -314,7 +314,7 @@ def setup():
         "--no-cache",
         action="store_true",
         help="Do not use cached metadata and files with the genomicsdb query",
-        )
+    )
     parser.add_argument(
         "-i",
         "--interval",
