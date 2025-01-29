@@ -116,7 +116,7 @@ def parse_callset_json_for_split_row_ranges(callset_file, chunk_size):
     return split_row_ranges
 
 
-def print_fields(key, val):
+def print_fields(key, val, descriptions):
     if "vcf_field_class" not in val:
         val["vcf_field_class"] = ["FILTER"]
     if "length" not in val:
@@ -148,19 +148,64 @@ def print_fields(key, val):
                 field_type = "String"
             else:
                 field_type = "Char"
-        print(f"{key:<20} {field_class:10} {field_type:10} {field_length}")
+        tuple_index = (key, field_class)
+        if descriptions and tuple_index in descriptions:
+            print(f"{key:<20} {field_class:10} {field_type:10} {field_length:10} {descriptions[tuple_index]}")
+        else:
+            print(f"{key:<20} {field_class:10} {field_type:10} {field_length}")
 
 
-def parse_vidmap_json_and_print_fields(vidmap_file):
+def parse_template_header_file(template_header_file):
+    if not genomicsdb.is_file(template_header_file):
+        return None
+    header_contents = genomicsdb.read_entire_file(template_header_file)
+    start = 0
+    template_header_fields = {}
+    while True:
+        end = header_contents.find("\n", start)
+        if end == -1:
+            break
+        line = header_contents[start:end]
+        if line.startswith("##INFO") or line.startswith("##FORMAT") or line.startswith("##FILTER"):
+            try:
+                line = line[2:]
+                field_start = line.find("=<")
+                field_end = line.find(">")
+                field_type = line[0:field_start]
+                fields = line[field_start + 2 : field_end].split(",")
+                field_id = None
+                field_description = None
+                for field in fields:
+                    val = field.find("ID=")
+                    if val == 0:
+                        field_id = field[val + len("ID=") :]
+                    else:
+                        val = field.find("Description=")
+                        if val == 0:
+                            field_description = field[val + len("Description=") :]
+                if field_id and field_description:
+                    template_header_fields[(field_id, field_type)] = field_description
+            except Exception as e:
+                logging.error(f"Exception={e} when processing {template_header_file} for line={line}")
+        start = end + 1
+    return template_header_fields
+
+
+def parse_and_print_fields(vidmap_file, template_header_file):
+    descriptions = parse_template_header_file(template_header_file)
     vidmap = json.loads(genomicsdb.read_entire_file(vidmap_file))
     fields = vidmap["fields"]
-    print(f"{'Field':20} {'Class':10} {'Type':10} {'Length'}")
-    print(f"{'-----':20} {'-----':10} {'----':10} {'------'}")
+    if descriptions:
+        print(f"{'Field':20} {'Class':10} {'Type':10} {'Length':10} {'Description'}")
+        print(f"{'-----':20} {'-----':10} {'----':10} {'------':10} {'-----------'}")
+    else:
+        print(f"{'Field':20} {'Class':10} {'Type':10} {'Length'}")
+        print(f"{'-----':20} {'-----':10} {'----':10} {'------'}")
     if isinstance(fields, list):
-        {print_fields(field["name"], field) for field in fields}
+        {print_fields(field["name"], field, descriptions) for field in fields}
     else:  # Old style vidmap json
         for key, val in fields.items():
-            print_fields(key, val)
+            print_fields(key, val, descriptions)
     # See https://github.com/GenomicsDB/GenomicsDB/wiki/Importing-VCF-data-into-GenomicsDB
     # for description of lengths in vid mapping files
     abbreviations = {
@@ -379,7 +424,8 @@ def setup():
 
     # List fields
     if args.list_fields:
-        parse_vidmap_json_and_print_fields(vidmap_file)
+        template_header_file = workspace + "/vcfheader.vcf"
+        parse_and_print_fields(vidmap_file, template_header_file)
         sys.exit(0)
 
     intervals = args.interval
