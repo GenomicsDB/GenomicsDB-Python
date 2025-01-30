@@ -247,5 +247,4 @@ run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS -S $T
 rm $WORKSPACE/vcfheader.vcf
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-fields"
 
-
 cleanup
