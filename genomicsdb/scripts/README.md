@@ -3,6 +3,9 @@
 Simple GenomicsDB query tool `genomicsdb_query`, given a workspace and genomic intervals of the form `<CONTIG>:<START>-<END>`.  The intervals at a minimum need to have the contig specified, start and end are optional. e.g chr1:100-1000, chr1:100 and chr1 are all valid. Start defaults to 1 if not specified and end defaults to the length of the contig if not specified.
 
 Assumption : The workspace should have been created with the `vcf2genomicsdb` tool or with `gatk GenomicsDBImport` and should exist.
+ 
+* [Caching for enhanced performance](#caching)
+* [Filters and Attributes](#filters)
 
 ``` 
 ~/GenomicsDB-Python/examples: ./genomicsdb_query --help
@@ -26,6 +29,7 @@ options:
   --list-contigs        List contigs configured in vid mapping for the workspace and exit
   --list-fields         List genomic fields configured in vid mapping for the workspace and exit
   --list-partitions     List interval partitions(genomicsdb arrays in the workspace) for the given intervals(-i/--interval or -I/--interval-list) or all the intervals for the workspace and exit
+  --no-cache            Do not use cached metadata and files with the genomicsdb query
   -i INTERVAL, --interval INTERVAL
                         genomic intervals over which to operate. The intervals should be specified in the <CONTIG>:<START>-<END> format with START and END optional.
                         This argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. 
@@ -49,7 +53,7 @@ options:
                         	1. -s/--sample and -S/--sample-list are mutually exclusive 
                         	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
   -a ATTRIBUTES, --attributes ATTRIBUTES
-                        Optional - comma separated list of genomic attributes or fields described in the vid mapping for the query, eg. GT,AC,PL,DP... Defaults to GT
+                        Optional - comma separated list of genomic attributes(REF, ALT) and fields described in the vid mapping for the query, eg. GT,AC,PL,DP... Defaults to REF,GT
   -f FILTER, --filter FILTER
                         Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == "G" && resolve(GT, REF, ALT) &= "T/T" && ALT |= "T"'
   -n NPROC, --nproc NPROC
@@ -105,6 +109,7 @@ query_output_1-100-100000.csv  query_output_1-100001.csv      query_output_2.csv
 
 ```
 
+<a name="caching"></a>
 ### Caching for enhanced performance
 
 Locally caching artifacts from cloud URLs is optional for GenomicsDB metadata and helps with performance for metadata/artifacts which can be accessed multiple times. There is a separate caching tool `genomicsdb_cache` which takes as inputs the workspace, optionally callset/vidmap/loader.json and also optionally the intervals or intervals with the -i/--interval/-I/--interval-list option. Note that the json files are downloaded to the current working directory whereas other metadata are persisted in `$TMPDIR` or in `/tmp`. This is envisioned to be done once before the first start of the queries for the interval. Set the env variable `TILEDB_CACHE` to `1` and explicitly use `-c callset.json -v vidmap.json -l loader.json` with the `genomicsdb_query` command to access locally cached GenomicsDB metadata and json artifacts.
@@ -141,4 +146,67 @@ options:
                         	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
 ```
 
+<a name="filters"></a>
+### Filters and Attributes
 
+Filters can be specified via an optional argument(`-f/--filter`) to `genomicsdb_query`. They are genomic filter expressions for the query and are based on the genomic attributes specified for the query.  Genomic attributes are all the fields and `REF` and `ALT` specified during import of the variant files into GenomicsDB. Note that any attribute used in the filter expression should also be specified as an attribute to the query via `-a/--attribute` argument if they are not the defaults(`REF` and `GT`).
+
+The expressions themselves are enhanced algebraic expressions using the attributes and the values for those attributes at the locus(contig+position) for the sample. The supported operators are all the binary, algebraic operators, e.g. `==, !=, >, <, >=, <=...` and custom operators `|=` to use with `ALT` for a match with any of the alternate alleles and `&=` to match a resolved `GT` field with respect to `REF` and `ALT`. The expressions can also contain [predefined aliases](#predefined_aliases)  for often used operations. Also see [supported operators](#supported_operators) and try listing the fields(`--list-fields`) to help build the filter expression. See [examples](#examples) for sample filter expressions.
+
+```
+~/GenomicsDB-Python/examples: genomicsdb_query -w my_workspace --list-fields
+Field                Class      Type       Length     Description
+-----                -----      ----       ------     -----------
+PASS                 FILTER     Integer    1          "All filters passed"
+q10                  FILTER     Integer    1          "Quality below 10"
+s50                  FILTER     Integer    1          "Less than 50\% \of samples have data"
+NS                   INFO       Integer    1          "Number of Samples With Data"
+DP                   INFO       Integer    1          "Total Depth"
+AF                   INFO       Float      A          "Allele Frequency"
+AA                   INFO       String     var        "Ancestral Allele"
+DB                   INFO       Flag       1          "dbSNP membership
+H2                   INFO       Flag       1          "HapMap2 membership"
+GT                   FORMAT     Integer    PP         "Genotype"
+VAF                  FORMAT     Float      1          "Variant Allele Fraction"
+VP                   FORMAT     Integer    1          "Variant Priority or clinical significance"
+--
+Abbreviations : 
+  A: Number of alternate alleles
+  R: Number of alleles (including reference allele)
+  G: Number of possible genotypes
+  PP or P: Ploidy
+  VAR or var: variable length
+```
+
+<a name="predefined_aliases"></a>
+#### Predefined aliases
+1. ISCALL   : is a variant call, filters out `GT="./."` for example
+2. ISHOMREF : homozygous with the reference allele(REF)
+3. ISHOMALT : both the alleles are non-REF (ALT)
+4. ISHET    : heterozygous when the alleles in GT are different
+5. resolve  : resolves the GT field specified as `0/0` or `1|2` into alleles with respect to REF and ALT. Phase separator is also considered for the comparison.
+
+<a name="supported_operators"></a>
+#### Supported operators
+
+* Standard operators: +, -, *, /, ^
+* Assignment operators: =, +=, -=, *=, /=
+* Logical operators: &&, ||, ==, !=, >, <, <=, >=
+* Bit manipulation: &, |, <<, >>
+* String concatenation: //
+* if then else conditionals with lazy evaluation: ?:
+* Type conversions: (float), (int)
+* Array index operator(for use with arrays of Integer/Float): e.g. AF[0]
+* Standard functions abs, sin, cos, tan, sinh, cosh, tanh, ln, log, log10, exp, sqrt
+* Unlimited number of arguments: min, max, sum
+* String functions: str2dbl, strlen, toupper
+* Array functions: sizeof and by index e.g. AF[2]
+* Custom operators: |= used with ALT, &= used with resolve(GT, REF, ALT) 
+
+<a name="examples"></a>
+#### Example filters:
+
+* ISCALL && !ISHOMREF: Filter out no-calls and variant calls that are not homozygous reference.
+* ISCALL && (REF == "G" && ALT |= "T" && resolve(GT, REF, ALT) &= "T/T"): Filter out no-calls and only keep variants where the REF is G, ALT contains T and the genotype is T/T.
+* ISCALL && (DP>0 && resolve(GT, REF, ALT) &= "T/T"): Filter out no-calls and only keep variants where the genotype is T/T and DP is greater than 0
+* ISCALL && AF[0] > 0.5
