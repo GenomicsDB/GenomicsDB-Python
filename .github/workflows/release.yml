@@ -54,6 +54,10 @@ jobs:
             CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
             CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
           CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: >
+            pytest {package}/test
+            genomicsdb_query -h
+            genomicsdb_cache -h
 
       - uses: actions/upload-artifact@v4
         name: Upload Wheel artifacts
