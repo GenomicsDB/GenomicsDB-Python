@@ -153,16 +153,16 @@ Filters can be specified via an optional argument(`-f/--filter`) to `genomicsdb_
 
 The expressions themselves are enhanced algebraic expressions using the attributes and the values for those attributes at the locus(contig+position) for the sample. The supported operators are all the binary, algebraic operators, e.g. `==, !=, >, <, >=, <=...` and custom operators `|=` to use with `ALT` for a match with any of the alternate alleles and `&=` to match a resolved `GT` field with respect to `REF` and `ALT`. The expressions can also contain predefined aliases for often used operations. These are currently supported per sample per locus -
 
-1. ISCALL   : is a variant call, filters out `GT="./."` fir example
+1. ISCALL   : is a variant call, filters out `GT="./."` for example
 2. ISHOMREF : homozygous with the reference allele(REF)
 3. ISHOMALT : both the alleles are non-REF (ALT)
 4. ISHET    : heterozygous when the alleles in GT are different
-5. resolve  : resolves the GT field specified as `0/0` or `1|2` into alleles with respect to REF and ALT.
+5. resolve  : resolves the GT field specified as `0/0` or `1|2` into alleles with respect to REF and ALT. Phase separator is also considered for the comparison.
 
 Example filters:
 
-* ISCALL && !ISHOMREF
-* ISCALL && (REF == "G" && ALT |= "T" && resolve(GT, REF, ALT) &= "T/T")
-* ISCALL && (DP>0 && resolve(GT, REF, ALT) &= "T/T")
+* ISCALL && !ISHOMREF: Filter out no-calls and variant calls that are not homozygous reference.
+* ISCALL && (REF == "G" && ALT |= "T" && resolve(GT, REF, ALT) &= "T/T"): Filter out no-calls and only keep variants where the REF is G, ALT contains T and the genotype is T/T.
+* ISCALL && (DP>0 && resolve(GT, REF, ALT) &= "T/T"): Filter out no-calls and only keep variants where the genotype is T/T and DP is greater than 0.
 
 
