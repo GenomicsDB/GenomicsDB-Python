@@ -149,16 +149,15 @@ options:
 <a name="filters"></a>
 ### Filters and Attributes
 
-Filters can be specified via an optional argument(`-f/--filter`) to `genomicsdb_query`. They are genomic filter expressions for the query and are based on the genomic attributes specified for the query.  Genomic attributes are all the fields and REF and ALT specified during import of the variant files into GenomicsDB. Note that any attribute used in the filter expression should also be specified as an attribute to the query via `-a/--attribute` argument if they are not the defaults(REF and GT).
+Filters can be specified via an optional argument(`-f/--filter`) to `genomicsdb_query`. They are genomic filter expressions for the query and are based on the genomic attributes specified for the query.  Genomic attributes are all the fields and `REF` and `ALT` specified during import of the variant files into GenomicsDB. Note that any attribute used in the filter expression should also be specified as an attribute to the query via `-a/--attribute` argument if they are not the defaults(`REF` and `GT`).
 
-The expressions themselves are enhanced algebraic expressions using the attributes and the values for those attributes at the locus(contig+position) for the sample. The supported operators are all the binary, algebraic operators, e.g. `==, !=, >, <, >=, <=...` and custom operators `|=` to use with `ALT` for a match with any of the alternate alleles and `&=` to match a resolved GT field with respect to REF and ALT. The expressions can also contain predefined aliases for often used operations. These are currently supported per sample per locus -
+The expressions themselves are enhanced algebraic expressions using the attributes and the values for those attributes at the locus(contig+position) for the sample. The supported operators are all the binary, algebraic operators, e.g. `==, !=, >, <, >=, <=...` and custom operators `|=` to use with `ALT` for a match with any of the alternate alleles and `&=` to match a resolved `GT` field with respect to `REF` and `ALT`. The expressions can also contain predefined aliases for often used operations. These are currently supported per sample per locus -
 
 1. ISCALL   : is a variant call, filters out `GT="./."` fir example
 2. ISHOMREF : homozygous with the reference allele(REF)
 3. ISHOMALT : both the alleles are non-REF (ALT)
 4. ISHET    : heterozygous when the alleles in GT are different
 5. resolve  : resolves the GT field specified as `0/0` or `1|2` into alleles with respect to REF and ALT.
-6. splitcompare : 
 
 Example filters:
 
