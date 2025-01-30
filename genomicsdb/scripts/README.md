@@ -151,18 +151,64 @@ options:
 
 Filters can be specified via an optional argument(`-f/--filter`) to `genomicsdb_query`. They are genomic filter expressions for the query and are based on the genomic attributes specified for the query.  Genomic attributes are all the fields and `REF` and `ALT` specified during import of the variant files into GenomicsDB. Note that any attribute used in the filter expression should also be specified as an attribute to the query via `-a/--attribute` argument if they are not the defaults(`REF` and `GT`).
 
-The expressions themselves are enhanced algebraic expressions using the attributes and the values for those attributes at the locus(contig+position) for the sample. The supported operators are all the binary, algebraic operators, e.g. `==, !=, >, <, >=, <=...` and custom operators `|=` to use with `ALT` for a match with any of the alternate alleles and `&=` to match a resolved `GT` field with respect to `REF` and `ALT`. The expressions can also contain predefined aliases for often used operations. These are currently supported per sample per locus -
+The expressions themselves are enhanced algebraic expressions using the attributes and the values for those attributes at the locus(contig+position) for the sample. The supported operators are all the binary, algebraic operators, e.g. `==, !=, >, <, >=, <=...` and custom operators `|=` to use with `ALT` for a match with any of the alternate alleles and `&=` to match a resolved `GT` field with respect to `REF` and `ALT`. The expressions can also contain [predefined aliases](#predefined_aliases)  for often used operations. Also see the [supported operators](#supported_operators) and the `genomicsdb_query -w <ws> --list-fields` to build the expression itelf. See [examples](#examples) for sample filter expressions.
 
+```
+~/GenomicsDB-Python/examples: genomicsdb_query -w my_workspace --list-fields
+Field                Class      Type       Length     Description
+-----                -----      ----       ------     -----------
+PASS                 FILTER     Integer    1          "All filters passed"
+q10                  FILTER     Integer    1          "Quality below 10"
+s50                  FILTER     Integer    1          "Less than 50\% \of samples have data"
+NS                   INFO       Integer    1          "Number of Samples With Data"
+DP                   INFO       Integer    1          "Total Depth"
+AF                   INFO       Float      A          "Allele Frequency"
+AA                   INFO       String     var        "Ancestral Allele"
+DB                   INFO       Flag       1          "dbSNP membership
+H2                   INFO       Flag       1          "HapMap2 membership"
+GT                   FORMAT     Integer    PP         "Genotype"
+VAF                  FORMAT     Float      1          "Variant Allele Fraction"
+VP                   FORMAT     Integer    1          "Variant Priority or clinical significance"
+--
+Abbreviations : 
+  A: Number of alternate alleles
+  R: Number of alleles (including reference allele)
+  G: Number of possible genotypes
+  PP or P: Ploidy
+  VAR or var: variable length
+```
+
+<a name="predefined_aliases"></a>
+### Predefined aliases
 1. ISCALL   : is a variant call, filters out `GT="./."` for example
 2. ISHOMREF : homozygous with the reference allele(REF)
 3. ISHOMALT : both the alleles are non-REF (ALT)
 4. ISHET    : heterozygous when the alleles in GT are different
 5. resolve  : resolves the GT field specified as `0/0` or `1|2` into alleles with respect to REF and ALT. Phase separator is also considered for the comparison.
 
-Example filters:
+<a name="supported_operators"></a>
+### Supported operators
+
+Standard operators: +, -, *, /, ^
+Assignment operators: =, +=, -=, *=, /=
+Logical operators: &&, ||, ==, !=, >, <, <=, >=
+Bit manipulation: &, |, <<, >>
+String concatenation: //
+if then else conditionals with lazy evaluation: ?:
+
+Type conversions: -, (float), (int)
+
+Array index operator(for use with arrays of Integer/Float): AF[0]
+
+Standard functions abs, sin, cos, tan, sinh, cosh, tanh, ln, log, log10, exp, sqrt
+Unlimited number of arguments: min, max, sum
+String functions: str2dbl, strlen, toupper
+Array functions: sizeof and by index e.g. AF[2]
+
+<a name="examples"></a>
+### Example filters:
 
 * ISCALL && !ISHOMREF: Filter out no-calls and variant calls that are not homozygous reference.
 * ISCALL && (REF == "G" && ALT |= "T" && resolve(GT, REF, ALT) &= "T/T"): Filter out no-calls and only keep variants where the REF is G, ALT contains T and the genotype is T/T.
-* ISCALL && (DP>0 && resolve(GT, REF, ALT) &= "T/T"): Filter out no-calls and only keep variants where the genotype is T/T and DP is greater than 0.
-
-
+* ISCALL && (DP>0 && resolve(GT, REF, ALT) &= "T/T"): Filter out no-calls and only keep variants where the genotype is T/T and DP is greater than 0
+* ISCALL && AF[0] > 0.5
