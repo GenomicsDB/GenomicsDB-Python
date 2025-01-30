@@ -39,6 +39,16 @@ def normalize_path(path):
         return os.path.abspath(path)
 
 
+def join_paths(path1, path2):
+    if "://" in path1:
+        if path1.endswith("/"):
+            return path1 + path2
+        else:
+            return path1 + "/" + path2
+    else:
+        return os.path.join(path1, path2)
+
+
 def parse_vidmap_json(vidmap_file, intervals=None):
     if isinstance(intervals, str):
         is_file = True

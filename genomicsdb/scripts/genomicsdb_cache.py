@@ -48,7 +48,7 @@ def get_arrays(interval, contigs_map, partitions):
 def main():
     parser = argparse.ArgumentParser(
         prog="cache",
-        description="Cache GenomicsDB metadata and generated callset/vidmap/loader json artifacts for workspace cloud URLs",  # noqa
+        description="Cache GenomicsDB metadata and generated callset/vidmap/loader json artifacts for workspace cloud URLs. The metadata is copied to TMPDIR and the json files to the current working directory",  # noqa
         formatter_class=argparse.RawTextHelpFormatter,
         usage="%(prog)s [options]",
     )

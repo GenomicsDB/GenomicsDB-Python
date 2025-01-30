@@ -222,19 +222,23 @@ def parse_and_print_fields(vidmap_file, template_header_file):
 
 def parse_vidmap_json_for_attributes(vidmap_file, attributes=None):
     if attributes is None or len(attributes) == 0:
-        return ["GT"]
-    else:
-        vidmap = json.loads(genomicsdb.read_entire_file(vidmap_file))
-        fields = vidmap["fields"]
-        if isinstance(fields, list):
-            fields = [field["name"] for field in fields]
-        else:  # Old style vidmap json
-            fields = fields.keys()
-        attributes = attributes.replace(" ", "").split(",")
-        not_found = [attribute for attribute in attributes if attribute not in fields]
-        if len(not_found) > 0:
-            raise RuntimeError(f"Attributes({not_found}) not found in vid mapping({vidmap_file})")
-        return attributes
+        # Default
+        return ["REF", "GT"]
+
+    vidmap = json.loads(genomicsdb.read_entire_file(vidmap_file))
+    fields = vidmap["fields"]
+    if isinstance(fields, list):
+        fields = [field["name"] for field in fields]
+    else:  # Old style vidmap json
+        fields = fields.keys()
+    fields = set(fields)
+    fields.add("REF")
+    fields.add("ALT")
+    attributes = attributes.replace(" ", "").split(",")
+    not_found = [attribute for attribute in attributes if attribute not in fields]
+    if len(not_found) > 0:
+        raise RuntimeError(f"Attributes({not_found}) not found in vid mapping({vidmap_file})")
+    return attributes
 
 
 def parse_loader_json(loader_file, interval_form=True):
@@ -307,6 +311,11 @@ def setup():
         help="List interval partitions(genomicsdb arrays in the workspace) for the given intervals(-i/--interval or -I/--interval-list) or all the intervals for the workspace and exit",  # noqa
     )
     parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Do not use cached metadata and files with the genomicsdb query",
+    )
+    parser.add_argument(
         "-i",
         "--interval",
         action="append",
@@ -336,7 +345,7 @@ def setup():
         "-a",
         "--attributes",
         required=False,
-        help="Optional - comma separated list of genomic attributes or fields described in the vid mapping for the query, eg. GT,AC,PL,DP... Defaults to GT",  # noqa
+        help="Optional - comma separated list of genomic attributes(REF, ALT) and fields described in the vid mapping for the query, eg. GT,AC,PL,DP... Defaults to REF,GT",  # noqa
     )
     parser.add_argument(
         "-f",
@@ -398,17 +407,27 @@ def setup():
     args = parser.parse_args()
 
     workspace = genomicsdb_common.normalize_path(args.workspace)
+    is_cloud_workspace = True if "://" in workspace else False
     if not genomicsdb.workspace_exists(workspace):
         raise RuntimeError(f"workspace({workspace}) not found")
     callset_file = args.callset
     if not callset_file:
-        callset_file = workspace + "/callset.json"
+        if is_cloud_workspace and not args.no_cache and genomicsdb.is_file("callset.json"):
+            callset_file = "callset.json"
+        else:
+            callset_file = genomicsdb_common.join_paths(workspace, "callset.json")
     vidmap_file = args.vidmap
     if not vidmap_file:
-        vidmap_file = workspace + "/vidmap.json"
+        if is_cloud_workspace and not args.no_cache and genomicsdb.is_file("vidmap.json"):
+            vidmap_file = "vidmap.json"
+        else:
+            vidmap_file = genomicsdb_common.join_paths(workspace, "vidmap.json")
     loader_file = args.loader
     if not loader_file:
-        loader_file = workspace + "/loader.json"
+        if not args.no_cache and genomicsdb.is_file("loader.json"):
+            loader_file = "loader.json"
+        else:
+            loader_file = genomicsdb_common.join_paths(workspace, "loader.json")
     if (
         not genomicsdb.is_file(callset_file)
         or not genomicsdb.is_file(vidmap_file)
@@ -465,6 +484,11 @@ def setup():
 
     row_tuples = parse_callset_json_for_row_ranges(callset_file, samples or sample_list)
     attributes = parse_vidmap_json_for_attributes(vidmap_file, args.attributes)
+
+    if args.no_cache:
+        os.environ.pop("TILEDB_CACHE", None)
+    else:
+        os.environ["TILEDB_CACHE"] = "1"
 
     return workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, attributes, args
 
@@ -588,6 +612,8 @@ def process(config):
     query_config = config.query_config
     output_config = config.output_config
     msg = f"array({query_config.array_name}) for interval({query_config.interval})"
+    if query_config.row_tuples:
+        msg += f" and rows({query_config.row_tuples})"
     if not genomicsdb.array_exists(export_config.workspace, query_config.array_name):
         logging.error(msg + f" not imported into workspace({export_config.workspace})")
         return -1
@@ -636,7 +662,7 @@ def process(config):
         gdb = None
         return -1
 
-    logging.info(f"Processed array {query_config.array_name} for interval {query_config.interval}")
+    logging.info(f"Processed {msg}")
     return 0
 
 
