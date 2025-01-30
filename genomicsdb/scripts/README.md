@@ -26,6 +26,7 @@ options:
   --list-contigs        List contigs configured in vid mapping for the workspace and exit
   --list-fields         List genomic fields configured in vid mapping for the workspace and exit
   --list-partitions     List interval partitions(genomicsdb arrays in the workspace) for the given intervals(-i/--interval or -I/--interval-list) or all the intervals for the workspace and exit
+  --no-cache            Do not use cached metadata and files with the genomicsdb query
   -i INTERVAL, --interval INTERVAL
                         genomic intervals over which to operate. The intervals should be specified in the <CONTIG>:<START>-<END> format with START and END optional.
                         This argument may be specified 0 or more times e.g -i chr1:1-10000 -i chr2 -i chr3:1000. 
@@ -49,7 +50,7 @@ options:
                         	1. -s/--sample and -S/--sample-list are mutually exclusive 
                         	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
   -a ATTRIBUTES, --attributes ATTRIBUTES
-                        Optional - comma separated list of genomic attributes or fields described in the vid mapping for the query, eg. GT,AC,PL,DP... Defaults to GT
+                        Optional - comma separated list of genomic attributes(REF, ALT) and fields described in the vid mapping for the query, eg. GT,AC,PL,DP... Defaults to REF,GT
   -f FILTER, --filter FILTER
                         Optional - genomic filter expression for the query, e.g. 'ISHOMREF' or 'ISHET' or 'REF == "G" && resolve(GT, REF, ALT) &= "T/T" && ALT |= "T"'
   -n NPROC, --nproc NPROC
@@ -140,5 +141,24 @@ options:
                         	1. -i/--interval and -I/--interval-list are mutually exclusive 
                         	2. either samples and/or intervals using -i/-I/-s/-S options has to be specified
 ```
+
+### Filters and Attributes
+
+Filters can be specified via an optional argument(`-f/--filter`) to `genomicsdb_query`. They are genomic filter expressions for the query and are based on the genomic attributes specified for the query.  Genomic attributes are all the fields and REF and ALT specified during import of the variant files into GenomicsDB. Note that any attribute used in the filter expression should also be specified as an attribute to the query via `-a/--attribute` argument if they are not the defaults(REF and GT).
+
+The expressions themselves are enhanced algebraic expressions using the attributes and the values for those attributes at the locus(contig+position) for the sample. The supported operators are all the binary, algebraic operators, e.g. `==, !=, >, <, >=, <=...` and custom operators `|=` to use with `ALT` for a match with any of the alternate alleles and `&=` to match a resolved GT field with respect to REF and ALT. The expressions can also contain predefined aliases for often used operations. These are currently supported per sample per locus -
+
+1. ISCALL   : is a variant call, filters out `GT="./."` fir example
+2. ISHOMREF : homozygous with the reference allele(REF)
+3. ISHOMALT : both the alleles are non-REF (ALT)
+4. ISHET    : heterozygous when the alleles in GT are different
+5. resolve  : resolves the GT field specified as `0/0` or `1|2` into alleles with respect to REF and ALT.
+6. splitcompare : 
+
+Example filters:
+
+* ISCALL && !ISHOMREF
+* ISCALL && (REF == "G" && ALT |= "T" && resolve(GT, REF, ALT) &= "T/T")
+* ISCALL && (DP>0 && resolve(GT, REF, ALT) &= "T/T")
 
 
