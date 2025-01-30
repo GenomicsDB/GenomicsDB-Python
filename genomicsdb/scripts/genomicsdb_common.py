@@ -28,6 +28,7 @@ import json
 import logging
 import os
 import sys
+from urllib.parse import urljoin
 
 import genomicsdb
 
@@ -40,10 +41,10 @@ def normalize_path(path):
 
 
 def join_paths(path1, path2):
-    if path1.endswith("/"):
-        return path1 + path2
+    if "://" in path1:
+        return urljoin(path1, path2)
     else:
-        return path1 + "/" + path2
+        return os.path.join(path1, path2)
 
 
 def parse_vidmap_json(vidmap_file, intervals=None):
