@@ -179,7 +179,7 @@ Abbreviations :
 ```
 
 <a name="predefined_aliases"></a>
-### Predefined aliases
+#### Predefined aliases
 1. ISCALL   : is a variant call, filters out `GT="./."` for example
 2. ISHOMREF : homozygous with the reference allele(REF)
 3. ISHOMALT : both the alleles are non-REF (ALT)
@@ -187,7 +187,7 @@ Abbreviations :
 5. resolve  : resolves the GT field specified as `0/0` or `1|2` into alleles with respect to REF and ALT. Phase separator is also considered for the comparison.
 
 <a name="supported_operators"></a>
-### Supported operators
+#### Supported operators
 
 Standard operators: +, -, *, /, ^
 Assignment operators: =, +=, -=, *=, /=
@@ -206,7 +206,7 @@ String functions: str2dbl, strlen, toupper
 Array functions: sizeof and by index e.g. AF[2]
 
 <a name="examples"></a>
-### Example filters:
+#### Example filters:
 
 * ISCALL && !ISHOMREF: Filter out no-calls and variant calls that are not homozygous reference.
 * ISCALL && (REF == "G" && ALT |= "T" && resolve(GT, REF, ALT) &= "T/T"): Filter out no-calls and only keep variants where the REF is G, ALT contains T and the genotype is T/T.
