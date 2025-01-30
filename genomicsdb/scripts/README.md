@@ -196,11 +196,12 @@ Abbreviations :
 * String concatenation: //
 * if then else conditionals with lazy evaluation: ?:
 * Type conversions: (float), (int)
-* Array index operator(for use with arrays of Integer/Float): AF[0]
+* Array index operator(for use with arrays of Integer/Float): e.g. AF[0]
 * Standard functions abs, sin, cos, tan, sinh, cosh, tanh, ln, log, log10, exp, sqrt
 * Unlimited number of arguments: min, max, sum
 * String functions: str2dbl, strlen, toupper
 * Array functions: sizeof and by index e.g. AF[2]
+* Custom operators: |= used with ALT, &= used with resolve(GT, REF, ALT) 
 
 <a name="examples"></a>
 #### Example filters:
