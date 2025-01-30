@@ -173,6 +173,8 @@ do
 done
 
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096 -o $OUTPUT"
+run_command "genomicsdb_query -w ${WORKSPACE}/ -I $TEMP_DIR/contigs.list -s HG00096 -o $OUTPUT"
+run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00097 -s HG00100 -s HG00096 -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s HG00096 -s NON_EXISTENT_SAMPLE -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE -I $TEMP_DIR/contigs.list -s NON_EXISTENT_SAMPLE -o $OUTPUT"
