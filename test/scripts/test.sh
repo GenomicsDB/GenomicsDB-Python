@@ -232,7 +232,7 @@ run_command "genomicsdb_query -w $WORKSPACE -i 4 --chunk-size=4 -b -o $OUTPUT -d
 # Duplicates
 check_command_with_duplicates "genomicsdb_query -w $WORKSPACE -i 1 -i 1 --chunk-size=2 -o $OUTPUT" 2 "1 1_1"
 check_command_with_duplicates "genomicsdb_query -w $WORKSPACE -i 1 -i 1 --chunk-size=2 -s HG00141 -s HG00141 -o $OUTPUT" 1 "1"
-
+run_command "genomicsdb_query -w $WORKSPACE -i 4 --chunk-size=4 -b -o $OUTPUT --no-cache"
 
 OLDSTYLE_JSONS="-l $OLDSTYLE_DIR/loader.json -c $OLDSTYLE_DIR/callset_t0_1_2.json -v $OLDSTYLE_DIR/vid.json"
 run_command "genomicsdb_cache -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS"
@@ -246,5 +246,6 @@ run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS -S $T
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS $INTERVAL_ARGS -S $TEMP_DIR/samples.list -a GT -o $OUTPUT"
 rm $WORKSPACE/vcfheader.vcf
 run_command "genomicsdb_query -w $WORKSPACE $OLDSTYLE_JSONS --list-fields"
+
 
 cleanup

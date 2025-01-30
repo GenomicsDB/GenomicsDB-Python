@@ -407,17 +407,18 @@ def setup():
     args = parser.parse_args()
 
     workspace = genomicsdb_common.normalize_path(args.workspace)
+    is_cloud_workspace = True if "://" in workspace else False
     if not genomicsdb.workspace_exists(workspace):
         raise RuntimeError(f"workspace({workspace}) not found")
     callset_file = args.callset
     if not callset_file:
-        if not args.no_cache and genomicsdb.is_file("callset.json"):
+        if is_cloud_workspace and not args.no_cache and genomicsdb.is_file("callset.json"):
             callset_file = "callset.json"
         else:
             callset_file = genomicsdb_common.join_paths(workspace, "callset.json")
     vidmap_file = args.vidmap
     if not vidmap_file:
-        if not args.no_cache and genomicsdb.is_file("vidmap.json"):
+        if is_cloud_workspace and not args.no_cache and genomicsdb.is_file("vidmap.json"):
             vidmap_file = "vidmap.json"
         else:
             vidmap_file = genomicsdb_common.join_paths(workspace, "vidmap.json")
