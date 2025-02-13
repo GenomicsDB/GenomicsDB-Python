@@ -665,6 +665,14 @@ def process(config):
     logging.info(f"Processed {msg}")
     return 0
 
+def check_output(output):
+    parent_dir = os.path.dirname(output)
+    if not os.path.isdir(parent_dir):
+        if os.path.isfile(os.path.dirname(output)):
+            raise RuntimeError(f"Cannot proceed as output's parent directory({parent_dir}) is a file")
+        else:
+            raise RuntimeError(f"Cannot proceed as output's parent directory({parent_dir}) does not exist. Create dir({parent_dir}) before restarting query")
+    return output
 
 def main():
     workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, attributes, args = setup()
@@ -672,10 +680,8 @@ def main():
     if row_tuples is not None and len(row_tuples) == 0:
         return
 
-    print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
-
     output_type = args.output_type
-    output = args.output
+    output = check_output(args.output)
     json_type = None
     if output_type == "json":
         json_type = parse_args_for_json_type(args.json_output_type)
@@ -685,6 +691,8 @@ def main():
             os.mkdir(output)
         max_arrow_bytes = parse_args_for_max_bytes(args.max_arrow_byte_size)
         print(f"Using {args.max_arrow_byte_size} number of bytes as hint for writing out parquet files")
+
+    print(f"Starting genomicsdb_query for workspace({workspace}) and intervals({intervals})")
 
     export_config = GenomicsDBExportConfig(
         workspace, vidmap_file, callset_file, attributes, args.filter, args.bypass_intersecting_intervals_phase
