@@ -665,14 +665,18 @@ def process(config):
     logging.info(f"Processed {msg}")
     return 0
 
+
 def check_output(output):
     parent_dir = os.path.dirname(output)
     if not os.path.isdir(parent_dir):
         if os.path.isfile(os.path.dirname(output)):
             raise RuntimeError(f"Cannot proceed as output's parent directory({parent_dir}) is a file")
         else:
-            raise RuntimeError(f"Cannot proceed as output's parent directory({parent_dir}) does not exist. Create dir({parent_dir}) before restarting query")
+            raise RuntimeError(
+                f"Cannot proceed as output's parent directory({parent_dir}) does not exist. Create dir({parent_dir}) before restarting query"  # noqa
+            )
     return output
+
 
 def main():
     workspace, callset_file, vidmap_file, partitions, contigs_map, intervals, row_tuples, attributes, args = setup()
