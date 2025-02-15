@@ -540,7 +540,7 @@ class GenomicsDBExportConfig(NamedTuple):
         else:
             filter_str = ""
         bypass_str = f" bypass_intersecting_intervals_phase={self.bypass_intersecting_intervals_phase}"
-        return f"workspace={self.workspace} attributes={self.attributes}{filter_str}{bypass_str}"
+        return f"workspace={self.workspace} vidmap={self.vidmap_file} callset={self.callset_file} attributes={self.attributes}{filter_str}{bypass_str}"
 
 
 class GenomicsDBQueryConfig(NamedTuple):
@@ -606,6 +606,12 @@ def configure_query(config: GenomicsDBQueryConfig):
         query_config.query_row_ranges.extend([row_range_list])
     return query_config
 
+def instantiate_genomicsdb(pb_config, msg):
+    logging.info("Instantiating genomicsdb to process " + msg + "...")
+    gdb = genomicsdb.connect_with_protobuf(pb_config)
+    logging.info("Instantiating genomicsdb to process " + msg + " DONE")
+    return gdb
+
 
 def process(config):
     export_config = config.export_config
@@ -618,64 +624,83 @@ def process(config):
         logging.error(msg + f" not imported into workspace({export_config.workspace})")
         return -1
     global gdb
-    try:
-        if gdb:
-            logging.info("Found gdb to process " + msg)
-        else:
-            logging.error("Something wrong, gdb seems to be None")
-            return -1
-    except NameError:
-        logging.info("Instantiating genomicsdb to process " + msg + "...")
-        gdb = genomicsdb.connect_with_protobuf(configure_export(export_config))
-        logging.info("Instantiating genomicsdb to process " + msg + " DONE")
-    query_protobuf = configure_query(query_config)
-    try:
-        if output_config.type == "csv":
-            df = gdb.query_variant_calls(query_protobuf=query_protobuf, flatten_intervals=True)
-            df.to_csv(output_config.filename, index=False)
-        elif output_config.type == "json":
-            json_output = gdb.query_variant_calls(query_protobuf=query_protobuf, json_output=output_config.json_type)
-            with open(output_config.filename, "wb") as f:
-                f.write(json_output)
-        elif output_config.type == "arrow":
-            nbytes = 0
-            writer = None
-            i = 0
-            for out in gdb.query_variant_calls(query_protobuf=query_protobuf, arrow_output=True, batching=True):
-                reader = pa.ipc.open_stream(out)
-                for batch in reader:
-                    if nbytes > output_config.max_arrow_bytes:
-                        i += 1
-                        nbytes = 0
-                        if writer:
-                            writer.close()
-                            writer = None
-                    if not writer:
-                        writer = pq.ParquetWriter(f"{output_config.filename}__{i}.parquet", batch.schema)
-                    nbytes += batch.nbytes
-                    writer.write_batch(batch)
-                if writer:
-                    writer.close()
-                    writer = None
-    except Exception as e:
-        logging.critical(f"Unexpected exception : {e}")
-        gdb = None
-        return -1
+    # Allow one retry to account for expired access tokens for azure URLs
+    if export_config.workspace.startswith("az://"):
+        allow_retry = True
+    else:
+        allow_retry = False
+    while True:
+        try:
+            if gdb:
+                logging.info("Found gdb to process " + msg)
+            else:
+                logging.info("Starting new gdb to process " + msg)
+                gdb = instantiate_genomicsdb(configure_export(export_config), msg);
+        except NameError:
+            gdb = instantiate_genomicsdb(configure_export(export_config), msg)
 
-    logging.info(f"Processed {msg}")
-    return 0
+        query_protobuf = configure_query(query_config)
+
+        try:
+            if output_config.type == "csv":
+                df = gdb.query_variant_calls(query_protobuf=query_protobuf, flatten_intervals=True)
+                df.to_csv(output_config.filename, index=False)
+            elif output_config.type == "json":
+                json_output = gdb.query_variant_calls(query_protobuf=query_protobuf, json_output=output_config.json_type)
+                with open(output_config.filename, "wb") as f:
+                    f.write(json_output)
+            elif output_config.type == "arrow":
+                nbytes = 0
+                writer = None
+                i = 0
+                for out in gdb.query_variant_calls(query_protobuf=query_protobuf, arrow_output=True, batching=True):
+                    reader = pa.ipc.open_stream(out)
+                    for batch in reader:
+                        if nbytes > output_config.max_arrow_bytes:
+                            i += 1
+                            nbytes = 0
+                            if writer:
+                                writer.close()
+                                writer = None
+                        if not writer:
+                            writer = pq.ParquetWriter(f"{output_config.filename}__{i}.parquet", batch.schema)
+                        nbytes += batch.nbytes
+                        writer.write_batch(batch)
+                    if writer:
+                        writer.close()
+                        writer = None
+            logging.info(f"Processed {msg}")
+            return 0
+        except Exception as e:
+            if allow_retry:
+                # Check for the possibility of an expired access token
+                allow_retry = False
+                try:
+                    if not gdb.workspace_exists(export_config.workspace):
+                        logging.info(f"Retrying query with a new instance of gdb for {msg}...")
+                        gdb = None
+                        continue
+                except Exception as ex:
+                    logging.info(f"Exception({ex}) encountered. Retrying query with a new instance of gdb for {msg}...")
+                    gdb = None
+                    continue
+            logging.critical(f"Unexpected exception : {e}")
+            return -1
 
 
 def check_output(output):
     parent_dir = os.path.dirname(output)
-    if not os.path.isdir(parent_dir):
+    if parent_dir and not os.path.isdir(parent_dir):
         if os.path.isfile(os.path.dirname(output)):
             raise RuntimeError(f"Cannot proceed as output's parent directory({parent_dir}) is a file")
         else:
             raise RuntimeError(
                 f"Cannot proceed as output's parent directory({parent_dir}) does not exist. Create dir({parent_dir}) before restarting query"  # noqa
             )
-    return output
+    if output.endswith("/") or os.path.isdir(output):
+        return genomicsdb_common.join_paths(output, "query_output")
+    else:
+        return output
 
 
 def main():

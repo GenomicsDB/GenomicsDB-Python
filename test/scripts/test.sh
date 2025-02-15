@@ -185,8 +185,16 @@ run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -S $TEMP_DIR/samples.
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -a $FIELDS  -o $OUTPUT"
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -a NON_EXISTENT_FIELD,$FIELDS -o $OUTPUT" 1
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o NON_EXISTENT_DIR/output" 1
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o NON_EXISTENT_DIR/" 1
 touch $TEMP_DIR/just_a_file
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/just_a_file/out" 1
+run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/output_dir/" 1
+#mkdir $TEMP_DIR/output_dir
+#run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/output_dir"
+#run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/output_dir/"
+#pushd $TEMP_DIR
+#run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS"
+#popd
 
 rm -f loader.json callset.json vidmap.json
 run_command "genomicsdb_cache -w $WORKSPACE $INTERVAL_ARGS"
