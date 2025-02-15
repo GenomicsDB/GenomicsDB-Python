@@ -540,7 +540,7 @@ class GenomicsDBExportConfig(NamedTuple):
         else:
             filter_str = ""
         bypass_str = f" bypass_intersecting_intervals_phase={self.bypass_intersecting_intervals_phase}"
-        return f"workspace={self.workspace} vidmap={self.vidmap_file} callset={self.callset_file} attributes={self.attributes}{filter_str}{bypass_str}"
+        return f"workspace={self.workspace} vidmap={self.vidmap_file} callset={self.callset_file} attributes={self.attributes}{filter_str}{bypass_str}"  # noqa
 
 
 class GenomicsDBQueryConfig(NamedTuple):
@@ -606,6 +606,7 @@ def configure_query(config: GenomicsDBQueryConfig):
         query_config.query_row_ranges.extend([row_range_list])
     return query_config
 
+
 def instantiate_genomicsdb(pb_config, msg):
     logging.info("Instantiating genomicsdb to process " + msg + "...")
     gdb = genomicsdb.connect_with_protobuf(pb_config)
@@ -635,7 +636,7 @@ def process(config):
                 logging.info("Found gdb to process " + msg)
             else:
                 logging.info("Starting new gdb to process " + msg)
-                gdb = instantiate_genomicsdb(configure_export(export_config), msg);
+                gdb = instantiate_genomicsdb(configure_export(export_config), msg)
         except NameError:
             gdb = instantiate_genomicsdb(configure_export(export_config), msg)
 
@@ -646,7 +647,9 @@ def process(config):
                 df = gdb.query_variant_calls(query_protobuf=query_protobuf, flatten_intervals=True)
                 df.to_csv(output_config.filename, index=False)
             elif output_config.type == "json":
-                json_output = gdb.query_variant_calls(query_protobuf=query_protobuf, json_output=output_config.json_type)
+                json_output = gdb.query_variant_calls(
+                    query_protobuf=query_protobuf, json_output=output_config.json_type
+                )
                 with open(output_config.filename, "wb") as f:
                     f.write(json_output)
             elif output_config.type == "arrow":
