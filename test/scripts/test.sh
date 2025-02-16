@@ -190,8 +190,8 @@ touch $TEMP_DIR/just_a_file
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/just_a_file/out" 1
 run_command "genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/output_dir/" 1
 mkdir -p $TEMP_DIR/output_dir
-genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/output_dir || exit 1
-genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/output_dir/ || exit 1
+genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/output_dir >& /dev/null || (echo "query output to $TEMP_DIR/output_dir not successful"; exit 1)
+genomicsdb_query -w $WORKSPACE $INTERVAL_ARGS -o $TEMP_DIR/output_dir/ >& /dev/null || (echo "query output to $TEMP_DIR/output_dir/ not successful"; exit 1)
 
 rm -f loader.json callset.json vidmap.json
 run_command "genomicsdb_cache -w $WORKSPACE $INTERVAL_ARGS"

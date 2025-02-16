@@ -673,12 +673,17 @@ def process(config):
                         writer.close()
                         writer = None
             logging.info(f"Processed {msg}")
+            # exit out of the loop as the query has completed
             return 0
         except Exception as e:
-            if allow_retry:
+            # Try handle read errors from TileDB storage for azure urls
+            # e.g. GenomicsDBIteratorException exception : Error while reading from TileDB array
+            if allow_retry and "GenomicsDB" in str(type(e)) and "TileDB" in str(e):
                 # Check for the possibility of an expired access token
                 allow_retry = False
                 try:
+                    # If the check for workspace under consideration succeeds and the workspace exists as it should,
+                    # genomicsdb instance is functional! Probably not an expired token, so re-raise outer exception
                     if not gdb.workspace_exists(export_config.workspace):
                         logging.info(f"Retrying query with a new instance of gdb for {msg}...")
                         gdb = None
@@ -687,8 +692,8 @@ def process(config):
                     logging.info(f"Exception({ex}) encountered. Retrying query with a new instance of gdb for {msg}...")
                     gdb = None
                     continue
-            logging.critical(f"Unexpected exception : {e}")
-            return -1
+            logging.critical(f"Unexpected exception while processing {msg} : {e}")
+            raise e
 
 
 def check_output(output):
@@ -789,10 +794,18 @@ def main():
         sys.exit(0)
 
     if min(len(configs), args.nproc) == 1:
-        results = list(map(process, configs))
+        try:
+            results = list(map(process, configs))
+        except Exception as e:
+            raise RuntimeError(f"genomicsdb_query returned unexpectedly: {e}")
     else:
         with multiprocessing.Pool(processes=min(len(configs), args.nproc)) as pool:
-            results = list(pool.map(process, configs))
+            try:
+                results = list(pool.map(process, configs))
+            except Exception as e:
+                pool.terminate()
+                pool.join()
+                raise RuntimeError(f"Terminating as a query in the multiprocessing pool returned unexpectedly: {e}")
 
     msg = "successfully"
     for result in results:
