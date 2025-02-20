@@ -676,20 +676,25 @@ def process(config):
             # exit out of the loop as the query has completed
             return 0
         except Exception as e:
-            # Try handle read errors from TileDB storage for azure urls
+            # Try to handle read errors with expired access tokens for azure urls
             # e.g. GenomicsDBIteratorException exception : Error while reading from TileDB array
-            if allow_retry and "GenomicsDB" in str(type(e)) and "TileDB" in str(e):
+            #      VariantQueryProcessorException : Could not open array <array> at workspace <workspace>
+            if allow_retry:
+                if os.environ.get("GENOMICSDB_PRINT_EXCEPTION", None):
+                    logging.info(f"Exception({e}) encountered with genomicdb query")
                 # Check for the possibility of an expired access token
                 allow_retry = False
                 try:
                     # If the check for workspace under consideration succeeds and the workspace exists as it should,
                     # genomicsdb instance is functional! Probably not an expired token, so re-raise outer exception
                     if not gdb.workspace_exists(export_config.workspace):
-                        logging.info(f"Retrying query with a new instance of gdb for {msg}...")
+                        logging.info(f"Retrying after workspace check with a new instance of genomicsdb for {msg}...")
                         gdb = None
                         continue
                 except Exception as ex:
-                    logging.info(f"Exception({ex}) encountered. Retrying query with a new instance of gdb for {msg}...")
+                    if os.environ.get("GENOMICSDB_PRINT_EXCEPTION", None):
+                        logging.info(f"Exception({ex}) encountered with genomicdb workspace check")
+                    logging.info(f"Retrying query with a new instance of genomicsdb for {msg}...")
                     gdb = None
                     continue
             logging.critical(f"Unexpected exception while processing {msg} : {e}")
