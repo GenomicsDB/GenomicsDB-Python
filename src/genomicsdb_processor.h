@@ -92,6 +92,13 @@ class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
                const int64_t* coordinates,
                const genomic_interval_t& genomic_interval,
                const std::vector<genomic_field_t>& genomic_fields);
+  void process_str_field(const std::string& field_name, PyObject *calls, int dims, npy_intp *sizes) {
+    auto found = std::find(m_field_names.begin(), m_field_names.end(), field_name);
+    if (found != m_field_names.end()) {
+        PyDict_SetItem(calls, PyUnicode_FromString(field_name.c_str()),
+                       PyArray_SimpleNewFromData(dims, sizes, NPY_OBJECT, m_string_fields[field_name].data()));
+    }
+  }
   PyObject* construct_data_frame() {
     int dims = 1;
     npy_intp sizes[1] = { static_cast<npy_intp>(m_sample_names.size()) };
@@ -99,8 +106,12 @@ class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
     PyDict_SetItem(calls, PyUnicode_FromString("Sample"), PyArray_SimpleNewFromData(dims, sizes, NPY_OBJECT, m_sample_names.data()));
     PyDict_SetItem(calls, PyUnicode_FromString("CHR"), PyArray_SimpleNewFromData(dims, sizes, NPY_OBJECT, m_chrom.data()));
     PyDict_SetItem(calls, PyUnicode_FromString("POS"), PyArray_SimpleNewFromData(dims, sizes, NPY_INT64, m_pos.data()));
-
+    // Process REF, ALT and GT first.
+    process_str_field("REF", calls, dims, sizes);
+    process_str_field("ALT", calls, dims, sizes);
+    process_str_field("GT", calls, dims, sizes);
     for (auto field_name: m_field_names) {
+      if (field_name == "REF" || field_name == "ALT" || field_name == "GT") continue;
       if (m_string_fields.find(field_name) != m_string_fields.end()) {
         PyDict_SetItem(calls, PyUnicode_FromString(field_name.c_str()),
                        PyArray_SimpleNewFromData(dims, sizes, NPY_OBJECT, m_string_fields[field_name].data()));

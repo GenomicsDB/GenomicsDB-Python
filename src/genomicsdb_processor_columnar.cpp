@@ -41,7 +41,7 @@ void ColumnarVariantCallProcessor::process(const interval_t& interval) {
     for (auto& field_type_pair : *genomic_field_types) {
       std::string field_name = field_type_pair.first;
       genomic_field_type_t field_type = field_type_pair.second;
-      if (!field_name.compare("END") || !field_name.compare("REF") || !field_name.compare("ALT")) {
+      if (!field_name.compare("END")) {
         continue;
       }
       m_field_names.push_back(field_name);
