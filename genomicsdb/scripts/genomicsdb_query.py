@@ -675,6 +675,15 @@ def process(config):
             logging.info(f"Processed {msg}")
             # exit out of the loop as the query has completed
             return 0
+        except OSError as e:
+            # See https://docs.python.org/3/library/exceptions.html#OSError, possible errors are :
+            #   File not found: Attempting to open a file that does not exist
+            #   Permission denied: Trying to access a file or directory without the necessary permissions.
+            #   Disk full: Running out of storage space while writing to a file.
+            #   Invalid file path: Providing an incorrect or malformed file path.
+            #   Device errors: Problems with hardware devices, such as a disconnected drive.
+            logging.critical(f"Cannot continue - OS Error encountered while processing {msg} : {e}")
+            raise e
         except Exception as e:
             # Try to handle read errors with expired access tokens for azure urls
             # e.g. GenomicsDBIteratorException exception : Error while reading from TileDB array
