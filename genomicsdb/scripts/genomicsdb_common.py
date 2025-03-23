@@ -74,12 +74,6 @@ def parse_vidmap_json(vidmap_file, intervals=None):
         else:  # Generated with vcf2genomicsdb_init
             contig_name = contig["name"]
             contig_elem = contig
-        # Sanity check of column offsets
-        if column_offset != contig_elem["tiledb_column_offset"]:
-            logging.critical(
-                f"vidmap file({vidmap_file}) has wrong column offset for {contig_name}. Cannot process vidmap file from contigs({contig_name})"  # noqa
-            )
-            break
         contigs_map[contig_name] = contig_elem
         column_offset += contig_elem["length"]
         if all_intervals:
